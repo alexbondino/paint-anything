@@ -1,36 +1,44 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
+import './App.css';
 
-function App() {
-  /// Variables
-  const [data, setData] = useState(null);
+function ImageUploader() {
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  /// Usa un efecto para obtener data
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const handleImageChange = (event) => {
+    setSelectedImage(event.target.files[0]);
+  };
 
-  /// Esta función realiza una petición get a la url /api/data
-  const fetchData = () => {
-    axios.get('http://localhost:8000/api/data')
-      .then((response) => {  /// Esto accede al json de respuesta y almacena la data
-        setData(response.data); //Actualiza el estado de react con la respuesta a la solicitud.
-        console.log(response.data)
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!selectedImage) {
+      console.error("No se ha seleccionado ninguna imagen.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('imagen', selectedImage);
+
+    try {
+      await axios.post('http://localhost:8000/api/image', formData);
+      console.log("Imagen enviada correctamente.");
+    } catch (error) {
+      console.error("Error al enviar la imagen:", error);
+    }
   };
 
   return (
     <div>
-      {data ? (
-        <p>{data.message}</p>
-      ) : (
-        <p>Daniel Smith</p>
-      )}
+      <form onSubmit={handleSubmit} class="initial_form">
+        <label for="file_upload" class="custom-file-upload">
+          <span>Seleccionar archivo</span>
+        </label>
+        <input id="file_upload" hidden type="file" accept="image/*" name="imagen"class="upload_image"  onChange={handleImageChange} />
+        <button type="submit" class="primary_button">Submit</button>
+      </form>
     </div>
   );
 }
 
-export default App;
+export default ImageUploader;
