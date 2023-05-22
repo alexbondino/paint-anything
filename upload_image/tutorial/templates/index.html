@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask App</title>
+
+
+</head>
+
+<body>
+    <h1>Hola {{ nombre }}</h1>
+    <h2>Bienvenidos</h2>
+    {% if num == 1 %}
+    <h1>Uno</h1>
+    {% else %}
+    <h1>Cero</h1>
+    {% endif %}
+
+    <form action="{{ url_for('contacto') }}", method="post">
+        <input type="text" name="nombre" placeholder="Ingresa un nombre">
+        <button>Enviar</button>
+
+
+    </form>
+
+
+
+</body>
+</html>
