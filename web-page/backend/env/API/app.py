@@ -22,20 +22,32 @@ app.add_middleware(
 
 temp_dir = None  # Global variable to store the temporary directory path
 
-# Post api for the image
+
 '''This statement does the following:
-1. Generates a HTTP exception (400) if the image is not provided
-2. Creates a temporary directory if its not created
+1. 
+2. 
 3. Creates an image.jpg file in the temporary directory when the api is called by the frontend
-4. Returns the file_path of the temporary directory when the api is called by the frontend'''
+4. '''
+# Post api for the image
 @app.post('/api/image')
 async def upload_image(image: UploadFile = None):
+    """_summary_
+
+    Args:
+        image (UploadFile, optional): _description_. Defaults to None.
+
+    Raises:
+        HTTPException: HTTP exception (400) if the image is not provided
+
+    Returns:
+        _type_: File_path of the temporary directory when the api is called by the frontend
+    """
     global temp_dir
 
     if image is None:
         raise HTTPException(status_code=400, detail='No image provided.')
 
-    if temp_dir is None:  # Create temporary directory if not already created
+    if temp_dir is None:  
         temp_dir = tempfile.mkdtemp()
 
     file_path = os.path.join(temp_dir, 'image.jpg')
