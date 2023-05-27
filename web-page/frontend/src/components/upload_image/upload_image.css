@@ -1,0 +1,42 @@
+.primary_button{
+  display: flex;
+  background-color: rgb(37, 37, 147);
+  color: white;
+  border-radius: 4px;
+  height: 80px;
+  width: 250px;
+  cursor: pointer;
+  font-size: 30px;
+  text-align: center;
+  font:bold;
+  justify-content: center;
+  line-height: 70px;
+  
+}
+
+
+.initial_form{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+}
+
+
+.custom-file-upload {
+  display: flex;
+  height: 80px;
+  width: 600px;
+  background-color: white;
+  color: #333;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 30px;
+  font:bold;
+  justify-content: center;
+  line-height: 70px;
+}
+
