@@ -125,7 +125,7 @@ export default function PersistentDrawerRight() {
           <Toolbar>
             <BrushIcon />
             <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
-              Paint Anything
+              Imagine Houses
             </Typography>
             <IconButton
               color="inherit"
