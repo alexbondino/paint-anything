@@ -22,25 +22,20 @@ app.add_middleware(
 
 temp_dir = None  # Global variable to store the temporary directory path
 
-
-'''This statement does the following:
-1. 
-2. 
-3. Creates an image.jpg file in the temporary directory when the api is called by the frontend
-4. '''
 # Post api for the image
 @app.post('/api/image')
 async def upload_image(image: UploadFile = None):
-    """_summary_
+    """Triggers the creation of a temporary directory and an image.jpg file inside it.
 
     Args:
-        image (UploadFile, optional): _description_. Defaults to None.
+        image (UploadFile, optional): Image given by the frontend. If None is passed, ErrorException will rise. 
+        Defaults to None.
 
     Raises:
-        HTTPException: HTTP exception (400) if the image is not provided
+        HTTPException: HTTP exception (400) if the image is not provided.
 
     Returns:
-        _type_: File_path of the temporary directory when the api is called by the frontend
+        dict: File_path of the temporary directory when the api is called by the frontend
     """
     global temp_dir
 
@@ -57,8 +52,7 @@ async def upload_image(image: UploadFile = None):
     print(file_path)
     return {'message': 'Image uploaded successfully.', 'file_path': file_path}
 
-# Post api cleanup
-'''This statement errases the temporary directory when the page is shutdown using shutil.rmtree method.'''
+
 @app.post('/api/cleanup')
 def cleanup_temp_dir():
     global temp_dir

@@ -59,7 +59,7 @@ yarn-error.log*
 
 
 # Dependency directories
-node_modules/
+**/node_modules/
 jspm_packages/
 
 # Optional npm cache directory
@@ -91,4 +91,4 @@ lerna-debug.log
 Thumbs.db
 
 # Python comments
-__pycache__
+**/__pycache__/
