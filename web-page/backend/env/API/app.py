@@ -22,6 +22,26 @@ app.add_middleware(
 
 temp_dir = None  # Global variable to store the temporary directory path
 
+# Get image
+@app.get('/api/image')
+async def get_image():
+    """
+    Gets image from temp_dir. If there's no image, ErrorException will
+    rise.
+
+    Rises:
+
+
+    Returns: file_patch
+    """
+
+    # TODO: change way to access file path. Avoid using global variables.
+    if temp_dir is None:
+        raise HTTPException(status_code=404, detail="Image not found")
+    file_path = os.path.join(temp_dir, 'image.jpg')
+
+    return {'message': 'Obtained image succesfully.', 'file_path': file_path}
+
 # Post api for the image
 @app.post('/api/image')
 async def upload_image(image: UploadFile = None):
@@ -42,7 +62,7 @@ async def upload_image(image: UploadFile = None):
     if image is None:
         raise HTTPException(status_code=400, detail='No image provided.')
 
-    if temp_dir is None:  
+    if temp_dir is None:
         temp_dir = tempfile.mkdtemp()
 
     file_path = os.path.join(temp_dir, 'image.jpg')
@@ -62,6 +82,9 @@ def cleanup_temp_dir():
         return {'message': 'Temporary directory cleaned up.'}
     else:
         return {'message': 'No temporary directory to clean up.'}
+
+
+
 
 if __name__ == '__main__':
     import uvicorn
