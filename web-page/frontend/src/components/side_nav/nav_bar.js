@@ -124,7 +124,7 @@ const NavLayer = ({ id, selectedIndex, onLayerSelected, onLayerDelete }) => {
       >
         <DialogContent>
           <DialogContentText id="erase-layer-alert-description">
-            Are you sure you want to delete this layer?
+            {`Are you sure you want to delete Layer ${id}?`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
