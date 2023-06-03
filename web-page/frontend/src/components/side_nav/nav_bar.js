@@ -27,6 +27,12 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
 import ImageIcon from '@mui/icons-material/Image';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Button from '@mui/material/Button';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
 
 const drawerWidth = 240;
 
@@ -75,6 +81,63 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-start',
 }));
 
+const NavLayer = ({ id, selectedIndex, onLayerSelected, onLayerDelete }) => {
+  const [openAlert, setOpenAlert] = React.useState(false);
+  const handleDeleteAlertOpen = () => {
+    setOpenAlert(true);
+  };
+
+  const handleDeleteAlertClose = () => {
+    setOpenAlert(false);
+  };
+
+  const handleDeleteConfirmation = () => {
+    handleDeleteAlertClose();
+    onLayerDelete(id);
+  };
+
+  return (
+    <ListItem>
+      <ListItemButton
+        id={id}
+        disableRipple
+        selected={selectedIndex === id}
+        onClick={() => onLayerSelected(id)}
+      >
+        <ListItemIcon>
+          <ImageIcon />
+        </ListItemIcon>
+        <ListItemText primary={'Layer ' + id} />
+      </ListItemButton>
+      <IconButton
+        color="inherit"
+        disableTouchRipple
+        aria-label="delete layer"
+        onClick={handleDeleteAlertOpen}
+      >
+        <DeleteIcon />
+      </IconButton>
+      <Dialog
+        open={openAlert}
+        onClose={handleDeleteAlertClose}
+        aria-describedby="erase-layer-alert-description"
+      >
+        <DialogContent>
+          <DialogContentText id="erase-layer-alert-description">
+            Are you sure you want to delete this layer?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteConfirmation}>Confirm</Button>
+          <Button onClick={handleDeleteAlertClose} autoFocus>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </ListItem>
+  );
+};
+
 export default function PersistentDrawerRight() {
   const theme = createTheme({
     palette: {
@@ -85,11 +148,12 @@ export default function PersistentDrawerRight() {
     },
   });
   const [open, setOpen] = React.useState(false);
-  const [openLayers, setOpenLayers] = React.useState(false);
-  const [layers, setLayers] = React.useState([]);
+  const [expandLayers, setExpandLayers] = React.useState(false);
+  const [layerIds, setLayerIds] = React.useState([]);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
 
   const handleLayersClick = () => {
-    setOpenLayers(!openLayers);
+    setExpandLayers(!expandLayers);
   };
 
   const handleDrawerOpen = () => {
@@ -100,22 +164,43 @@ export default function PersistentDrawerRight() {
     setOpen(false);
   };
 
-  const handleAddLayerClick = () => {
-    const layerName = 'Layer ' + (layers.length + 1);
-    const newLayers = [
-      ...layers,
-      <ListItemButton sx={{ pl: 4 }} id={layers.length + 1}>
-        <ListItemIcon>
-          <ImageIcon />
-        </ListItemIcon>
-        <ListItemText primary={layerName} />
-      </ListItemButton>,
-    ];
-    setLayers(newLayers);
-    if (!openLayers) {
-      setOpenLayers(!openLayers);
+  const handleAddLayer = () => {
+    const layerId = layerIds.length + 1;
+    const newLayerIds = [...layerIds, layerId];
+    setLayerIds(newLayerIds);
+    if (!expandLayers) {
+      setExpandLayers(!expandLayers);
     }
   };
+
+  function handleSelectLayer(layerId) {
+    if (layerId === selectedIndex) {
+      setSelectedIndex(0);
+      return;
+    }
+    setSelectedIndex(layerId);
+  }
+
+  function handleLayerDelete(layerId) {
+    const newLayerIds = [...layerIds];
+    newLayerIds.pop(layerId);
+    if (selectedIndex === layerId) {
+      setSelectedIndex(0);
+    }
+    setLayerIds(newLayerIds);
+  }
+
+  const layers = layerIds.map((layerId) => {
+    console.log(layerId);
+    return (
+      <NavLayer
+        id={layerId}
+        selectedIndex={selectedIndex}
+        onLayerSelected={handleSelectLayer}
+        onLayerDelete={handleLayerDelete}
+      />
+    );
+  });
 
   return (
     <ThemeProvider theme={theme}>
@@ -166,10 +251,10 @@ export default function PersistentDrawerRight() {
                 <LayersIcon />
               </ListItemIcon>
               <ListItemText primary="Layers" />
-              <IconButton color="inherit" aria-label="add layer" onClick={handleAddLayerClick}>
+              <IconButton color="inherit" aria-label="add layer" onClick={handleAddLayer}>
                 <AddIcon />
               </IconButton>
-              {openLayers ? (
+              {expandLayers ? (
                 <IconButton color="inherit" aria-label="retract layers" onClick={handleLayersClick}>
                   <ExpandLess />{' '}
                 </IconButton>
@@ -179,17 +264,17 @@ export default function PersistentDrawerRight() {
                 </IconButton>
               )}
             </ListItem>
-            <Collapse in={openLayers} timeout="auto" unmountOnExit>
+            <Collapse in={expandLayers} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
                 {layers}
               </List>
             </Collapse>
-            <ListItem key="DownloadResult" disablePadding>
+            <ListItem key="Download Result" disablePadding>
               <ListItemButton>
                 <ListItemIcon>
                   <DownloadIcon />
                 </ListItemIcon>
-                <ListItemText primary="DownloadResult" />
+                <ListItemText primary="Download Result" />
               </ListItemButton>
             </ListItem>
           </List>
