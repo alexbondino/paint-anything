@@ -190,14 +190,12 @@ export default function PersistentDrawerRight() {
               )}
             </ListItem>
             <Collapse in={expandLayers} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                <Layers
-                  layerIds={layerIds}
-                  selectedIndex={selectedLayerIdx}
-                  onDeleteLayer={handleLayerDelete}
-                  onSelectLayer={handleSelectLayer}
-                />
-              </List>
+              <Layers
+                layerIds={layerIds}
+                selectedIndex={selectedLayerIdx}
+                onDeleteLayer={handleLayerDelete}
+                onSelectLayer={handleSelectLayer}
+              />
             </Collapse>
             <ListItem key="Download Result" disablePadding>
               <ListItemButton>

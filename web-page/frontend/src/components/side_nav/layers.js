@@ -1,6 +1,7 @@
 import * as React from 'react';
 import IconButton from '@mui/material/IconButton';
 
+import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -72,7 +73,7 @@ const NavLayer = ({ id, selectedIndex, onLayerSelected, onLayerDelete }) => {
 };
 
 export default function Layers({ layerIds, selectedIndex, onSelectLayer, onDeleteLayer }) {
-  return layerIds.map((layerId) => {
+  const layers = layerIds.map((layerId) => {
     console.log(layerId);
     return (
       <NavLayer
@@ -83,4 +84,5 @@ export default function Layers({ layerIds, selectedIndex, onSelectLayer, onDelet
       />
     );
   });
+  return <List>{layers}</List>;
 }
