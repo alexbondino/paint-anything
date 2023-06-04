@@ -1,5 +1,6 @@
 import * as React from 'react';
 import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -9,12 +10,20 @@ import ListItemText from '@mui/material/ListItemText';
 
 import ImageIcon from '@mui/icons-material/Image';
 import DeleteIcon from '@mui/icons-material/Delete';
-import Button from '@mui/material/Button';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
 
+/**
+ * Layer item placed inside the editor drawer to handle a mask edition
+ *
+ * @param {int} id layer identification number
+ * @param {int} selectedIndex id of selected layer. If none, defaults to -1
+ * @param {function} onLayerSelected trigger function for layer selection
+ * @param {function} onLayerDelete trigger function for when layer is deleted
+ * @returns the navigation layer item
+ */
 const NavLayer = ({ id, selectedIndex, onLayerSelected, onLayerDelete }) => {
   const [openAlert, setOpenAlert] = React.useState(false);
   const handleDeleteAlertOpen = () => {
@@ -74,9 +83,9 @@ const NavLayer = ({ id, selectedIndex, onLayerSelected, onLayerDelete }) => {
 
 export default function Layers({ layerIds, selectedIndex, onSelectLayer, onDeleteLayer }) {
   const layers = layerIds.map((layerId) => {
-    console.log(layerId);
     return (
       <NavLayer
+        key={'layer ' + layerId}
         id={layerId}
         selectedIndex={selectedIndex}
         onLayerSelected={onSelectLayer}
