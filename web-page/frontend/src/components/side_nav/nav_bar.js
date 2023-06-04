@@ -29,7 +29,9 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-const drawerWidth = 240;
+
+// controls the width of the drawer
+const drawerWidth = 280;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -81,9 +83,12 @@ export default function ImageEditorDrawer() {
   const [open, setOpen] = React.useState(false);
   const [expandLayers, setExpandLayers] = React.useState(false);
   // layerIds holds the list of existing layer ids
-  const [layerIds, setLayerIds] = React.useState([]);
+  const [layerNames, setLayerNames] = React.useState(new Set());
+  const [lastLayerId, setLastLayerId] = React.useState(1);
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
-  const [selectedLayerIdx, setSelectedLayerIdx] = React.useState(-1);
+  const [selectedLayer, setSelectedLayer] = React.useState('');
+  // map to indicate layer visibility
+  const [layersVisibility, setLayersVisibility] = React.useState(new Map());
 
   const handleLayersClick = () => {
     setExpandLayers(!expandLayers);
@@ -98,31 +103,47 @@ export default function ImageEditorDrawer() {
   };
 
   const handleAddLayer = () => {
-    const layerId = layerIds.length + 1;
-    const newLayerIds = [...layerIds, layerId];
-    setLayerIds(newLayerIds);
+    // by default, each layer is created with the name as the index of last layer created + 1
+    setLastLayerId(lastLayerId + 1);
+    const layerName = lastLayerId.toString();
+    const newLayerNames = new Set(layerNames).add(layerName);
+    // layer is visible on creation
+    const newLayerVisibilities = new Map(layersVisibility).set(layerName, true);
+    setLayerNames(newLayerNames);
+    setLayersVisibility(newLayerVisibilities);
     // open layer list if it is not already open
     if (!expandLayers) {
       setExpandLayers(!expandLayers);
     }
   };
 
-  const handleSelectLayer = ({ layerId }) => {
+  function handleSelectLayer(layerName) {
     // deselect layer if it has already been selected
-    if (layerId === selectedLayerIdx) {
-      setSelectedLayerIdx(-1);
+    if (layerName === selectedLayer) {
+      setSelectedLayer('');
       return;
     }
-    setSelectedLayerIdx(layerId);
-  };
+    setSelectedLayer(layerName);
+  }
 
-  function handleLayerDelete(layerId) {
-    const newLayerIds = [...layerIds];
-    newLayerIds.pop(layerId);
-    if (selectedLayerIdx === layerId) {
-      setSelectedLayerIdx(0);
+  function handleLayerVisibilityClick(layerName) {
+    const newLayersVisibility = new Map(layersVisibility).set(
+      layerName,
+      !layersVisibility.get(layerName)
+    );
+    setLayersVisibility(newLayersVisibility);
+  }
+
+  function handleLayerDelete(layerName) {
+    const newLayerNames = new Set(layerNames);
+    const newLayersVisibility = new Map(layersVisibility);
+    newLayerNames.delete(layerName);
+    newLayersVisibility.delete(layerName);
+    if (selectedLayer === layerName) {
+      setSelectedLayer('');
     }
-    setLayerIds(newLayerIds);
+    setLayerNames(newLayerNames);
+    setLayersVisibility(newLayersVisibility);
   }
 
   return (
@@ -188,10 +209,12 @@ export default function ImageEditorDrawer() {
           </ListItem>
           <Collapse key="layer_drawer" in={expandLayers} timeout="auto" unmountOnExit>
             <Layers
-              layerIds={layerIds}
-              selectedIndex={selectedLayerIdx}
-              onDeleteLayer={handleLayerDelete}
+              layerNames={layerNames}
+              selectedLayer={selectedLayer}
+              layersVisibility={layersVisibility}
               onSelectLayer={handleSelectLayer}
+              onDeleteLayer={handleLayerDelete}
+              onVisibilityClicked={handleLayerVisibilityClick}
             />
           </Collapse>
           <ListItem key="download_result" disablePadding>
