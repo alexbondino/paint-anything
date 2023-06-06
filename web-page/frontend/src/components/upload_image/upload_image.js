@@ -5,6 +5,7 @@ import { Button, Input } from '@mui/material';
 
 function ImageUploader() { //Change the selected image and save it in a variable
   const [selectedImage, setSelectedImage] = useState(null);
+  const [customStyles, setCustomStyles] = useState({ display: 'block' });
 
   const handleImageChange = (event) => { //manages the selected image change
     setSelectedImage(event.target.files[0]); // This saves the image in cache without calling the POST API.
@@ -24,6 +25,9 @@ function ImageUploader() { //Change the selected image and save it in a variable
     try {
       await axios.post('http://localhost:8000/api/image', formData); // Connects to the POST API and sends the image in the formData const
       console.log("Imagen enviada correctamente.");
+
+      setCustomStyles({ display: 'none' });
+
     } catch (error) {
       console.error("Error al enviar la imagen:", error);
     }
@@ -40,14 +44,14 @@ submit button: utiliza la función handle sumbit para que cuando se presione, se
         <Input 
         type="file" 
         onChange={handleImageChange} 
-        sx={{ width: '500px', height: '55px' }}
+        sx={{ width: '500px', height: '55px', ...customStyles}}
         inputProps={{title: 'Selexfdas documento'}}/>
 
         <Button 
         type="submit" 
         variant="contained"
         size="large"
-        sx={{ fontSize: '20px', padding: '12px' }}
+        sx={{ fontSize: '20px', padding: '12px', ...customStyles }}
         >Submit</Button>
       </form>
 
