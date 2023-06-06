@@ -1,21 +1,23 @@
-import React, { useEffect, useState } from 'react';
+//import React, { useEffect, useState } from 'react';
 import Grid from '@mui/material/Grid'; // Grid version 1
 //import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
 import Box from '@mui/material/Box';
-import ImageView from 'image_view.js'
+import ImageView from './image_view.js'
 import Slider from '@mui/material/Slider';
+import Typography from '@mui/material/Typography';
+import './image-editor.scss';
 
-
-const [img, setImg] = useState()
+//const [img, setImg] = useState()
 
 function valueLabelFormat(value) {
     return `${value} ${'%'}`;
-  }
+}
 
 /*
 * Image editor
 */
 export default function ImageEditor(){
+    // TODO: Get image from backend
     //Get image from API and display it.
     /*
     const [image, setImage] = useState([])
@@ -33,38 +35,53 @@ export default function ImageEditor(){
         fetchImage();
     }, []);
     */
+   //TODO: center image for vertical images
     return (
-        <Box xs ={{ flexGrow: 1}}>
-            <Grid xs={8}>
-                <ImageView url='web-page\frontend\src\assets\house.jpg'/>
-            </Grid>
-            <Grid xs={4}>
-            </Grid>
-            <Grid xs={8}>
+        <Box className="background-full" >
+            <Box className='image-box'>
+            
+                <img src='../../assets/house.jpg'
+                alt="uploaded"
+                />
+            </Box>
+            <Box className="sliders-box">
+                <Typography variant="button" id="input-slider" gutterBottom>
+                Hue
+                </Typography>
                 <Slider
                     aria-label='Hue'
+                    size="small"
                     default-value={0}
                     min={0}
                     max={360}
+                    valueLabelDisplay="auto"
                     >
                 </Slider>
+                <Typography variant="button" id="input-slider" gutterBottom>
+                    Saturation
+                </Typography>
                 <Slider
-                    aria-label='Saturation'>
+                    aria-label='Saturation'
                     default-value={0}
+                    size="small"
                     min={0}
                     max={100}
-                    valueLabelFormat={valueLabelFormat}
+                    valueLabelDisplay="auto"
+                    valueLabelFormat={valueLabelFormat}>
                 </Slider>
+                <Typography variant="button" id="input-slider" gutterBottom>
+                    Lightness
+                </Typography>
                 <Slider
                     aria-label='Lightness'
                     default-value={0}
+                    size="small"
                     min={0}
                     max={100}
+                    valueLabelDisplay="auto"
                     valueLabelFormat={valueLabelFormat}>
                 </Slider>
-            </Grid>
-            <Grid xs={4}>
-            </Grid>
+            </Box>
         </Box>
     );
 }

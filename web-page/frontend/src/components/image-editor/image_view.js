@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+//import React, { useEffect } from 'react';
 
 function ImageView(image) {
     return(
         <div>
-            <img src={image.url}/>
+            <img src={image.path} alt="uploaded"/>
         </div>
     );
 }
