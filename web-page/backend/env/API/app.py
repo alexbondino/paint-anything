@@ -42,13 +42,14 @@ async def get_image():
 
     return {'message': 'Obtained image succesfully.', 'file_path': file_path}
 
+
 # Post api for the image
-@app.post('/api/image')
+@app.post("/api/image")
 async def upload_image(image: UploadFile = None):
     """Triggers the creation of a temporary directory and an image.jpg file inside it.
 
     Args:
-        image (UploadFile, optional): Image given by the frontend. If None is passed, ErrorException will rise. 
+        image (UploadFile, optional): Image given by the frontend. If None is passed, ErrorException will rise.
         Defaults to None.
 
     Raises:
@@ -60,32 +61,31 @@ async def upload_image(image: UploadFile = None):
     global temp_dir
 
     if image is None:
-        raise HTTPException(status_code=400, detail='No image provided.')
+        raise HTTPException(status_code=400, detail="No image provided.")
 
     if temp_dir is None:
         temp_dir = tempfile.mkdtemp()
 
-    file_path = os.path.join(temp_dir, 'image.jpg')
-    with open(file_path, 'wb') as file:
+    file_path = os.path.join(temp_dir, "image.jpg")
+    with open(file_path, "wb") as file:
         file.write(await image.read())
 
     print(file_path)
-    return {'message': 'Image uploaded successfully.', 'file_path': file_path}
+    return {"message": "Image uploaded successfully.", "file_path": file_path}
 
 
-@app.post('/api/cleanup')
+@app.post("/api/cleanup")
 def cleanup_temp_dir():
     global temp_dir
     if temp_dir is not None:
         shutil.rmtree(temp_dir)
         temp_dir = None
-        return {'message': 'Temporary directory cleaned up.'}
+        return {"message": "Temporary directory cleaned up."}
     else:
-        return {'message': 'No temporary directory to clean up.'}
+        return {"message": "No temporary directory to clean up."}
 
 
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     import uvicorn
-    uvicorn.run('app:app', reload=True, port=8000)
+
+    uvicorn.run("app:app", reload=True, port=8000)
