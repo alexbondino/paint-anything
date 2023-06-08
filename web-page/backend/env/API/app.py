@@ -30,7 +30,7 @@ async def get_image():
     rise.
 
     Rises:
-
+        HTTPException: HTTP Not Found (404) if the image is not provided.
 
     Returns: file_patch
     """

@@ -1,13 +1,8 @@
-//import React, { useEffect, useState } from 'react';
-import Grid from '@mui/material/Grid'; // Grid version 1
-//import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
 import Box from '@mui/material/Box';
-import ImageView from './image_view.js'
 import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
 import './image-editor.scss';
 
-//const [img, setImg] = useState()
 
 function valueLabelFormat(value) {
     return `${value} ${'%'}`;
@@ -18,30 +13,13 @@ function valueLabelFormat(value) {
 */
 export default function ImageEditor(){
     // TODO: Get image from backend
-    //Get image from API and display it.
-    /*
-    const [image, setImage] = useState([])
+    //Get an image from link and display it.
 
-    const fetchImage = async () => {
-        const res = await fetch('http://localhost:8000/api/image', {
-            method: 'GET',
-        });
-        const imageBlob = await res.blob();
-        const imageObjectURL = URL.createObjectURL(imageBlob);
-        setImg(imageObjectURL);
-      };
-
-    useEffect(() => {
-        fetchImage();
-    }, []);
-    */
-   //TODO: center image for vertical images
     return (
         <Box className="background-full" >
             <Box className='image-box'>
-            
-                <img src='../../assets/house.jpg'
-                alt="uploaded"
+                <img src={require("../../assets/house.jpg")}
+                alt="Image not working"
                 />
             </Box>
             <Box className="sliders-box">
