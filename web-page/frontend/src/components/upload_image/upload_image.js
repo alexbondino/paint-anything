@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './upload_image.css';
+import { Button, Input } from '@mui/material';
 
 function ImageUploader() { //Change the selected image and save it in a variable
   const [selectedImage, setSelectedImage] = useState(null);
@@ -35,10 +36,19 @@ submit button: utiliza la función handle sumbit para que cuando se presione, se
     <div>
       <form onSubmit={handleSubmit} className="initial_form"> 
         <label htmlFor="file_upload" className="custom-file-upload">
-        <span>Select File</span>
         </label>
-        <input id="file_upload" hidden type="file" accept="image/*" name="imagen" className="upload_image"  onChange={handleImageChange} />
-        <button type="submit" className="primary_button">Submit</button>
+        <Input 
+        type="file" 
+        onChange={handleImageChange} 
+        sx={{ width: '500px', height: '55px' }}
+        inputProps={{title: 'Selexfdas documento'}}/>
+
+        <Button 
+        type="submit" 
+        variant="contained"
+        size="large"
+        sx={{ fontSize: '20px', padding: '12px' }}
+        >Submit</Button>
       </form>
 
     </div>
