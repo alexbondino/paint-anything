@@ -1,5 +1,5 @@
 import * as React from 'react';
-import axios from 'axios';
+import { useRef } from 'react';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
 import Layers from './layers';
+import axios from 'axios';
 
 // list components
 import List from '@mui/material/List';
@@ -31,10 +32,10 @@ import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
-import { ImageUploader } from '../upload_image/upload_image.js'
 
 // controls the width of the drawer
 const drawerWidth = 280;
+
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -83,7 +84,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function ImageEditorDrawer() {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const [expandLayers, setExpandLayers] = React.useState(true);
   // layerIds holds the list of existing layer ids
   const [layerNames, setLayerNames] = React.useState(new Set());
@@ -92,7 +93,7 @@ export default function ImageEditorDrawer() {
   const [selectedLayer, setSelectedLayer] = React.useState('');
   // map to indicate layer visibility
   const [layersVisibility, setLayersVisibility] = React.useState(new Map());
-  const [uploaderVisibility, setUploaderVisibility] = React.useState({ display: 'none' })
+  
 
   const handleLayersClick = () => {
     setExpandLayers(!expandLayers);
@@ -113,6 +114,7 @@ export default function ImageEditorDrawer() {
     const newLayerNames = new Set(layerNames).add(layerName);
     // layer is visible on creation
     const newLayerVisibilities = new Map(layersVisibility).set(layerName, true);
+    
     setLayerNames(newLayerNames);
     setLayersVisibility(newLayerVisibilities);
     // open layer list if it is not already open
@@ -149,10 +151,36 @@ export default function ImageEditorDrawer() {
     }
     setLayerNames(newLayerNames);
     setLayersVisibility(newLayersVisibility);
+    
   }
 
+  const fileInputRef = useRef(null);
+
+  function handleUploadButtonClick() {
+    fileInputRef.current.click();
+    console.log("fdsañfjadsf")
+  }
+
+  async function handleFileUpload(event){
+    const file = event.target.files[0];
+    console.log('Archivo seleccionado:', file);
+
+    const formData = new FormData(); 
+    formData.append('image', file); // adds the image to the formData variable
+    
+    try{
+      await axios.post('http://localhost:8000/api/image', formData);
+      console.log("Imagen enviada correctamente.");
+    } catch (error) {
+      console.error("Error al enviar la imagen:", error);
+    }
+  }
+
+
+
+
   return (
-    <Box sx={{ disply: "flex" }}>
+    <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       <TitleBar position="fixed" open={open}>
         <Toolbar>
@@ -243,16 +271,23 @@ export default function ImageEditorDrawer() {
           ))}
         </List>
         <Divider />
+
         <List>
-          {[['Upload Image', <DownloadForOfflineIcon />]].map((text, index) => (
-            <ListItem key={text[0]} disablePadding>
-              <ListItemButton>
-                <ListItemIcon
-                >{text[1]}</ListItemIcon>
-                <ListItemText primary={text[0]} />
-              </ListItemButton>
-            </ListItem>
-          ))}
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleUploadButtonClick} variant="contained">
+              <ListItemIcon>
+                <DownloadForOfflineIcon />
+              </ListItemIcon>
+              <ListItemText primary="Upload Image" />
+              <input
+              hidden
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              onClick={(event) => event.stopPropagation()} // Evitar la propagación
+              />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
     </Box>

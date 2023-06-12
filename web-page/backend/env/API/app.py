@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import tempfile
 import shutil
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -63,7 +64,6 @@ def cleanup_temp_dir():
         return {"message": "Temporary directory cleaned up."}
     else:
         return {"message": "No temporary directory to clean up."}
-
 
 if __name__ == "__main__":
     import uvicorn
