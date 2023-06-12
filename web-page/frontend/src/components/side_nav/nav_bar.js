@@ -1,4 +1,5 @@
 import * as React from 'react';
+import axios from 'axios';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -29,6 +30,7 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 // controls the width of the drawer
 const drawerWidth = 280;
@@ -80,8 +82,8 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function ImageEditorDrawer() {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
-  const [expandLayers, setExpandLayers] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
+  const [expandLayers, setExpandLayers] = React.useState(true);
   // layerIds holds the list of existing layer ids
   const [layerNames, setLayerNames] = React.useState(new Set());
   const [lastLayerId, setLastLayerId] = React.useState(1);
@@ -89,6 +91,7 @@ export default function ImageEditorDrawer() {
   const [selectedLayer, setSelectedLayer] = React.useState('');
   // map to indicate layer visibility
   const [layersVisibility, setLayersVisibility] = React.useState(new Map());
+  const [uploaderVisibility, setUploaderVisibility] = React.useState({ display: 'none' })
 
   const handleLayersClick = () => {
     setExpandLayers(!expandLayers);
@@ -116,6 +119,7 @@ export default function ImageEditorDrawer() {
       setExpandLayers(!expandLayers);
     }
   };
+
 
   function handleSelectLayer(layerName) {
     // deselect layer if it has already been selected
@@ -147,7 +151,7 @@ export default function ImageEditorDrawer() {
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ disply: "flex" }}>
       <CssBaseline />
       <TitleBar position="fixed" open={open}>
         <Toolbar>
@@ -229,6 +233,17 @@ export default function ImageEditorDrawer() {
         <Divider />
         <List>
           {[['Developers', <GroupsIcon />]].map((text, index) => (
+            <ListItem key={text[0]} disablePadding>
+              <ListItemButton>
+                <ListItemIcon>{text[1]}</ListItemIcon>
+                <ListItemText primary={text[0]} />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+        <Divider />
+        <List>
+          {[['Upload Image', <DownloadForOfflineIcon />]].map((text, index) => (
             <ListItem key={text[0]} disablePadding>
               <ListItemButton>
                 <ListItemIcon>{text[1]}</ListItemIcon>
