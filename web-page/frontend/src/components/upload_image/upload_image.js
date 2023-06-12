@@ -4,15 +4,17 @@ import './upload_image.css';
 import { Button, Input } from '@mui/material';
 
 
-function ImageUploader() { //Change the selected image and save it in a variable
+
+
+ export function ImageUploader() { //Change the selected image and save it in a variable
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploaderVisibility, setUploaderVisibility] = useState({ display: 'block' });
 
-  const handleImageChange = (event) => { //manages the selected image change
-    setSelectedImage(event.target.files[0]); // This saves the image in cache without calling the POST API.
-  };
+  function handleImageChange(event){
+    setSelectedImage(event.target.files[0]);
+  }
 
-  const handleSubmit = async (event) => {
+  async function handleSubmit(event){
     event.preventDefault();
 
     if (!selectedImage) { 

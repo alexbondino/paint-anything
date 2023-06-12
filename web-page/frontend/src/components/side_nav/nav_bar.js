@@ -31,6 +31,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
+import { ImageUploader } from '../upload_image/upload_image.js'
 
 // controls the width of the drawer
 const drawerWidth = 280;
@@ -246,7 +247,8 @@ export default function ImageEditorDrawer() {
           {[['Upload Image', <DownloadForOfflineIcon />]].map((text, index) => (
             <ListItem key={text[0]} disablePadding>
               <ListItemButton>
-                <ListItemIcon>{text[1]}</ListItemIcon>
+                <ListItemIcon
+                >{text[1]}</ListItemIcon>
                 <ListItemText primary={text[0]} />
               </ListItemButton>
             </ListItem>
