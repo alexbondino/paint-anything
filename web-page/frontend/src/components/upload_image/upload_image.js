@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Button, Input } from '@mui/material';
 import Box from '@mui/material/Box';
 
-export function ImageUploader() {
+export function ImageUploader({onImageUpload}) {
   const [uploaderVisibility, setUploaderVisibility] = useState('block')
   const [selectedImage, setSelectedImage] = useState(null);
 
@@ -28,6 +28,8 @@ export function ImageUploader() {
       console.log('Imagen enviada correctamente.');
 
       setUploaderVisibility({display:'none'});
+      onImageUpload({newSidebar: 'flex'})
+      
 
     } catch (error) {
       console.error('Error al enviar la imagen:', error);

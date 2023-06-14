@@ -82,7 +82,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-start',
 }));
 
-export default function ImageEditorDrawer() {
+export function ImageEditorDrawer({sidebarVisibility}) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [expandLayers, setExpandLayers] = React.useState(true);
@@ -176,13 +176,10 @@ export default function ImageEditorDrawer() {
     }
   }
 
-
-
-
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex'}}>
       <CssBaseline />
-      <TitleBar position="fixed" open={open}>
+      <TitleBar position="fixed" open={open} >
         <Toolbar>
           <BrushIcon />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
@@ -193,7 +190,7 @@ export default function ImageEditorDrawer() {
             aria-label="open drawer"
             edge="end"
             onClick={handleDrawerOpen}
-            sx={{ ...(open && { display: 'none' }) }}
+            sx={{ ...(open && { display: 'none' }), display: sidebarVisibility }}
           >
             <MenuIcon />
           </IconButton>
@@ -209,13 +206,14 @@ export default function ImageEditorDrawer() {
           flexShrink: 0,
           '& .MuiDrawer-paper': {
             width: drawerWidth,
+            display: sidebarVisibility
           },
         }}
         variant="persistent"
         anchor="right"
         open={open}
       >
-        <DrawerHeader>
+        <DrawerHeader >
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
