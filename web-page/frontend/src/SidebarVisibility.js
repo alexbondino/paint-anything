@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {ImageUploader} from './components/upload_image/upload_image.js'
 import {ImageEditorDrawer} from './components/side_nav/nav_bar.js'
 
-export function ImageEditor(){
+export function SidebarVisibility(){
     const [sidebarVisibility, setSidebarVisibility] = useState('none');
     console.log(sidebarVisibility)
 
