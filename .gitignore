@@ -94,3 +94,8 @@ Thumbs.db
 
 # Python comments
 **/__pycache__/
+web-page/backend/env/API/__pycache__/app.cpython-310.pyc
+web-page/frontend/src/assets/house.avif
+web-page/frontend/src/assets/house.jpeg
+web-page/frontend/src/assets/house.jpg
+web-page/frontend/src/assets/house.png

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useRef } from 'react';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -11,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
 import Layers from './layers';
+import axios from 'axios';
 
 // list components
 import List from '@mui/material/List';
@@ -29,9 +31,11 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 // controls the width of the drawer
 const drawerWidth = 280;
+
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -78,10 +82,10 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-start',
 }));
 
-export default function ImageEditorDrawer() {
+export function ImageEditorDrawer({sidebarVisibility}) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
-  const [expandLayers, setExpandLayers] = React.useState(false);
+  const [expandLayers, setExpandLayers] = React.useState(true);
   // layerIds holds the list of existing layer ids
   const [layerNames, setLayerNames] = React.useState(new Set());
   const [lastLayerId, setLastLayerId] = React.useState(1);
@@ -89,6 +93,7 @@ export default function ImageEditorDrawer() {
   const [selectedLayer, setSelectedLayer] = React.useState('');
   // map to indicate layer visibility
   const [layersVisibility, setLayersVisibility] = React.useState(new Map());
+  
 
   const handleLayersClick = () => {
     setExpandLayers(!expandLayers);
@@ -109,6 +114,7 @@ export default function ImageEditorDrawer() {
     const newLayerNames = new Set(layerNames).add(layerName);
     // layer is visible on creation
     const newLayerVisibilities = new Map(layersVisibility).set(layerName, true);
+    
     setLayerNames(newLayerNames);
     setLayersVisibility(newLayerVisibilities);
     // open layer list if it is not already open
@@ -116,6 +122,7 @@ export default function ImageEditorDrawer() {
       setExpandLayers(!expandLayers);
     }
   };
+
 
   function handleSelectLayer(layerName) {
     // deselect layer if it has already been selected
@@ -144,12 +151,35 @@ export default function ImageEditorDrawer() {
     }
     setLayerNames(newLayerNames);
     setLayersVisibility(newLayersVisibility);
+    
+  }
+
+  const fileInputRef = useRef(null);
+
+  function handleUploadButtonClick() {
+    fileInputRef.current.click();
+    console.log("fdsañfjadsf")
+  }
+
+  async function handleFileUpload(event){
+    const file = event.target.files[0];
+    console.log('Archivo seleccionado:', file);
+
+    const formData = new FormData(); 
+    formData.append('image', file); // adds the image to the formData variable
+    
+    try{
+      await axios.post('http://localhost:8000/api/image', formData);
+      console.log("Imagen enviada correctamente.");
+    } catch (error) {
+      console.error("Error al enviar la imagen:", error);
+    }
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex'}}>
       <CssBaseline />
-      <TitleBar position="fixed" open={open}>
+      <TitleBar position="fixed" open={open} >
         <Toolbar>
           <BrushIcon />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
@@ -160,7 +190,7 @@ export default function ImageEditorDrawer() {
             aria-label="open drawer"
             edge="end"
             onClick={handleDrawerOpen}
-            sx={{ ...(open && { display: 'none' }) }}
+            sx={{ ...(open && { display: 'none' }), display: sidebarVisibility }}
           >
             <MenuIcon />
           </IconButton>
@@ -176,13 +206,14 @@ export default function ImageEditorDrawer() {
           flexShrink: 0,
           '& .MuiDrawer-paper': {
             width: drawerWidth,
+            display: sidebarVisibility
           },
         }}
         variant="persistent"
         anchor="right"
         open={open}
       >
-        <DrawerHeader>
+        <DrawerHeader >
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
@@ -236,6 +267,25 @@ export default function ImageEditorDrawer() {
               </ListItemButton>
             </ListItem>
           ))}
+        </List>
+        <Divider />
+
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleUploadButtonClick} variant="contained">
+              <ListItemIcon>
+                <DownloadForOfflineIcon />
+              </ListItemIcon>
+              <ListItemText primary="Upload Image" />
+              <input
+              hidden
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              onClick={(event) => event.stopPropagation()} // Evitar la propagación
+              />
+            </ListItemButton>
+          </ListItem>
         </List>
       </Drawer>
     </Box>
