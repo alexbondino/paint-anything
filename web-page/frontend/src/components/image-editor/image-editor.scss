@@ -1,0 +1,32 @@
+
+
+.background-full {
+    display: grid;
+}
+
+.image-box {
+    background-color: #EBEBEB;
+    width: 65%;
+    height: 600px;
+    margin: auto;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.image-box img {
+    object-fit:contain;
+    max-height: 100%;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+
+}
+
+.sliders-box {
+    width: 400px;
+    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
+}

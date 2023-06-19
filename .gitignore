@@ -89,6 +89,8 @@ lerna-debug.log
 # System Files
 .DS_Store
 Thumbs.db
+**/web-page/frontend/src/assets
+
 
 # Python comments
 **/__pycache__/

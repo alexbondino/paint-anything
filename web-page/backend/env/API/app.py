@@ -23,6 +23,26 @@ app.add_middleware(
 
 temp_dir = None  # Global variable to store the temporary directory path
 
+# Get image
+@app.get('/api/image')
+async def get_image():
+    """
+    Gets image from temp_dir. If there's no image, ErrorException will
+    rise.
+
+    Rises:
+        HTTPException: HTTP Not Found (404) if the image is not provided.
+
+    Returns: file_patch
+    """
+
+    # TODO: change way to access file path. Avoid using global variables.
+    if temp_dir is None:
+        raise HTTPException(status_code=404, detail="Image not found")
+    file_path = os.path.join(temp_dir, 'image.jpg')
+
+    return {'message': 'Obtained image succesfully.', 'file_path': file_path}
+
 
 # Post api for the image
 @app.post("/api/image")
