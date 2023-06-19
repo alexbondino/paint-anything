@@ -11,18 +11,18 @@ function valueLabelFormat(value) {
 /*
 * Image editor
 */
-export default function ImageEditor(){
+export default function ImageEditor({sidebarVisibility}){
     // TODO: Get image from backend
     //Get an image from link and display it.
 
     return (
-        <Box className="background-full" >
+        <Box className="background-full" sx={{display: sidebarVisibility}}>
             <Box className='image-box'>
                 <img src={require("../../assets/house.jpg")}
                 alt="Image not working"
                 />
             </Box>
-            <Box className="sliders-box">
+            <Box className="sliders-box" >
                 <Typography variant="button" id="input-slider" gutterBottom>
                 Hue
                 </Typography>
