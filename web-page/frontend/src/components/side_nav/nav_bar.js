@@ -36,7 +36,6 @@ import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 // controls the width of the drawer
 const drawerWidth = 280;
 
-
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
     flexGrow: 1,
@@ -82,18 +81,19 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-start',
 }));
 
-export function ImageEditorDrawer({sidebarVisibility}) {
+export function ImageEditorDrawer({
+  sidebarVisibility,
+  layerNames,
+  selectedLayer,
+  layersVis,
+  onNewLayerNames,
+  onNewLayerSelected,
+  onNewLayersVis,
+}) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [expandLayers, setExpandLayers] = React.useState(true);
-  // layerIds holds the list of existing layer ids
-  const [layerNames, setLayerNames] = React.useState(new Set());
   const [lastLayerId, setLastLayerId] = React.useState(1);
-  // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
-  const [selectedLayer, setSelectedLayer] = React.useState('');
-  // map to indicate layer visibility
-  const [layersVisibility, setLayersVisibility] = React.useState(new Map());
-  
 
   const handleLayersClick = () => {
     setExpandLayers(!expandLayers);
@@ -107,79 +107,74 @@ export function ImageEditorDrawer({sidebarVisibility}) {
     setOpen(false);
   };
 
+  function handleLayerVisibilityClick(layerName) {
+    const newLayersVisibility = new Map(layersVis).set(layerName, !layersVis.get(layerName));
+    onNewLayersVis(newLayersVisibility);
+  }
+
   const handleAddLayer = () => {
     // by default, each layer is created with the name as the index of last layer created + 1
     setLastLayerId(lastLayerId + 1);
     const layerName = lastLayerId.toString();
     const newLayerNames = new Set(layerNames).add(layerName);
     // layer is visible on creation
-    const newLayerVisibilities = new Map(layersVisibility).set(layerName, true);
-    
-    setLayerNames(newLayerNames);
-    setLayersVisibility(newLayerVisibilities);
+    const newLayerVisibilities = new Map(layersVis).set(layerName, true);
+
+    onNewLayerNames(newLayerNames);
+    onNewLayersVis(newLayerVisibilities);
     // open layer list if it is not already open
     if (!expandLayers) {
       setExpandLayers(!expandLayers);
     }
   };
 
-
   function handleSelectLayer(layerName) {
     // deselect layer if it has already been selected
     if (layerName === selectedLayer) {
-      setSelectedLayer('');
+      onNewLayerSelected('');
       return;
     }
-    setSelectedLayer(layerName);
-  }
-
-  function handleLayerVisibilityClick(layerName) {
-    const newLayersVisibility = new Map(layersVisibility).set(
-      layerName,
-      !layersVisibility.get(layerName)
-    );
-    setLayersVisibility(newLayersVisibility);
+    onNewLayerSelected(layerName);
   }
 
   function handleLayerDelete(layerName) {
     const newLayerNames = new Set(layerNames);
-    const newLayersVisibility = new Map(layersVisibility);
+    const newLayersVisibility = new Map(layersVis);
     newLayerNames.delete(layerName);
     newLayersVisibility.delete(layerName);
     if (selectedLayer === layerName) {
-      setSelectedLayer('');
+      onNewLayerSelected('');
     }
-    setLayerNames(newLayerNames);
-    setLayersVisibility(newLayersVisibility);
-    
+    onNewLayerNames(newLayerNames);
+    onNewLayersVis(newLayersVisibility);
   }
 
   const fileInputRef = useRef(null);
 
   function handleUploadButtonClick() {
     fileInputRef.current.click();
-    console.log("fdsañfjadsf")
+    console.log('fdsañfjadsf');
   }
 
-  async function handleFileUpload(event){
+  async function handleFileUpload(event) {
     const file = event.target.files[0];
     console.log('Archivo seleccionado:', file);
 
-    const formData = new FormData(); 
+    const formData = new FormData();
     formData.append('image', file); // adds the image to the formData variable
-    
-    try{
+
+    try {
       await axios.post('http://localhost:8000/api/image', formData);
-      console.log("Imagen enviada correctamente.");
+      console.log('Imagen enviada correctamente.');
     } catch (error) {
-      console.error("Error al enviar la imagen:", error);
+      console.error('Error al enviar la imagen:', error);
     }
   }
 
   return (
-    <Box sx={{ display: 'flex'}}>
+    <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <TitleBar position="fixed" open={open} >
+      <TitleBar position="fixed" open={open}>
         <Toolbar>
           <BrushIcon />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
@@ -206,14 +201,14 @@ export function ImageEditorDrawer({sidebarVisibility}) {
           flexShrink: 0,
           '& .MuiDrawer-paper': {
             width: drawerWidth,
-            display: sidebarVisibility
+            display: sidebarVisibility,
           },
         }}
         variant="persistent"
         anchor="right"
         open={open}
       >
-        <DrawerHeader >
+        <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
@@ -242,7 +237,7 @@ export function ImageEditorDrawer({sidebarVisibility}) {
             <Layers
               layerNames={layerNames}
               selectedLayer={selectedLayer}
-              layersVisibility={layersVisibility}
+              layersVisibility={layersVis}
               onSelectLayer={handleSelectLayer}
               onDeleteLayer={handleLayerDelete}
               onVisibilityClicked={handleLayerVisibilityClick}
@@ -278,11 +273,11 @@ export function ImageEditorDrawer({sidebarVisibility}) {
               </ListItemIcon>
               <ListItemText primary="Upload Image" />
               <input
-              hidden
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              onClick={(event) => event.stopPropagation()} // Evitar la propagación
+                hidden
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                onClick={(event) => event.stopPropagation()} // Evitar la propagación
               />
             </ListItemButton>
           </ListItem>

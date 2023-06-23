@@ -17,13 +17,17 @@ export default function ImageEditor({ sidebarVisibility }) {
   const [maskFilePaths, setMaskFilePaths] = useState(['house_2_mask.png', 'mickey.png']);
 
   const maskImgs = maskFilePaths.map((filepath) => {
-    return (
-      <img
-        src={require(`../../assets/${filepath}`)}
-        alt="mask_image"
-        style={{ position: 'absolute', width: '100%', height: '100%' }}
-      />
-    );
+    try {
+      return (
+        <img
+          src={require(`../../assets/${filepath}`)}
+          alt="mask_image"
+          style={{ position: 'absolute', width: '100%', height: '100%' }}
+        />
+      );
+    } catch {
+      console.log(`Image ${filepath} not found`);
+    }
   });
 
   return (
