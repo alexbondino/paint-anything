@@ -14,15 +14,23 @@ function valueLabelFormat(value) {
 export default function ImageEditor({ sidebarVisibility }) {
   // TODO: Get image from backend
   //Get an image from link and display it.
+  const [maskFilePaths, setMaskFilePaths] = useState(['house_2_mask.png', 'mickey.png']);
+
+  const maskImgs = maskFilePaths.map((filepath) => {
+    return (
+      <img
+        src={require(`../../assets/${filepath}`)}
+        alt="mask_image"
+        style={{ position: 'absolute', width: '100%', height: '100%' }}
+      />
+    );
+  });
+
   return (
     <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>
       <Box className="image-box" sx={{ position: 'relative' }}>
         <img src={require('../../assets/house_2.jpg')} alt="base_image" />
-        <img
-          src={require('../../assets/house_2_mask.png')}
-          alt="mask_image"
-          style={{ position: 'absolute', width: '100%' }}
-        />
+        {maskImgs}
       </Box>
       <Box className="sliders-box" sx={{ display: 'flex', flexDirection: 'column' }}>
         <Typography variant="button" id="input-slider" gutterBottom>
