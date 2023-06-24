@@ -83,12 +83,10 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export function ImageEditorDrawer({
   sidebarVisibility,
-  layerNames,
+  layersDef,
   selectedLayer,
-  layersVis,
-  onNewLayerNames,
+  onNewLayerDef,
   onNewLayerSelected,
-  onNewLayersVis,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -107,46 +105,39 @@ export function ImageEditorDrawer({
     setOpen(false);
   };
 
-  function handleLayerVisibilityClick(layerName) {
-    const newLayersVisibility = new Map(layersVis).set(layerName, !layersVis.get(layerName));
-    onNewLayersVis(newLayersVisibility);
+  function handleLayerVisibilityClick(layerId) {
+    const newLayerDef = [...layersDef];
+    const layerPos = newLayerDef.findIndex((l) => l.id === layerId);
+    newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
+    onNewLayerDef(newLayerDef);
   }
 
   const handleAddLayer = () => {
     // by default, each layer is created with the name as the index of last layer created + 1
     setLastLayerId(lastLayerId + 1);
-    const layerName = lastLayerId.toString();
-    const newLayerNames = new Set(layerNames).add(layerName);
-    // layer is visible on creation
-    const newLayerVisibilities = new Map(layersVis).set(layerName, true);
-
-    onNewLayerNames(newLayerNames);
-    onNewLayersVis(newLayerVisibilities);
+    const newLayersDef = [...layersDef, { id: lastLayerId, visibility: true }];
+    onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
     if (!expandLayers) {
       setExpandLayers(!expandLayers);
     }
   };
 
-  function handleSelectLayer(layerName) {
+  function handleSelectLayer(layerId) {
     // deselect layer if it has already been selected
-    if (layerName === selectedLayer) {
+    if (layerId === selectedLayer) {
       onNewLayerSelected('');
       return;
     }
-    onNewLayerSelected(layerName);
+    onNewLayerSelected(layerId);
   }
 
-  function handleLayerDelete(layerName) {
-    const newLayerNames = new Set(layerNames);
-    const newLayersVisibility = new Map(layersVis);
-    newLayerNames.delete(layerName);
-    newLayersVisibility.delete(layerName);
-    if (selectedLayer === layerName) {
+  function handleLayerDelete(layerId) {
+    const newLayerDef = [...layersDef.filter((l) => l.id != layerId)];
+    if (selectedLayer === layerId) {
       onNewLayerSelected('');
     }
-    onNewLayerNames(newLayerNames);
-    onNewLayersVis(newLayersVisibility);
+    onNewLayerDef(newLayerDef);
   }
 
   const fileInputRef = useRef(null);
@@ -235,9 +226,8 @@ export function ImageEditorDrawer({
           </ListItem>
           <Collapse key="layer_drawer" in={expandLayers} timeout="auto" unmountOnExit>
             <Layers
-              layerNames={layerNames}
+              layersDef={layersDef}
               selectedLayer={selectedLayer}
-              layersVisibility={layersVis}
               onSelectLayer={handleSelectLayer}
               onDeleteLayer={handleLayerDelete}
               onVisibilityClicked={handleLayerVisibilityClick}

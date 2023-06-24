@@ -6,9 +6,7 @@ import ImageEditor from './components/image-editor/image_editor.js';
 export function Editor() {
   const [sidebarVisibility, setSidebarVisibility] = useState('none');
   // layerIds holds the list of existing layer ids
-  const [layerNames, setLayerNames] = React.useState(new Set());
-  // map to indicate layer visibility
-  const [layersVisibility, setLayersVisibility] = React.useState(new Map());
+  const [layersDef, setLayersDef] = React.useState([]);
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState('');
   console.log(sidebarVisibility);
@@ -20,12 +18,10 @@ export function Editor() {
   return [
     <ImageEditorDrawer
       sidebarVisibility={sidebarVisibility}
-      layerNames={layerNames}
+      layersDef={layersDef}
       selectedLayer={selectedLayer}
-      layersVis={layersVisibility}
-      onNewLayerNames={(newLayerNames) => setLayerNames(newLayerNames)}
+      onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       onNewLayerSelected={(newLayerSelected) => setSelectedLayer(newLayerSelected)}
-      onNewLayersVis={(newVis) => setLayersVisibility(newVis)}
     />,
     <ImageEditor sidebarVisibility={sidebarVisibility} />,
     <ImageUploader onImageUpload={handleSidebarVisibilityChange} />,

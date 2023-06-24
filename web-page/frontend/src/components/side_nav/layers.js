@@ -22,32 +22,33 @@ import DialogContentText from '@mui/material/DialogContentText';
  * Layer item placed inside the editor drawer to handle a mask edition
  *
  * @param {int} id layer identification number
- * @param {int} selectedIndex id of selected layer. If none, defaults to -1
+ * @param {int} selectedLayer id of selected layer. If none, defaults to -1
  * @param {function} onSelected trigger function for layer selection
  * @param {function} onDelete trigger function for when layer is deleted
  * @returns the navigation layer item
  */
-const NavLayer = ({ name, selectedLayer, visible, onSelected, onDelete, onVisClick }) => {
+const NavLayer = ({ id, selectedLayer, visible, onSelected, onDelete, onVisClick }) => {
   const [openAlert, setOpenAlert] = React.useState(false);
+  const layerName = 'Layer ' + id;
 
   const handleDeleteConfirmation = () => {
     setOpenAlert(false);
-    onDelete(name);
+    onDelete(id);
   };
   return (
     <ListItem>
       <ListItemButton
-        id={name}
+        id={id}
         disableRipple
-        selected={selectedLayer === name}
-        onClick={() => onSelected(name)}
+        selected={selectedLayer === id}
+        onClick={() => onSelected(id)}
       >
         <ListItemIcon>
           <ImageIcon />
         </ListItemIcon>
-        <ListItemText primary={'Layer ' + name} />
+        <ListItemText primary={layerName} />
       </ListItemButton>
-      <IconButton disableTouchRipple aria-label="layer visibility" onClick={() => onVisClick(name)}>
+      <IconButton disableTouchRipple aria-label="layer visibility" onClick={() => onVisClick(id)}>
         {visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
       </IconButton>
       <IconButton disableTouchRipple aria-label="delete layer" onClick={() => setOpenAlert(true)}>
@@ -60,7 +61,7 @@ const NavLayer = ({ name, selectedLayer, visible, onSelected, onDelete, onVisCli
       >
         <DialogContent>
           <DialogContentText id="erase-layer-alert-description">
-            {`Are you sure you want to delete Layer ${name}?`}
+            {`Are you sure you want to delete Layer ${layerName}?`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -75,19 +76,18 @@ const NavLayer = ({ name, selectedLayer, visible, onSelected, onDelete, onVisCli
 };
 
 export default function Layers({
-  layerNames,
+  layersDef,
   selectedLayer,
-  layersVisibility,
   onSelectLayer,
   onDeleteLayer,
   onVisibilityClicked,
 }) {
-  const layers = [...layerNames].map((layerName, i) => {
+  const layers = layersDef.map((l) => {
     return (
       <NavLayer
-        key={'layer ' + layerName}
-        name={layerName}
-        visible={layersVisibility.get(layerName)}
+        id={l.id}
+        key={'layer ' + l.id}
+        visible={l.visibility}
         selectedLayer={selectedLayer}
         onSelected={onSelectLayer}
         onDelete={onDeleteLayer}

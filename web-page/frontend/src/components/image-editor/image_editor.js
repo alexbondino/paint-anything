@@ -14,7 +14,7 @@ function valueLabelFormat(value) {
 export default function ImageEditor({ sidebarVisibility }) {
   // TODO: Get image from backend
   //Get an image from link and display it.
-  const [maskFilePaths, setMaskFilePaths] = useState(['house_2_mask.png', 'mickey.png']);
+  const [maskFilePaths, setMaskFilePaths] = useState(['1.png', '2.png']);
 
   const maskImgs = maskFilePaths.map((filepath) => {
     try {
