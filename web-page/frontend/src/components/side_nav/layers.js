@@ -47,7 +47,16 @@ function hslToHex(h, s, l) {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
+/**
+ * Hue, saturation and lightness sliders
+ * @param {int} layerId
+ * @param {int} hue
+ * @param {int} saturation
+ * @param {int} lightness
+ * @param {function} onHSLChange
+ * @returns HSL slider for modifying hsl color of layer
+ */
+function HSLSlider(layerId, hue, saturation, lightness, onHSLChange) {
   return (
     <Box className="sliders-box" sx={{ display: 'flex', flexDirection: 'column', mt: 0, mx: 3 }}>
       <Typography variant="button" id="input-slider" gutterBottom>
@@ -90,48 +99,39 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
       ></Slider>
     </Box>
   );
-};
+}
 
 /**
  * Layer item placed inside the editor drawer to handle a mask edition
  *
- * @param {int} id layer identification number
+ * @param {object} layerDef layer definition object
  * @param {int} selectedLayer id of selected layer. If none, defaults to -1
  * @param {function} onSelected trigger function for layer selection
  * @param {function} onDelete trigger function for when layer is deleted
  * @returns the navigation layer item
  */
-const NavLayer = ({
-  id,
-  selectedLayer,
-  visible,
-  hsl,
-  onSelected,
-  onDelete,
-  onVisClick,
-  onHSLChange,
-}) => {
+const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, onHSLChange }) => {
   const [openAlert, setOpenAlert] = React.useState(false);
-  const layerName = 'Layer ' + id;
+  const layerName = 'Layer ' + layerDef.id;
 
   const handleDeleteConfirmation = () => {
     setOpenAlert(false);
-    onDelete(id);
+    onDelete(layerDef.id);
   };
   return (
     <div>
       <ListItem>
         <ListItemButton
-          id={id}
+          id={layerDef.id}
           disableRipple
-          selected={selectedLayer === id}
-          onClick={() => onSelected(id)}
+          selected={selectedLayer === layerDef.id}
+          onClick={() => onSelected(layerDef.id)}
         >
           <ListItemIcon>
-            {hsl.length === 3 ? (
+            {layerDef.hsl.length === 3 ? (
               <SquareRoundedIcon
                 sx={{
-                  color: hslToHex(hsl[0], hsl[1], hsl[2]),
+                  color: hslToHex(layerDef.hsl[0], layerDef.hsl[1], layerDef.hsl[2]),
                   stroke: 'black',
                   strokeWidth: 1,
                 }}
@@ -149,8 +149,12 @@ const NavLayer = ({
           </ListItemIcon>
           <ListItemText primary={layerName} />
         </ListItemButton>
-        <IconButton disableTouchRipple aria-label="layer visibility" onClick={() => onVisClick(id)}>
-          {visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+        <IconButton
+          disableTouchRipple
+          aria-label="layer visibility"
+          onClick={() => onVisClick(layerDef.id)}
+        >
+          {layerDef.visibility ? <VisibilityIcon /> : <VisibilityOffIcon />}
         </IconButton>
         <IconButton disableTouchRipple aria-label="delete layer" onClick={() => setOpenAlert(true)}>
           <DeleteIcon />
@@ -173,13 +177,13 @@ const NavLayer = ({
           </DialogActions>
         </Dialog>
       </ListItem>
-      {selectedLayer === id && hsl.length === 3 ? (
+      {selectedLayer === layerDef.id && layerDef.hsl.length === 3 ? (
         <ListItem>
           <HSLSlider
-            layerId={id}
-            hue={hsl[0]}
-            saturation={hsl[1]}
-            lightness={hsl[2]}
+            layerId={layerDef.id}
+            hue={layerDef.hsl[0]}
+            saturation={layerDef.hsl[1]}
+            lightness={layerDef.hsl[2]}
             onHSLChange={onHSLChange}
           />
         </ListItem>
@@ -199,11 +203,9 @@ export default function Layers({
   const layers = layersDef.map((l) => {
     return (
       <NavLayer
-        id={l.id}
+        layerDef={l}
         key={'layer ' + l.id}
-        visible={l.visibility}
         selectedLayer={selectedLayer}
-        hsl={l.hsl}
         onSelected={onSelectLayer}
         onDelete={onDeleteLayer}
         onVisClick={onVisibilityClicked}
