@@ -9,7 +9,6 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
-import ImageIcon from '@mui/icons-material/Image';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -41,7 +40,7 @@ function hslToHex(h, s, l) {
   return `#${f(0)}${f(8)}${f(4)}`;
 }
 
-const HSLSlider = ({ hue, saturation, lightness }) => {
+const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   return (
     <Box className="sliders-box" sx={{ display: 'flex', flexDirection: 'column', mt: 0, mx: 3 }}>
       <Typography variant="button" id="input-slider" gutterBottom>
@@ -54,6 +53,7 @@ const HSLSlider = ({ hue, saturation, lightness }) => {
         min={0}
         max={360}
         valueLabelDisplay="auto"
+        onChange={(e) => onHSLChange([e.target.value, saturation, lightness], layerId)}
       ></Slider>
       <Typography variant="button" id="input-slider" gutterBottom>
         Saturation
@@ -66,6 +66,7 @@ const HSLSlider = ({ hue, saturation, lightness }) => {
         max={100}
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
+        onChange={(e) => onHSLChange([hue, e.target.value, lightness], layerId)}
       ></Slider>
       <Typography variant="button" id="input-slider" gutterBottom>
         Lightness
@@ -78,6 +79,7 @@ const HSLSlider = ({ hue, saturation, lightness }) => {
         max={100}
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
+        onChange={(e) => onHSLChange([hue, saturation, e.target.value], layerId)}
       ></Slider>
     </Box>
   );
@@ -92,7 +94,16 @@ const HSLSlider = ({ hue, saturation, lightness }) => {
  * @param {function} onDelete trigger function for when layer is deleted
  * @returns the navigation layer item
  */
-const NavLayer = ({ id, selectedLayer, visible, hsl, onSelected, onDelete, onVisClick }) => {
+const NavLayer = ({
+  id,
+  selectedLayer,
+  visible,
+  hsl,
+  onSelected,
+  onDelete,
+  onVisClick,
+  onHSLChange,
+}) => {
   const [openAlert, setOpenAlert] = React.useState(false);
   const layerName = 'Layer ' + id;
 
@@ -157,7 +168,13 @@ const NavLayer = ({ id, selectedLayer, visible, hsl, onSelected, onDelete, onVis
       </ListItem>
       {selectedLayer === id && hsl.length === 3 ? (
         <ListItem>
-          <HSLSlider hue={hsl[0]} saturation={hsl[1]} lightness={hsl[2]} />
+          <HSLSlider
+            layerId={id}
+            hue={hsl[0]}
+            saturation={hsl[1]}
+            lightness={hsl[2]}
+            onHSLChange={onHSLChange}
+          />
         </ListItem>
       ) : null}
     </div>
@@ -170,6 +187,7 @@ export default function Layers({
   onSelectLayer,
   onDeleteLayer,
   onVisibilityClicked,
+  onHSLChange,
 }) {
   const layers = layersDef.map((l) => {
     return (
@@ -182,6 +200,7 @@ export default function Layers({
         onSelected={onSelectLayer}
         onDelete={onDeleteLayer}
         onVisClick={onVisibilityClicked}
+        onHSLChange={onHSLChange}
       />
     );
   });

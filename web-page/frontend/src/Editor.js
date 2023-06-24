@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
-import Typography from '@mui/material/Typography';
 
 // initial layer shown after image is uploaded
 const initialLayer = {
@@ -50,6 +49,13 @@ export function Editor() {
     updateLayerUrl(layerId, imgUrl);
   }
 
+  function handleHSLChange(newHSL, layerId) {
+    const newLayer = layersDef.find((l) => l.id === layerId);
+    newLayer.hsl = newHSL;
+    const newLayersDef = [...layersDef.filter((l) => l.id !== layerId), newLayer];
+    setLayersDef(newLayersDef);
+  }
+
   return [
     <ImageEditorDrawer
       key="side_nav"
@@ -59,6 +65,7 @@ export function Editor() {
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       onNewLayerSelected={(newLayerSelected) => setSelectedLayer(newLayerSelected)}
       onImageUpload={(imgFile) => handleImageUpload(imgFile)}
+      onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
     />,
     <ImageEditor
       key="img_editor"

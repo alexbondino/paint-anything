@@ -87,6 +87,7 @@ export function ImageEditorDrawer({
   onNewLayerDef,
   onNewLayerSelected,
   onImageUpload,
+  onHSLChange,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -220,6 +221,7 @@ export function ImageEditorDrawer({
               onSelectLayer={handleSelectLayer}
               onDeleteLayer={handleLayerDelete}
               onVisibilityClicked={handleLayerVisibilityClick}
+              onHSLChange={onHSLChange}
             />
           </Collapse>
           <ListItem key="download_result" disablePadding>
