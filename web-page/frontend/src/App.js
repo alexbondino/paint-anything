@@ -9,7 +9,6 @@ const App = () => {
     <ThemeProvider theme={AppTheme()}>
       <div>
         <Editor />
-        <CleanTempDir />
       </div>
     </ThemeProvider>
   );

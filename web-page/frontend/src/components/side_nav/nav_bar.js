@@ -87,11 +87,13 @@ export function ImageEditorDrawer({
   selectedLayer,
   onNewLayerDef,
   onNewLayerSelected,
+  onMaskUpdate,
+  onMaskDelete,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [expandLayers, setExpandLayers] = React.useState(true);
-  const [lastLayerId, setLastLayerId] = React.useState(1);
+  const [lastLayerId, setLastLayerId] = React.useState(0);
 
   const handleLayersClick = () => {
     setExpandLayers(!expandLayers);
@@ -112,9 +114,10 @@ export function ImageEditorDrawer({
     onNewLayerDef(newLayerDef);
   }
 
-  const handleAddLayer = () => {
+  const handleAddLayer = async () => {
     // by default, each layer is created with the name as the index of last layer created + 1
     setLastLayerId(lastLayerId + 1);
+    await onMaskUpdate(lastLayerId + 1);
     const newLayersDef = [...layersDef, { id: lastLayerId + 1, visibility: true }];
     onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
@@ -138,6 +141,7 @@ export function ImageEditorDrawer({
       onNewLayerSelected('');
     }
     onNewLayerDef(newLayerDef);
+    onMaskDelete(layerId);
   }
 
   const fileInputRef = useRef(null);
@@ -211,7 +215,11 @@ export function ImageEditorDrawer({
               <LayersIcon />
             </ListItemIcon>
             <ListItemText primary="Layers" />
-            <IconButton color="inherit" aria-label="add layer" onClick={handleAddLayer}>
+            <IconButton
+              color="inherit"
+              aria-label="add layer"
+              onClick={async () => await handleAddLayer()}
+            >
               <AddIcon />
             </IconButton>
             {expandLayers ? (
