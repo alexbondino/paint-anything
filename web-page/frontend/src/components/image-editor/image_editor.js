@@ -4,14 +4,10 @@ import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
 import './image-editor.scss';
 
-function valueLabelFormat(value) {
-  return `${value} ${'%'}`;
-}
-
 /*
  * Image editor
  */
-export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
+export default function ImageEditor({ baseImg, sidebarVisibility, layersDef, selectedLayer }) {
   // construct mask images dynamically from layer definitions
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null)
@@ -40,43 +36,6 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
       <Box className="image-box" sx={{ position: 'relative' }}>
         <img src={baseImg} alt="base_image" />
         {maskImgComps}
-      </Box>
-      <Box className="sliders-box" sx={{ display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="button" id="input-slider" gutterBottom>
-          Hue
-        </Typography>
-        <Slider
-          aria-label="Hue"
-          size="small"
-          default-value={0}
-          min={0}
-          max={360}
-          valueLabelDisplay="auto"
-        ></Slider>
-        <Typography variant="button" id="input-slider" gutterBottom>
-          Saturation
-        </Typography>
-        <Slider
-          aria-label="Saturation"
-          default-value={0}
-          size="small"
-          min={0}
-          max={100}
-          valueLabelDisplay="auto"
-          valueLabelFormat={valueLabelFormat}
-        ></Slider>
-        <Typography variant="button" id="input-slider" gutterBottom>
-          Lightness
-        </Typography>
-        <Slider
-          aria-label="Lightness"
-          default-value={0}
-          size="small"
-          min={0}
-          max={100}
-          valueLabelDisplay="auto"
-          valueLabelFormat={valueLabelFormat}
-        ></Slider>
       </Box>
     </Box>
   );

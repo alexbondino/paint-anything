@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 
@@ -12,11 +13,75 @@ import ImageIcon from '@mui/icons-material/Image';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
+
+import Slider from '@mui/material/Slider';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+
+function valueLabelFormat(value) {
+  return `${value} ${'%'}`;
+}
+
+function hslToHex(h, s, l) {
+  l /= 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
+  const f = (n) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, '0'); // convert to Hex and prefix "0" if needed
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+const HSLSlider = ({ hue, saturation, lightness }) => {
+  return (
+    <Box className="sliders-box" sx={{ display: 'flex', flexDirection: 'column', mt: 0, mx: 3 }}>
+      <Typography variant="button" id="input-slider" gutterBottom>
+        Hue
+      </Typography>
+      <Slider
+        aria-label="Hue"
+        size="small"
+        defaultValue={hue}
+        min={0}
+        max={360}
+        valueLabelDisplay="auto"
+      ></Slider>
+      <Typography variant="button" id="input-slider" gutterBottom>
+        Saturation
+      </Typography>
+      <Slider
+        aria-label="Saturation"
+        defaultValue={saturation}
+        size="small"
+        min={0}
+        max={100}
+        valueLabelDisplay="auto"
+        valueLabelFormat={valueLabelFormat}
+      ></Slider>
+      <Typography variant="button" id="input-slider" gutterBottom>
+        Lightness
+      </Typography>
+      <Slider
+        aria-label="Lightness"
+        defaultValue={lightness}
+        size="small"
+        min={0}
+        max={100}
+        valueLabelDisplay="auto"
+        valueLabelFormat={valueLabelFormat}
+      ></Slider>
+    </Box>
+  );
+};
 
 /**
  * Layer item placed inside the editor drawer to handle a mask edition
@@ -27,7 +92,7 @@ import DialogContentText from '@mui/material/DialogContentText';
  * @param {function} onDelete trigger function for when layer is deleted
  * @returns the navigation layer item
  */
-const NavLayer = ({ id, selectedLayer, visible, onSelected, onDelete, onVisClick }) => {
+const NavLayer = ({ id, selectedLayer, visible, hsl, onSelected, onDelete, onVisClick }) => {
   const [openAlert, setOpenAlert] = React.useState(false);
   const layerName = 'Layer ' + id;
 
@@ -36,42 +101,66 @@ const NavLayer = ({ id, selectedLayer, visible, onSelected, onDelete, onVisClick
     onDelete(id);
   };
   return (
-    <ListItem>
-      <ListItemButton
-        id={id}
-        disableRipple
-        selected={selectedLayer === id}
-        onClick={() => onSelected(id)}
-      >
-        <ListItemIcon>
-          <ImageIcon />
-        </ListItemIcon>
-        <ListItemText primary={layerName} />
-      </ListItemButton>
-      <IconButton disableTouchRipple aria-label="layer visibility" onClick={() => onVisClick(id)}>
-        {visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
-      </IconButton>
-      <IconButton disableTouchRipple aria-label="delete layer" onClick={() => setOpenAlert(true)}>
-        <DeleteIcon />
-      </IconButton>
-      <Dialog
-        open={openAlert}
-        onClose={() => setOpenAlert(false)}
-        aria-describedby="erase-layer-alert-description"
-      >
-        <DialogContent>
-          <DialogContentText id="erase-layer-alert-description">
-            {`Are you sure you want to delete Layer ${layerName}?`}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDeleteConfirmation}>Confirm</Button>
-          <Button onClick={() => setOpenAlert(false)} autoFocus>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </ListItem>
+    <div>
+      <ListItem>
+        <ListItemButton
+          id={id}
+          disableRipple
+          selected={selectedLayer === id}
+          onClick={() => onSelected(id)}
+        >
+          <ListItemIcon>
+            {hsl.length === 3 ? (
+              <SquareRoundedIcon
+                sx={{
+                  color: hslToHex(hsl[0], hsl[1], 50),
+                  stroke: 'black',
+                  strokeWidth: 1,
+                }}
+              />
+            ) : (
+              <SquareRoundedIcon
+                sx={{
+                  color: '#bdbdbd',
+                  stroke: 'black',
+                  strokeWidth: 1,
+                  strokeDasharray: '3',
+                }}
+              />
+            )}
+          </ListItemIcon>
+          <ListItemText primary={layerName} />
+        </ListItemButton>
+        <IconButton disableTouchRipple aria-label="layer visibility" onClick={() => onVisClick(id)}>
+          {visible ? <VisibilityIcon /> : <VisibilityOffIcon />}
+        </IconButton>
+        <IconButton disableTouchRipple aria-label="delete layer" onClick={() => setOpenAlert(true)}>
+          <DeleteIcon />
+        </IconButton>
+        <Dialog
+          open={openAlert}
+          onClose={() => setOpenAlert(false)}
+          aria-describedby="erase-layer-alert-description"
+        >
+          <DialogContent>
+            <DialogContentText id="erase-layer-alert-description">
+              {`Are you sure you want to delete Layer ${layerName}?`}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteConfirmation}>Confirm</Button>
+            <Button onClick={() => setOpenAlert(false)} autoFocus>
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </ListItem>
+      {selectedLayer === id && hsl.length === 3 ? (
+        <ListItem>
+          <HSLSlider hue={hsl[0]} saturation={hsl[1]} lightness={hsl[2]} />
+        </ListItem>
+      ) : null}
+    </div>
   );
 };
 
@@ -89,6 +178,7 @@ export default function Layers({
         key={'layer ' + l.id}
         visible={l.visibility}
         selectedLayer={selectedLayer}
+        hsl={l.hsl}
         onSelected={onSelectLayer}
         onDelete={onDeleteLayer}
         onVisClick={onVisibilityClicked}

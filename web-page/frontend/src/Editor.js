@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
+import Typography from '@mui/material/Typography';
 
 // initial layer shown after image is uploaded
 const initialLayer = {
   id: 0,
   visibility: true,
   imgUrl: null,
+  hsl: [120, 40, 50],
 };
 
 export function Editor() {
@@ -63,6 +65,7 @@ export function Editor() {
       baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
+      selectedLayer={selectedLayer}
     />,
     <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
   ];
