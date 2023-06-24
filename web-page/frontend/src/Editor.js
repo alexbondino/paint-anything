@@ -27,6 +27,14 @@ export function Editor() {
     setBaseImg(imgObjectURL);
   }
 
+  const updateLayerUrl = (layerId, url) => {
+    const updatedLayer = layersDef.find((l) => l.id === layerId);
+    // update url in layer definition
+    updatedLayer.imgUrl = url;
+    const newLayersDef = [...layersDef.filter((l) => l.id !== layerId), updatedLayer];
+    setLayersDef(newLayersDef);
+  };
+
   async function handleMaskUpdate(layerId) {
     // fetch mask for this layer from backend
     const imgResponse = await fetch(
@@ -37,11 +45,7 @@ export function Editor() {
     );
     // parse image and construct url
     const imgUrl = URL.createObjectURL(await imgResponse.blob());
-    const updatedLayer = layersDef.find((l) => l.id === layerId);
-    // update url in layer definition
-    updatedLayer.imgUrl = imgUrl;
-    const newLayersDef = [...layersDef.filter((l) => l.id !== layerId), updatedLayer];
-    setLayersDef(newLayersDef);
+    updateLayerUrl(layerId, imgUrl);
   }
 
   return [
