@@ -27,6 +27,11 @@ export function Editor() {
     setBaseImg(imgObjectURL);
   }
 
+  function handleImageDownload(imgFileDownload){
+    const imgObjectURL = URL.createObjectURL(imgFileDownload);
+  }
+
+
   const updateLayerUrl = (layerId, url) => {
     const updatedLayer = layersDef.find((l) => l.id === layerId);
     // update url in layer definition

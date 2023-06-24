@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, HTTPException, File
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, FileResponse
 import os
@@ -97,7 +98,18 @@ def cleanup_temp_dir():
         return {"message": "Temporary directory cleaned up."}
     else:
         return {"message": "No temporary directory to clean up."}
+    
+@app.get("/api/image_downloader")
+async def image_downloader():
+    from PIL import Image
 
+    img1 = Image.open("web-page/frontend/src/assets/house.jpg")
+    img2 = Image.open("web-page/frontend/src/assets/luffy.jpg")
+    img2 = img2.convert("RGBA")
+
+    img1.paste(img2, (0,0), mask = img2)
+    img1.save("web-page/frontend/src/assets/downloadable.png")
+    return FileResponse("web-page/frontend/src/assets/downloadable.png", media_type="image/png")
 
 if __name__ == "__main__":
     import uvicorn
