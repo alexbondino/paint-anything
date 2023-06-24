@@ -24,9 +24,9 @@ export function ImageUploader({ onImageUpload }) {
 
     try {
       onImageUpload(selectedImage);
-      setUploaderVisibility({ display: 'none' });
       await axios.post('http://localhost:8000/api/image', formData);
       console.log('Imagen enviada correctamente.');
+      setUploaderVisibility({ display: 'none' });
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
