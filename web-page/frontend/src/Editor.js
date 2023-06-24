@@ -29,10 +29,10 @@ export function Editor() {
   }
 
   const updateLayerUrl = (layerId, url) => {
-    const updatedLayer = layersDef.find((l) => l.id === layerId);
+    const newLayersDef = [...layersDef];
+    const layerPos = layersDef.findIndex((l) => l.id === layerId);
     // update url in layer definition
-    updatedLayer.imgUrl = url;
-    const newLayersDef = [...layersDef.filter((l) => l.id !== layerId), updatedLayer];
+    newLayersDef[layerPos].imgUrl = url;
     setLayersDef(newLayersDef);
   };
 
@@ -50,9 +50,10 @@ export function Editor() {
   }
 
   function handleHSLChange(newHSL, layerId) {
-    const newLayer = layersDef.find((l) => l.id === layerId);
-    newLayer.hsl = newHSL;
-    const newLayersDef = [...layersDef.filter((l) => l.id !== layerId), newLayer];
+    const newLayersDef = [...layersDef];
+    const layerPos = layersDef.findIndex((l) => l.id === layerId);
+    // update hsl in layer definition
+    newLayersDef[layerPos].hsl = newHSL;
     setLayersDef(newLayersDef);
   }
 

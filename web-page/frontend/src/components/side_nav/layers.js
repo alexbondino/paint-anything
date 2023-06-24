@@ -27,6 +27,13 @@ function valueLabelFormat(value) {
   return `${value} ${'%'}`;
 }
 
+/**
+ *  Converts hsl color model to hexadecimal string representation
+ * @param {int} h hue value [0-360]
+ * @param {int} s saturation value [0-100]
+ * @param {int} l lightness value [0-100]
+ * @returns hexadecimal string rep
+ */
 function hslToHex(h, s, l) {
   l /= 100;
   const a = (s * Math.min(l, 1 - l)) / 100;
@@ -124,7 +131,7 @@ const NavLayer = ({
             {hsl.length === 3 ? (
               <SquareRoundedIcon
                 sx={{
-                  color: hslToHex(hsl[0], hsl[1], 50),
+                  color: hslToHex(hsl[0], hsl[1], hsl[2]),
                   stroke: 'black',
                   strokeWidth: 1,
                 }}
