@@ -11,22 +11,22 @@ function valueLabelFormat(value) {
 /*
  * Image editor
  */
-export default function ImageEditor({ sidebarVisibility }) {
+export default function ImageEditor({ sidebarVisibility, layersDef }) {
   // TODO: Get image from backend
   //Get an image from link and display it.
-  const [maskFilePaths, setMaskFilePaths] = useState(['1.png', '2.png']);
 
-  const maskImgs = maskFilePaths.map((filepath) => {
+  const maskImgs = layersDef.map((layer) => {
     try {
       return (
         <img
-          src={require(`../../assets/${filepath}`)}
+          src={require(`../../assets/${layer.id}.png`)}
           alt="mask_image"
           style={{ position: 'absolute', width: '100%', height: '100%' }}
         />
       );
     } catch {
-      console.log(`Image ${filepath} not found`);
+      console.log(`Image for layer ${layer.id} not found`);
+      return;
     }
   });
 

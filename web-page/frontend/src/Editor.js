@@ -3,10 +3,15 @@ import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 
+const initialLayer = {
+  id: 1,
+  visibility: true,
+};
+
 export function Editor() {
   const [sidebarVisibility, setSidebarVisibility] = useState('none');
   // layerIds holds the list of existing layer ids
-  const [layersDef, setLayersDef] = React.useState([]);
+  const [layersDef, setLayersDef] = React.useState([initialLayer]);
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState('');
   console.log(sidebarVisibility);
@@ -23,7 +28,7 @@ export function Editor() {
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       onNewLayerSelected={(newLayerSelected) => setSelectedLayer(newLayerSelected)}
     />,
-    <ImageEditor sidebarVisibility={sidebarVisibility} />,
+    <ImageEditor sidebarVisibility={sidebarVisibility} layersDef={layersDef} />,
     <ImageUploader onImageUpload={handleSidebarVisibilityChange} />,
   ];
 }

@@ -115,7 +115,7 @@ export function ImageEditorDrawer({
   const handleAddLayer = () => {
     // by default, each layer is created with the name as the index of last layer created + 1
     setLastLayerId(lastLayerId + 1);
-    const newLayersDef = [...layersDef, { id: lastLayerId, visibility: true }];
+    const newLayersDef = [...layersDef, { id: lastLayerId + 1, visibility: true }];
     onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
     if (!expandLayers) {
@@ -133,7 +133,7 @@ export function ImageEditorDrawer({
   }
 
   function handleLayerDelete(layerId) {
-    const newLayerDef = [...layersDef.filter((l) => l.id != layerId)];
+    const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
     if (selectedLayer === layerId) {
       onNewLayerSelected('');
     }
