@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
@@ -21,7 +21,12 @@ export default function ImageEditor({ sidebarVisibility, layersDef }) {
         <img
           src={require(`../../assets/${layer.id}.png`)}
           alt="mask_image"
-          style={{ position: 'absolute', width: '100%', height: '100%' }}
+          style={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            visibility: layer.visibility ? 'visible' : 'hidden',
+          }}
         />
       );
     } catch {
