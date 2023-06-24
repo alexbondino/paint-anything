@@ -5,12 +5,11 @@ function CleanTempDir() {
   const handleCleanup = async () => {
     try {
       await axios.post('http://localhost:8000/api/cleanup'); //calls the cleanup_temp_dir in the api.
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
-    const handleWindowClose = async () => { 
+    const handleWindowClose = async () => {
       await handleCleanup(); // Waits fo the handleCleanup function to run for handleWindowClose running.
     };
 

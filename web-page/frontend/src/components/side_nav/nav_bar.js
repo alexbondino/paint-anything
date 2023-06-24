@@ -12,7 +12,6 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
 import Layers from './layers';
-import axios from 'axios';
 
 // list components
 import List from '@mui/material/List';
@@ -35,7 +34,6 @@ import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 // controls the width of the drawer
 const drawerWidth = 280;
-
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -82,18 +80,19 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-start',
 }));
 
-export function ImageEditorDrawer({sidebarVisibility}) {
+export function ImageEditorDrawer({
+  sidebarVisibility,
+  layersDef,
+  selectedLayer,
+  onNewLayerDef,
+  onNewLayerSelected,
+  onImageUpload,
+}) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [expandLayers, setExpandLayers] = React.useState(true);
-  // layerIds holds the list of existing layer ids
-  const [layerNames, setLayerNames] = React.useState(new Set());
-  const [lastLayerId, setLastLayerId] = React.useState(1);
-  // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
-  const [selectedLayer, setSelectedLayer] = React.useState('');
-  // map to indicate layer visibility
-  const [layersVisibility, setLayersVisibility] = React.useState(new Map());
-  
+  const lastLayerId = layersDef.length > 0 ? Math.max(...layersDef.map((l) => l.id)) : -1;
+  const fileInputRef = useRef(null);
 
   const handleLayersClick = () => {
     setExpandLayers(!expandLayers);
@@ -107,79 +106,48 @@ export function ImageEditorDrawer({sidebarVisibility}) {
     setOpen(false);
   };
 
-  const handleAddLayer = () => {
+  function handleLayerVisibilityClick(layerId) {
+    const newLayerDef = [...layersDef];
+    const layerPos = newLayerDef.findIndex((l) => l.id === layerId);
+    newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
+    onNewLayerDef(newLayerDef);
+  }
+
+  const handleAddLayer = async () => {
     // by default, each layer is created with the name as the index of last layer created + 1
-    setLastLayerId(lastLayerId + 1);
-    const layerName = lastLayerId.toString();
-    const newLayerNames = new Set(layerNames).add(layerName);
-    // layer is visible on creation
-    const newLayerVisibilities = new Map(layersVisibility).set(layerName, true);
-    
-    setLayerNames(newLayerNames);
-    setLayersVisibility(newLayerVisibilities);
+    const newLayersDef = [...layersDef, { id: lastLayerId + 1, visibility: true, imgUrl: null }];
+    onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
     if (!expandLayers) {
       setExpandLayers(!expandLayers);
     }
   };
 
-
-  function handleSelectLayer(layerName) {
+  function handleSelectLayer(layerId) {
     // deselect layer if it has already been selected
-    if (layerName === selectedLayer) {
-      setSelectedLayer('');
+    if (layerId === selectedLayer) {
+      onNewLayerSelected('');
       return;
     }
-    setSelectedLayer(layerName);
+    onNewLayerSelected(layerId);
   }
 
-  function handleLayerVisibilityClick(layerName) {
-    const newLayersVisibility = new Map(layersVisibility).set(
-      layerName,
-      !layersVisibility.get(layerName)
-    );
-    setLayersVisibility(newLayersVisibility);
-  }
-
-  function handleLayerDelete(layerName) {
-    const newLayerNames = new Set(layerNames);
-    const newLayersVisibility = new Map(layersVisibility);
-    newLayerNames.delete(layerName);
-    newLayersVisibility.delete(layerName);
-    if (selectedLayer === layerName) {
-      setSelectedLayer('');
+  function handleLayerDelete(layerId) {
+    const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
+    if (selectedLayer === layerId) {
+      onNewLayerSelected('');
     }
-    setLayerNames(newLayerNames);
-    setLayersVisibility(newLayersVisibility);
-    
+    onNewLayerDef(newLayerDef);
   }
-
-  const fileInputRef = useRef(null);
 
   function handleUploadButtonClick() {
     fileInputRef.current.click();
-    console.log("fdsañfjadsf")
-  }
-
-  async function handleFileUpload(event){
-    const file = event.target.files[0];
-    console.log('Archivo seleccionado:', file);
-
-    const formData = new FormData(); 
-    formData.append('image', file); // adds the image to the formData variable
-    
-    try{
-      await axios.post('http://localhost:8000/api/image', formData);
-      console.log("Imagen enviada correctamente.");
-    } catch (error) {
-      console.error("Error al enviar la imagen:", error);
-    }
   }
 
   return (
-    <Box sx={{ display: 'flex'}}>
+    <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <TitleBar position="fixed" open={open} >
+      <TitleBar position="fixed" open={open}>
         <Toolbar>
           <BrushIcon />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
@@ -206,14 +174,14 @@ export function ImageEditorDrawer({sidebarVisibility}) {
           flexShrink: 0,
           '& .MuiDrawer-paper': {
             width: drawerWidth,
-            display: sidebarVisibility
+            display: sidebarVisibility,
           },
         }}
         variant="persistent"
         anchor="right"
         open={open}
       >
-        <DrawerHeader >
+        <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
@@ -225,7 +193,11 @@ export function ImageEditorDrawer({sidebarVisibility}) {
               <LayersIcon />
             </ListItemIcon>
             <ListItemText primary="Layers" />
-            <IconButton color="inherit" aria-label="add layer" onClick={handleAddLayer}>
+            <IconButton
+              color="inherit"
+              aria-label="add layer"
+              onClick={async () => await handleAddLayer()}
+            >
               <AddIcon />
             </IconButton>
             {expandLayers ? (
@@ -240,9 +212,8 @@ export function ImageEditorDrawer({sidebarVisibility}) {
           </ListItem>
           <Collapse key="layer_drawer" in={expandLayers} timeout="auto" unmountOnExit>
             <Layers
-              layerNames={layerNames}
+              layersDef={layersDef}
               selectedLayer={selectedLayer}
-              layersVisibility={layersVisibility}
               onSelectLayer={handleSelectLayer}
               onDeleteLayer={handleLayerDelete}
               onVisibilityClicked={handleLayerVisibilityClick}
@@ -269,7 +240,6 @@ export function ImageEditorDrawer({sidebarVisibility}) {
           ))}
         </List>
         <Divider />
-
         <List>
           <ListItem disablePadding>
             <ListItemButton onClick={handleUploadButtonClick} variant="contained">
@@ -278,11 +248,11 @@ export function ImageEditorDrawer({sidebarVisibility}) {
               </ListItemIcon>
               <ListItemText primary="Upload Image" />
               <input
-              hidden
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              onClick={(event) => event.stopPropagation()} // Evitar la propagación
+                hidden
+                type="file"
+                ref={fileInputRef}
+                onChange={(event) => onImageUpload(event.target.files[0])}
+                onClick={(event) => event.stopPropagation()} // Evitar la propagación
               />
             </ListItemButton>
           </ListItem>
