@@ -49,7 +49,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
       <Slider
         aria-label="Hue"
         size="small"
-        defaultValue={hue}
+        value={hue}
         min={0}
         max={360}
         valueLabelDisplay="auto"
@@ -60,7 +60,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
       </Typography>
       <Slider
         aria-label="Saturation"
-        defaultValue={saturation}
+        value={saturation}
         size="small"
         min={0}
         max={100}
@@ -73,7 +73,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
       </Typography>
       <Slider
         aria-label="Lightness"
-        defaultValue={lightness}
+        value={lightness}
         size="small"
         min={0}
         max={100}
