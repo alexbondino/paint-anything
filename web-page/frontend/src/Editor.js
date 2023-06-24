@@ -50,6 +50,7 @@ export function Editor() {
 
   return [
     <ImageEditorDrawer
+      key="side_nav"
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
@@ -57,7 +58,12 @@ export function Editor() {
       onNewLayerSelected={(newLayerSelected) => setSelectedLayer(newLayerSelected)}
       onImageUpload={(imgFile) => handleImageUpload(imgFile)}
     />,
-    <ImageEditor baseImg={baseImg} sidebarVisibility={sidebarVisibility} layersDef={layersDef} />,
-    <ImageUploader onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
+    <ImageEditor
+      key="img_editor"
+      baseImg={baseImg}
+      sidebarVisibility={sidebarVisibility}
+      layersDef={layersDef}
+    />,
+    <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
   ];
 }
