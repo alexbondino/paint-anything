@@ -3,6 +3,7 @@ import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 
+// initial layer shown after image is uploaded
 const initialLayer = {
   id: 0,
   visibility: true,
@@ -15,7 +16,6 @@ export function Editor() {
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
   const [layersDef, setLayersDef] = React.useState([initialLayer]);
-
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
 
@@ -28,14 +28,17 @@ export function Editor() {
   }
 
   async function handleMaskUpdate(layerId) {
+    // fetch mask for this layer from backend
     const imgResponse = await fetch(
       'http://localhost:8000/api/fetch-mask?' +
         new URLSearchParams({
           layer_id: layerId,
         })
     );
+    // parse image and construct url
     const imgUrl = URL.createObjectURL(await imgResponse.blob());
     const updatedLayer = layersDef.find((l) => l.id === layerId);
+    // update url in layer definition
     updatedLayer.imgUrl = imgUrl;
     const newLayersDef = [...layersDef.filter((l) => l.id !== layerId), updatedLayer];
     setLayersDef(newLayersDef);

@@ -92,6 +92,7 @@ export function ImageEditorDrawer({
   const [open, setOpen] = React.useState(false);
   const [expandLayers, setExpandLayers] = React.useState(true);
   const lastLayerId = Math.max(...layersDef.map((l) => l.id));
+  const fileInputRef = useRef(null);
 
   const handleLayersClick = () => {
     setExpandLayers(!expandLayers);
@@ -138,8 +139,6 @@ export function ImageEditorDrawer({
     }
     onNewLayerDef(newLayerDef);
   }
-
-  const fileInputRef = useRef(null);
 
   function handleUploadButtonClick() {
     fileInputRef.current.click();
@@ -241,7 +240,6 @@ export function ImageEditorDrawer({
           ))}
         </List>
         <Divider />
-
         <List>
           <ListItem disablePadding>
             <ListItemButton onClick={handleUploadButtonClick} variant="contained">

@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, FileResponse
@@ -6,6 +7,8 @@ import tempfile
 import shutil
 from pydantic import BaseModel
 from PIL import Image
+
+temp_dir = tempfile.mkdtemp()  # Global variable to store the temporary directory path
 
 app = FastAPI()
 
@@ -23,8 +26,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-temp_dir = "/home/javier/Ramblings/ImagineHouses/samples"  # Global variable to store the temporary directory path
-
 
 # Get image
 @app.get("/api/image")
@@ -39,7 +40,6 @@ async def get_image():
     Returns: image
     """
 
-    # TODO: change way to access file path. Avoid using global variables.
     if temp_dir is None:
         raise HTTPException(status_code=404, detail="Image not found")
     file_path = os.path.join(temp_dir, "image.jpg")
@@ -62,13 +62,9 @@ async def upload_image(image: UploadFile = None):
     Returns:
         dict: File_path of the temporary directory when the api is called by the frontend
     """
-    global temp_dir
 
     if image is None:
         raise HTTPException(status_code=400, detail="No image provided.")
-
-    if temp_dir is None:
-        temp_dir = tempfile.mkdtemp()
 
     file_path = os.path.join(temp_dir, "image.jpg")
     with open(file_path, "wb") as file:
@@ -79,7 +75,13 @@ async def upload_image(image: UploadFile = None):
 
 @app.get("/api/fetch-mask")
 async def fetch_mask(layer_id: int):
-    global temp_dir
+    """returns the mask of specified layer id
+    Args:
+        layer_id (int): id of mask, based on layer
+
+    Raises:
+        HTTPException: when mask was not found
+    """
     try:
         return FileResponse(os.path.join(temp_dir, f"{layer_id}.png"))
     except:
@@ -91,7 +93,7 @@ def cleanup_temp_dir():
     global temp_dir
     if temp_dir is not None:
         shutil.rmtree(temp_dir)
-        temp_dir = None
+        temp_dir = tempfile.mkdtemp()
         return {"message": "Temporary directory cleaned up."}
     else:
         return {"message": "No temporary directory to clean up."}

@@ -12,9 +12,7 @@ function valueLabelFormat(value) {
  * Image editor
  */
 export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
-  // TODO: Get image from backend
-  //Get an image from link and display it.
-
+  // construct mask images dynamically from layer definitions
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null)
     .map((layer) => {
