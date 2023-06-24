@@ -103,7 +103,10 @@ def cleanup_temp_dir():
 async def image_downloader():
     from PIL import Image
 
-    img1 = Image.open("web-page/frontend/src/assets/house.jpg")
+    # Relative Paths must be changed in future to adapt to layers. As we are not generating images as layers yet 
+    # this will remain still.
+
+    img1 = Image.open("web-page/frontend/src/assets/house.jpg") 
     img2 = Image.open("web-page/frontend/src/assets/luffy.jpg")
     img2 = img2.convert("RGBA")
 
