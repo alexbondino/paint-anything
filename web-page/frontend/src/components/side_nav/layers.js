@@ -56,7 +56,7 @@ function hslToHex(h, s, l) {
  * @param {function} onHSLChange
  * @returns HSL slider for modifying hsl color of layer
  */
-function HSLSlider(layerId, hue, saturation, lightness, onHSLChange) {
+const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   return (
     <Box className="sliders-box" sx={{ display: 'flex', flexDirection: 'column', mt: 0, mx: 3 }}>
       <Typography variant="button" id="input-slider" gutterBottom>
@@ -99,7 +99,7 @@ function HSLSlider(layerId, hue, saturation, lightness, onHSLChange) {
       ></Slider>
     </Box>
   );
-}
+};
 
 /**
  * Layer item placed inside the editor drawer to handle a mask edition
@@ -109,7 +109,7 @@ function HSLSlider(layerId, hue, saturation, lightness, onHSLChange) {
  * @param {function} onSelected hook for layer selection
  * @param {function} onDelete hook for layer elimination
  * @param {function} onVisClick hook for visibility change
- * @param {function} onHSLChange hook for changes in any hsl value
+ * @param {} onHSLChange hook for changes in any hsl value
  * @returns the navigation layer item
  */
 const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, onHSLChange }) => {
@@ -205,8 +205,8 @@ export default function Layers({
   const layers = layersDef.map((l) => {
     return (
       <NavLayer
-        layerDef={l}
         key={'layer ' + l.id}
+        layerDef={l}
         selectedLayer={selectedLayer}
         onSelected={onSelectLayer}
         onDelete={onDeleteLayer}

@@ -7,7 +7,7 @@ import ImageEditor from './components/image-editor/image_editor.js';
 const initialLayer = {
   id: 0,
   visibility: true,
-  imgUrl: null,
+  imgUrl: 'https://upload.wikimedia.org/wikipedia/en/d/d4/Mickey_Mouse.png',
   hsl: [120, 40, 50],
 };
 
@@ -73,7 +73,6 @@ export function Editor() {
       baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
-      selectedLayer={selectedLayer}
     />,
     <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
   ];

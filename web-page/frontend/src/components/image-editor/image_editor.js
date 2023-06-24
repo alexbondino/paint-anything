@@ -5,7 +5,7 @@ import './image-editor.scss';
 /*
  * Image editor
  */
-export default function ImageEditor({ baseImg, sidebarVisibility, layersDef, selectedLayer }) {
+export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
   // construct mask images dynamically from layer definitions
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null)
@@ -13,6 +13,7 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef, sel
       try {
         return (
           <img
+            key={layer.id}
             src={layer.imgUrl}
             alt={`mask_image_${layer.id}`}
             style={{
