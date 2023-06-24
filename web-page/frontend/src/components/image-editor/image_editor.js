@@ -11,33 +11,31 @@ function valueLabelFormat(value) {
 /*
  * Image editor
  */
-export default function ImageEditor({ baseImg, maskImgs, sidebarVisibility, layersDef }) {
+export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
   // TODO: Get image from backend
   //Get an image from link and display it.
 
-  const maskImgComps = layersDef.map((layer) => {
-    try {
-      const maskUrl = maskImgs.find((mask) => mask.id == layer.id);
-      if (!maskUrl) {
+  const maskImgComps = layersDef
+    .filter((l) => l.imgUrl !== null)
+    .map((layer) => {
+      try {
+        return (
+          <img
+            src={layer.imgUrl}
+            alt={`mask_image_${layer.id}`}
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              visibility: layer.visibility ? 'visible' : 'hidden',
+            }}
+          />
+        );
+      } catch {
+        console.log(`Image for layer ${layer.id} not found`);
         return;
       }
-      return (
-        <img
-          src={maskImgs.find((mask) => mask.id === layer.id).img}
-          alt={`mask_image_${layer.id}`}
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            visibility: layer.visibility ? 'visible' : 'hidden',
-          }}
-        />
-      );
-    } catch {
-      console.log(`Image for layer ${layer.id} not found`);
-      return;
-    }
-  });
+    });
 
   return (
     <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>

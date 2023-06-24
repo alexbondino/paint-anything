@@ -87,8 +87,7 @@ export function ImageEditorDrawer({
   selectedLayer,
   onNewLayerDef,
   onNewLayerSelected,
-  onMaskUpdate,
-  onMaskDelete,
+  onImageUpload,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -117,8 +116,7 @@ export function ImageEditorDrawer({
   const handleAddLayer = async () => {
     // by default, each layer is created with the name as the index of last layer created + 1
     setLastLayerId(lastLayerId + 1);
-    await onMaskUpdate(lastLayerId + 1);
-    const newLayersDef = [...layersDef, { id: lastLayerId + 1, visibility: true }];
+    const newLayersDef = [...layersDef, { id: lastLayerId + 1, visibility: true, imgUrl: null }];
     onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
     if (!expandLayers) {
@@ -141,29 +139,12 @@ export function ImageEditorDrawer({
       onNewLayerSelected('');
     }
     onNewLayerDef(newLayerDef);
-    onMaskDelete(layerId);
   }
 
   const fileInputRef = useRef(null);
 
   function handleUploadButtonClick() {
     fileInputRef.current.click();
-    console.log('fdsañfjadsf');
-  }
-
-  async function handleFileUpload(event) {
-    const file = event.target.files[0];
-    console.log('Archivo seleccionado:', file);
-
-    const formData = new FormData();
-    formData.append('image', file); // adds the image to the formData variable
-
-    try {
-      await axios.post('http://localhost:8000/api/image', formData);
-      console.log('Imagen enviada correctamente.');
-    } catch (error) {
-      console.error('Error al enviar la imagen:', error);
-    }
   }
 
   return (
@@ -274,7 +255,7 @@ export function ImageEditorDrawer({
                 hidden
                 type="file"
                 ref={fileInputRef}
-                onChange={handleFileUpload}
+                onChange={(event) => onImageUpload(event.target.files[0])}
                 onClick={(event) => event.stopPropagation()} // Evitar la propagación
               />
             </ListItemButton>

@@ -7,23 +7,24 @@ import ImageEditor from './components/image-editor/image_editor.js';
 const initialLayer = {
   id: 0,
   visibility: true,
+  imgUrl: null,
 };
 
 export function Editor() {
   const [sidebarVisibility, setSidebarVisibility] = useState('none');
   // base image to be edited
   const [baseImg, setBaseImg] = useState(null);
-  // mask imgs
-  const [maskImgs, setMaskImgs] = useState([]);
   // layerIds holds the list of existing layer ids
   const [layersDef, setLayersDef] = React.useState([initialLayer]);
 
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
-  const [selectedLayer, setSelectedLayer] = React.useState('');
+  const [selectedLayer, setSelectedLayer] = React.useState(0);
   console.log(sidebarVisibility);
 
   function handleImageUpload(imgFile) {
     setSidebarVisibility('flex');
+    setLayersDef([initialLayer]);
+    setSelectedLayer(0);
     const imgObjectURL = URL.createObjectURL(imgFile);
     setBaseImg(imgObjectURL);
   }
@@ -36,16 +37,10 @@ export function Editor() {
         })
     );
     const imgUrl = URL.createObjectURL(await imgResponse.blob());
-    const newMaskImgs = [
-      ...maskImgs.filter((mask) => mask.id != layerId),
-      { id: layerId, img: imgUrl },
-    ];
-    setMaskImgs(newMaskImgs);
-  }
-
-  function handleMaskDelete(layerId) {
-    const newMaskImgs = [...maskImgs.filter((mask) => mask.id != layerId)];
-    setMaskImgs(newMaskImgs);
+    const updatedLayer = layersDef.find((l) => l.id === layerId);
+    updatedLayer.imgUrl = imgUrl;
+    const newLayersDef = [...layersDef.filter((l) => l.id !== layerId), updatedLayer];
+    setLayersDef(newLayersDef);
   }
 
   return [
@@ -55,15 +50,9 @@ export function Editor() {
       selectedLayer={selectedLayer}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       onNewLayerSelected={(newLayerSelected) => setSelectedLayer(newLayerSelected)}
-      onMaskUpdate={async (layerId) => await handleMaskUpdate(layerId)}
-      onMaskDelete={(layerId) => handleMaskDelete(layerId)}
+      onImageUpload={(imgFile) => handleImageUpload(imgFile)}
     />,
-    <ImageEditor
-      baseImg={baseImg}
-      maskImgs={maskImgs}
-      sidebarVisibility={sidebarVisibility}
-      layersDef={layersDef}
-    />,
+    <ImageEditor baseImg={baseImg} sidebarVisibility={sidebarVisibility} layersDef={layersDef} />,
     <ImageUploader onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
   ];
 }
