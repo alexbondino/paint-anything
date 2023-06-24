@@ -106,8 +106,10 @@ function HSLSlider(layerId, hue, saturation, lightness, onHSLChange) {
  *
  * @param {object} layerDef layer definition object
  * @param {int} selectedLayer id of selected layer. If none, defaults to -1
- * @param {function} onSelected trigger function for layer selection
- * @param {function} onDelete trigger function for when layer is deleted
+ * @param {function} onSelected hook for layer selection
+ * @param {function} onDelete hook for layer elimination
+ * @param {function} onVisClick hook for visibility change
+ * @param {function} onHSLChange hook for changes in any hsl value
  * @returns the navigation layer item
  */
 const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, onHSLChange }) => {
