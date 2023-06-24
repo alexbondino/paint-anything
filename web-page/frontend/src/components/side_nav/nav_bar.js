@@ -91,7 +91,7 @@ export function ImageEditorDrawer({
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const [expandLayers, setExpandLayers] = React.useState(true);
-  const lastLayerId = Math.max(...layersDef.map((l) => l.id));
+  const lastLayerId = layersDef.length > 0 ? Math.max(...layersDef.map((l) => l.id)) : -1;
   const fileInputRef = useRef(null);
 
   const handleLayersClick = () => {
