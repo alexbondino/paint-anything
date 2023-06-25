@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
 import Layers from './layers';
+import axios from 'axios';
 
 // list components
 import List from '@mui/material/List';
@@ -144,6 +145,21 @@ export function ImageEditorDrawer({
     fileInputRef.current.click();
   }
 
+  async function handleDownloadButtonClick(){
+    try {
+      const response = await axios.get('http://localhost:8000/api/image_downloader', {responseType:'blob'});
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'image/png' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'imagen.png');
+      document.body.appendChild(link);
+      link.click();
+
+    } catch (error) {
+      console.error('Error al enviar la imagen:', error);
+    }
+  }
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -220,7 +236,7 @@ export function ImageEditorDrawer({
             />
           </Collapse>
           <ListItem key="download_result" disablePadding>
-            <ListItemButton>
+            <ListItemButton onClick={handleDownloadButtonClick}>
               <ListItemIcon>
                 <DownloadIcon />
               </ListItemIcon>
