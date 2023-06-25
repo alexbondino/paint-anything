@@ -9,6 +9,8 @@ import shutil
 from pydantic import BaseModel
 from PIL import Image
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
 temp_dir = tempfile.mkdtemp()  # Global variable to store the temporary directory path
 
 app = FastAPI()
@@ -40,7 +42,6 @@ async def get_image():
 
     Returns: image
     """
-
     if temp_dir is None:
         raise HTTPException(status_code=404, detail="Image not found")
     file_path = os.path.join(temp_dir, "image.jpg")
@@ -106,13 +107,22 @@ async def image_downloader():
     # Relative Paths must be changed in future to adapt to layers. As we are not generating images as layers yet 
     # this will remain still.
 
-    img1 = Image.open("web-page/frontend/src/assets/house.jpg") 
-    img2 = Image.open("web-page/frontend/src/assets/luffy.jpg")
+    relative_path = os.path.dirname(current_dir)
+    relative_path = os.path.dirname(relative_path)
+    relative_path = os.path.dirname(relative_path)
+    relative_path = os.path.join(relative_path, "frontend", "src", "assets")
+
+
+    print(relative_path)
+
+
+    img1 = Image.open(os.path.join(relative_path,"house.jpg"))
+    img2 = Image.open(os.path.join(relative_path,"luffy.jpg"))
     img2 = img2.convert("RGBA")
 
     img1.paste(img2, (0,0), mask = img2)
-    img1.save("web-page/frontend/src/assets/downloadable.png")
-    return FileResponse("web-page/frontend/src/assets/downloadable.png", media_type="image/png")
+    img1.save(os.path.join(relative_path,"downloadable.png"))
+    return FileResponse(os.path.join(relative_path,"downloadable.png"), media_type="image/png")
 
 if __name__ == "__main__":
     import uvicorn

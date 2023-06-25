@@ -26,8 +26,11 @@ export function ImageUploader({ onImageUpload }) {
       // image is shown in ui before sending to backend
       onImageUpload(selectedImage);
       await axios.post('http://localhost:8000/api/image', formData);
+
       console.log('Imagen enviada correctamente.');
+
       setUploaderVisibility('none');
+
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }

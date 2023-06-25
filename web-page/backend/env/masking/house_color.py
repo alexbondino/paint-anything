@@ -2,6 +2,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 ## Defining the mask and the points
 def show_mask(mask:list, ax, random_color=False):
@@ -81,7 +84,7 @@ def masking(input_point: np.ndarray, input_label: np.ndarray,  predictor):
 
 if __name__ == "__main__":
     
-    image = cv2.imread('masking/samples/casa.jpeg')
+    image = cv2.imread(os.path.join(current_dir, "samples", "casa.jpeg", "assets"))
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     mask_generator_test, sam_test = model_fetching()
