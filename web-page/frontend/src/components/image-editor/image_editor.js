@@ -11,9 +11,8 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
   const [coordinateX, setCoordinateX] = useState(0)
   const [coordinateY, setCoordinateY] = useState(0)
 
-
-
   useEffect(() => {
+    
     console.log('Coordenadas:', coordinateX, coordinateY);
     const x_coord = coordinateX;
     const y_coord = coordinateY
@@ -30,15 +29,17 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
     }
   }, [coordinateX, coordinateY])
 
+  const [circulos, setCirculos] = useState([])
+
   async function handleImageClick(event){
     const { clientX, clientY } = event
     setCoordinateX(clientX)
     setCoordinateY(clientY)
+
+    const { offsetX, offsetY } = event.nativeEvent;
+    const nuevoCirculo = { x: offsetX, y: offsetY };
+    setCirculos([...circulos, nuevoCirculo]);
   }
-
-
-
-
 
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null)
@@ -68,6 +69,20 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
     <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>
       <Box className="image-box" sx={{ position: 'relative' }}>
         <img src={baseImg} alt="base_image" onClick={handleImageClick}/>
+        {circulos.map((circulo, index) => (
+        <div
+          key={index}
+          style={{
+            position: 'absolute',
+            top: circulo.y,
+            left: circulo.x,
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            background: 'red',
+          }}
+        ></div>
+        ))}
         {maskImgComps}
       </Box>
     </Box>
