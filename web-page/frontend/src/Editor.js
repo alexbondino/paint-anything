@@ -8,6 +8,7 @@ const initialLayer = {
   id: 0,
   visibility: true,
   imgUrl: null,
+  hsl: [],
 };
 
 export function Editor() {
@@ -28,10 +29,10 @@ export function Editor() {
   }
 
   const updateLayerUrl = (layerId, url) => {
-    const updatedLayer = layersDef.find((l) => l.id === layerId);
+    const newLayersDef = [...layersDef];
+    const layerPos = layersDef.findIndex((l) => l.id === layerId);
     // update url in layer definition
-    updatedLayer.imgUrl = url;
-    const newLayersDef = [...layersDef.filter((l) => l.id !== layerId), updatedLayer];
+    newLayersDef[layerPos].imgUrl = url;
     setLayersDef(newLayersDef);
   };
 
@@ -48,6 +49,14 @@ export function Editor() {
     updateLayerUrl(layerId, imgUrl);
   }
 
+  function handleHSLChange(newHSL, layerId) {
+    const newLayersDef = [...layersDef];
+    const layerPos = layersDef.findIndex((l) => l.id === layerId);
+    // update hsl in layer definition
+    newLayersDef[layerPos].hsl = newHSL;
+    setLayersDef(newLayersDef);
+  }
+
   return [
     <ImageEditorDrawer
       key="side_nav"
@@ -57,6 +66,7 @@ export function Editor() {
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       onNewLayerSelected={(newLayerSelected) => setSelectedLayer(newLayerSelected)}
       onImageUpload={(imgFile) => handleImageUpload(imgFile)}
+      onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
     />,
     <ImageEditor
       key="img_editor"
