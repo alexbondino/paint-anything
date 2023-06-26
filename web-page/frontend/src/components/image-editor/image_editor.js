@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import './image-editor.scss';
 
@@ -7,6 +7,23 @@ import './image-editor.scss';
  */
 export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
   // construct mask images dynamically from layer definitions
+  const [coordinateX, setCoordinateX] = useState(0)
+  const [coordinateY, setCoordinateY] = useState(0)
+
+  useEffect(() => {
+    console.log('Coordenadas:', coordinateX, coordinateY);
+  }, [coordinateX, coordinateY])
+
+  function handleImageClick(event){
+    const { clientX, clientY } = event
+    setCoordinateX(clientX)
+    setCoordinateY(clientY)
+  }
+
+
+
+
+
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null)
     .map((layer) => {
@@ -28,12 +45,13 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
         console.log(`Image for layer ${layer.id} not found`);
         return;
       }
-    });
+    })
+    ;
 
   return (
     <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>
       <Box className="image-box" sx={{ position: 'relative' }}>
-        <img src={baseImg} alt="base_image" />
+        <img src={baseImg} alt="base_image" onClick={handleImageClick}/>
         {maskImgComps}
       </Box>
     </Box>
