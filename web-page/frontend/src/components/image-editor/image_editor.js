@@ -31,13 +31,28 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
 
   const [circulos, setCirculos] = useState([])
 
-  async function handleImageClick(event){
-    const { clientX, clientY } = event
-    setCoordinateX(clientX)
-    setCoordinateY(clientY)
-
-    const { offsetX, offsetY } = event.nativeEvent;
-    const nuevoCirculo = { x: offsetX, y: offsetY };
+  async function handleImageClick(event) {
+    const { clientX, clientY } = event;
+  
+    // Obtener el desplazamiento del contenedor de la imagen
+    const boxElement = document.querySelector('.image-box');
+    const boxRect = boxElement.getBoundingClientRect();
+    const containerX = clientX - boxRect.left;
+    const containerY = clientY - boxRect.top;
+  
+    // Obtener las dimensiones de la imagen
+    const imgElement = document.querySelector('.image-box img');
+    const imageWidth = imgElement.naturalWidth;
+    const imageHeight = imgElement.naturalHeight;
+  
+    // Calcular las coordenadas relativas a la imagen
+    const imageX = (containerX / boxRect.width) * imageWidth;
+    const imageY = (containerY / boxRect.height) * imageHeight;
+  
+    setCoordinateX(imageX);
+    setCoordinateY(imageY);
+  
+    const nuevoCirculo = { x: containerX, y: containerY };
     setCirculos([...circulos, nuevoCirculo]);
   }
 
