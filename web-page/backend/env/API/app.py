@@ -124,6 +124,10 @@ async def image_downloader():
     img1.save(os.path.join(relative_path,"downloadable.png"))
     return FileResponse(os.path.join(relative_path,"downloadable.png"), media_type="image/png")
 
+@app.post("/api/point_&_click")
+def point_and_click():
+    return ("message: Coordinadas pasadas correctamtente")
+
 if __name__ == "__main__":
     import uvicorn
 

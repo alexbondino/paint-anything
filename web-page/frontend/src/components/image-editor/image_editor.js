@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import './image-editor.scss';
+import axios from 'axios';
 
 /*
  * Image editor
@@ -10,14 +11,26 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
   const [coordinateX, setCoordinateX] = useState(0)
   const [coordinateY, setCoordinateY] = useState(0)
 
+
+
   useEffect(() => {
     console.log('Coordenadas:', coordinateX, coordinateY);
   }, [coordinateX, coordinateY])
 
-  function handleImageClick(event){
+  async function handleImageClick(event){
     const { clientX, clientY } = event
     setCoordinateX(clientX)
     setCoordinateY(clientY)
+
+    try {
+      // image is shown in ui before sending to backend
+      await axios.post('http://localhost:8000/api/point_&_click');
+  
+      console.log('Coordenadas enviadas correctamente.');
+  
+    } catch (error) {
+      console.error('Error al enviar la imagen:', error);
+    }
   }
 
 
