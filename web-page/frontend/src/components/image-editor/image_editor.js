@@ -22,14 +22,20 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
     setCoordinateX(clientX)
     setCoordinateY(clientY)
 
+    const x_coord = 100;
+    const y_coord = 200
+    const x_data = { x_coord };
+    const y_data = { y_coord }
+    const data = { x_coord, y_coord };
+
     try {
       // image is shown in ui before sending to backend
-      await axios.post('http://localhost:8000/api/point_&_click');
+      await axios.post('http://localhost:8000/api/point_&_click', data);
   
       console.log('Coordenadas enviadas correctamente.');
   
     } catch (error) {
-      console.error('Error al enviar la imagen:', error);
+      console.error('Error al enviar la coordenada:', error);
     }
   }
 
