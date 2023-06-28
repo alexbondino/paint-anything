@@ -25,7 +25,7 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
 
   async function handleImageClick(event) {
     const { clientX, clientY } = event;
-  
+
     // Obtener el desplazamiento del contenedor de la imagen
     const boxElement = document.querySelector('.image-box');
     const boxRect = boxElement.getBoundingClientRect();

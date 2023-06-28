@@ -158,6 +158,10 @@ def selected_layer(data: SelectedLayer):
     print(layer)
     return {"message": f"{layer}"}
 
+@app.get("/api/circles")
+def circles():
+    print("hola")
+    return {"message": layer_coords[layer_selected]}
 
 if __name__ == "__main__":
     import uvicorn

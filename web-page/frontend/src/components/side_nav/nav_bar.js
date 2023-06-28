@@ -138,6 +138,7 @@ export function ImageEditorDrawer({
     const layer = layerId
     const data = { layer }
     axios.post('http://localhost:8000/api/selected_layer', data);
+    const circles = axios.get('http://localhost:8000/api/circles', {responseType:'string'})
   }
 
   function handleLayerDelete(layerId) {
