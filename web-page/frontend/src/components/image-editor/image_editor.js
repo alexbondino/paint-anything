@@ -17,16 +17,8 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
     const x_coord = coordinateX;
     const y_coord = coordinateY
     const data = { x_coord, y_coord };
+    axios.post('http://localhost:8000/api/point_&_click', data);
 
-    try {
-      // image is shown in ui before sending to backend
-      axios.post('http://localhost:8000/api/point_&_click', data);
-  
-      console.log('Coordenadas enviadas correctamente.');
-  
-    } catch (error) {
-      console.error('Error al enviar la coordenada:', error);
-    }
   }, [coordinateX, coordinateY])
 
   const [circulos, setCirculos] = useState([])
