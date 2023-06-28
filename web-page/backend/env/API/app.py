@@ -130,14 +130,21 @@ class PointAndClickXData(BaseModel):
     y_coord: int
 
 
-coord_dict = {}
+layer_selected = 0
+layer_coords = {}
 
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickXData):
     x_coord = data.x_coord
     y_coord = data.y_coord
     print(x_coord,".." ,y_coord)
-    print(coord_dict)
+    print(layer_selected)
+    if layer_selected in layer_coords:
+        layer_coords[layer_selected].append([x_coord, y_coord])
+    elif layer_selected not in layer_coords:
+        layer_coords[layer_selected] = [[x_coord, y_coord]]
+    print(layer_coords)
+
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
 class SelectedLayer(BaseModel):
@@ -145,11 +152,11 @@ class SelectedLayer(BaseModel):
 
 @app.post("/api/selected_layer")
 def selected_layer(data: SelectedLayer):
+    global layer_selected
     layer = data.layer
-    coord_dict["layer"] = layer
+    layer_selected = layer
     print(layer)
     return {"message": f"{layer}"}
-
 
 
 if __name__ == "__main__":
