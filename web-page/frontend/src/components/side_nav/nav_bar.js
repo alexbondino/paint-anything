@@ -87,6 +87,7 @@ export function ImageEditorDrawer({
   selectedLayer,
   onNewLayerDef,
   onNewLayerSelected,
+  handleCoordsRewriting,
   onImageUpload,
   onHSLChange,
 }) {
@@ -135,11 +136,7 @@ export function ImageEditorDrawer({
       return;
     }
     onNewLayerSelected(layerId);
-    const layer = layerId
-    const data = { layer }
-    axios.post('http://localhost:8000/api/selected_layer', data);
-    const response = axios.get('http://localhost:8000/api/circles', {responseType:'json'})
-    console.log(response)
+    handleCoordsRewriting(layerId)
   }
 
   function handleLayerDelete(layerId) {

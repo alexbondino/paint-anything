@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
+import axios from 'axios';
 
 // initial layer shown after image is uploaded
 const initialLayer = {
@@ -57,6 +58,15 @@ export function Editor() {
     setLayersDef(newLayersDef);
   }
 
+  function handleCoordsRewriting(layerId) {
+    // deselect layer if it has already been selected
+    const layer = layerId
+    const data = { layer }
+    axios.post('http://localhost:8000/api/selected_layer', data);
+    const response = axios.get('http://localhost:8000/api/circles', {responseType:'json'})
+    console.log(response)
+  }
+
   return [
     <ImageEditorDrawer
       key="side_nav"
@@ -67,6 +77,7 @@ export function Editor() {
       onNewLayerSelected={(newLayerSelected) => setSelectedLayer(newLayerSelected)}
       onImageUpload={(imgFile) => handleImageUpload(imgFile)}
       onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
+      handleCoordsRewriting={(layerId) => handleCoordsRewriting(layerId)}
     />,
     <ImageEditor
       key="img_editor"
@@ -74,6 +85,8 @@ export function Editor() {
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
     />,
-    <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
+    <ImageUploader 
+    key="upload_img" 
+    onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
   ];
 }
