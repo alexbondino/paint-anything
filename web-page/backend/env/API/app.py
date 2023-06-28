@@ -129,12 +129,15 @@ class PointAndClickXData(BaseModel):
     x_coord: int
     y_coord: int
 
+
 coord_dict = {}
+
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickXData):
     x_coord = data.x_coord
     y_coord = data.y_coord
     print(x_coord,".." ,y_coord)
+    print(coord_dict)
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
 class SelectedLayer(BaseModel):
@@ -143,6 +146,7 @@ class SelectedLayer(BaseModel):
 @app.post("/api/selected_layer")
 def selected_layer(data: SelectedLayer):
     layer = data.layer
+    coord_dict["layer"] = layer
     print(layer)
     return {"message": f"{layer}"}
 
