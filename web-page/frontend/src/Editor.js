@@ -59,13 +59,18 @@ export function Editor() {
   }
 
   function handleCoordsRewriting(layerId) {
-    // deselect layer if it has already been selected
-    const layer = layerId
-    const data = { layer }
-    axios.post('http://localhost:8000/api/selected_layer', data);
-    const response = axios.get('http://localhost:8000/api/circles', {responseType:'json'})
-    console.log(response)
-  }
+    const layer = layerId;
+    const data = { layer };
+  
+    axios.post('http://localhost:8000/api/selected_layer', data)
+      .then(() => {
+        return axios.get('http://localhost:8000/api/circles', { responseType: 'json' });
+      })
+      .then(response => {
+        console.log(response.data.message); // Aquí se mostrarán los datos de la respuesta
+        // Hacer algo con los datos de la respuesta
+      })}
+  
 
   return [
     <ImageEditorDrawer
