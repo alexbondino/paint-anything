@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, UploadFile, HTTPException, File
+from fastapi import FastAPI, UploadFile, HTTPException, File, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, FileResponse
@@ -129,13 +129,24 @@ class PointAndClickXData(BaseModel):
     x_coord: int
     y_coord: int
 
-
+coord_dict = {}
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickXData):
     x_coord = data.x_coord
     y_coord = data.y_coord
     print(x_coord,".." ,y_coord)
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
+
+class SelectedLayer(BaseModel):
+    layer: int
+
+@app.post("/api/selected_layer")
+def selected_layer(data: SelectedLayer):
+    layer = data.layer
+    print(layer)
+    return {"message": f"{layer}"}
+
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -135,6 +135,9 @@ export function ImageEditorDrawer({
       return;
     }
     onNewLayerSelected(layerId);
+    const layer = layerId
+    const data = { layer }
+    axios.post('http://localhost:8000/api/selected_layer', data);
   }
 
   function handleLayerDelete(layerId) {

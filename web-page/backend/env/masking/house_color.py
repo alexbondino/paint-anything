@@ -11,7 +11,7 @@ def show_mask(mask:list, ax, random_color=False):
     if random_color:
         color = np.concatenate([np.random.random(3), np.array([0.6])], axis=0)
     else:
-        color = np.array([0/255, 255/255, 0/255, 0.6])
+        color = np.array([120/255, 100/255, 50/255, 0.6])
     h, w = mask.shape[-2:]
     mask_image = mask.reshape(h, w, 1) * color.reshape(1, 1, -1)
     ax.imshow(mask_image)
