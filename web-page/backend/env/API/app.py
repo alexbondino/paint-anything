@@ -156,8 +156,23 @@ def selected_layer(data: SelectedLayer):
     global layer_selected
     layerId = data.layerId
     layer_selected = layerId
-    print(layerId)
     return {"message": f"{layerId}"}
+
+class NegPointAndClickData(BaseModel):
+    x_coord: int
+    y_coord: int
+
+@app.post("/api/neg_point_&_click")
+def neg_point_and_click(data: NegPointAndClickData):
+    x_coord = data.x_coord
+    y_coord = data.y_coord
+    if layer_selected in layer_coords:
+        layer_coords[layer_selected].append([x_coord, y_coord])
+    elif layer_selected not in layer_coords:
+        layer_coords[layer_selected] = [[x_coord, y_coord]]
+
+    print(x_coord)
+    return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
 
 if __name__ == "__main__":

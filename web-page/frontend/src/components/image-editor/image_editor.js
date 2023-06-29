@@ -55,14 +55,62 @@ export default function ImageEditor({
     setCoordinateX(imageX);
     setCoordinateY(imageY);
 
+    
     if (!newLayerDef[layerPos].layerTrueCoords) {
       newLayerDef[layerPos].layerTrueCoords = [];
     }
-  
 
     newLayerDef[layerPos].layerTrueCoords.push([imageX, imageY]);
     onNewLayerDef(newLayerDef);
     console.log(newLayerDef[layerPos].layerTrueCoords);
+  }
+
+  useEffect(() => {
+    console.log('Coordenadas:', coordinateX, coordinateY);
+  
+    // Resto del código que deseas ejecutar con las coordenadas actualizadas
+    const x_coord = coordinateX;
+    const y_coord = coordinateY;
+    const data = { x_coord, y_coord };
+    axios.post('http://localhost:8000/api/neg_point_&_click', data);
+  
+  }, [coordinateX, coordinateY]);
+
+
+  async function handleNegPointAndClick(event) {
+    // Obtener el desplazamiento del contenedor de la imagen
+
+    event.preventDefault();
+    const { clientX, clientY } = event;
+
+    const newLayerDef = [...layersDef];
+    const layerPos = newLayerDef.findIndex((l) => l.id === selectedLayer);
+
+    const boxElement = document.querySelector('.image-box');
+    const boxRect = boxElement.getBoundingClientRect();
+    const containerX = clientX - boxRect.left;
+    const containerY = clientY - boxRect.top;
+  
+    // Obtener las dimensiones de la imagen
+    const imgElement = document.querySelector('.image-box img');
+    const imageWidth = imgElement.naturalWidth;
+    const imageHeight = imgElement.naturalHeight;
+  
+    // Calcular las coordenadas relativas a la imagen
+    const imageX = (containerX / boxRect.width) * imageWidth;
+    const imageY = (containerY / boxRect.height) * imageHeight;
+  
+    setCoordinateX(imageX);
+    setCoordinateY(imageY);
+
+    if (!newLayerDef[layerPos].layerFalseCoords) {
+      newLayerDef[layerPos].layerFalseCoords = [];
+    }
+  
+
+    newLayerDef[layerPos].layerFalseCoords.push([imageX, imageY]);
+    onNewLayerDef(newLayerDef);
+    console.log(newLayerDef[layerPos].layerFalseCoords);
   }
 
   const maskImgComps = layersDef
@@ -92,7 +140,7 @@ export default function ImageEditor({
   return (
     <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>
       <Box className="image-box" sx={{ position: 'relative' }}>
-        <img src={baseImg} alt="base_image" onClick={handlePointAndClick}/>
+        <img src={baseImg} alt="base_image" onClick={handlePointAndClick} onContextMenu={handleNegPointAndClick}/>
         {maskImgComps}
       </Box>
     </Box>
