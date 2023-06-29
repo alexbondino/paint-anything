@@ -67,6 +67,9 @@ export function Editor() {
       return;
     }
     setSelectedLayer(layerId);
+
+    const data = { layerId };
+    axios.post('http://localhost:8000/api/selected_layer', data);
   }
   
   

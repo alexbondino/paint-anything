@@ -149,23 +149,16 @@ def point_and_click(data: PointAndClickXData):
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
 class SelectedLayer(BaseModel):
-    layer: int
+    layerId: int
 
 @app.post("/api/selected_layer")
 def selected_layer(data: SelectedLayer):
     global layer_selected
-    layer = data.layer
-    layer_selected = layer
-    print(layer)
-    return {"message": f"{layer}"}
+    layerId = data.layerId
+    layer_selected = layerId
+    print(layerId)
+    return {"message": f"{layerId}"}
 
-@app.get("/api/circles")
-def circles():
-    if layer_selected in layer_coords:
-        print("hola")
-        return {"message": layer_coords[layer_selected]}
-    else:
-        return {"message": [[0,0]]}
 
 if __name__ == "__main__":
     import uvicorn
