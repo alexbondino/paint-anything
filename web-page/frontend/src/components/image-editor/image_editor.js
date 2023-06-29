@@ -6,27 +6,42 @@ import axios from 'axios';
 /*
  * Image editor
  */
-export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
+export default function ImageEditor({ 
+  baseImg, 
+  sidebarVisibility, 
+  layersDef, 
+  selectedLayer,
+  onSelectLayer,
+  onNewLayerDef,
+  }) {
   // construct mask images dynamically from layer definitions
   const [coordinateX, setCoordinateX] = useState(0)
   const [coordinateY, setCoordinateY] = useState(0)
+  
 
   useEffect(() => {
-    
     console.log('Coordenadas:', coordinateX, coordinateY);
+  
+    // Resto del código que deseas ejecutar con las coordenadas actualizadas
     const x_coord = coordinateX;
-    const y_coord = coordinateY
+    const y_coord = coordinateY;
     const data = { x_coord, y_coord };
     axios.post('http://localhost:8000/api/point_&_click', data);
-
-  }, [coordinateX, coordinateY])
+  
+  }, [coordinateX, coordinateY]);
+  
 
   const [circulos, setCirculos] = useState([])
 
-  async function handleImageClick(event) {
+
+  async function handlePointAndClick(event) {
+    // Obtener el desplazamiento del contenedor de la imagen
+
     const { clientX, clientY } = event;
 
-    // Obtener el desplazamiento del contenedor de la imagen
+    const newLayerDef = [...layersDef];
+    const layerPos = newLayerDef.findIndex((l) => l.id === selectedLayer);
+
     const boxElement = document.querySelector('.image-box');
     const boxRect = boxElement.getBoundingClientRect();
     const containerX = clientX - boxRect.left;
@@ -43,9 +58,16 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
   
     setCoordinateX(imageX);
     setCoordinateY(imageY);
-  
+
+    
+
+    newLayerDef[layerPos].layerCoords = [imageX, imageY];
+    onNewLayerDef(newLayerDef);
+    console.log(newLayerDef[layerPos].layerCoords);
+
     const nuevoCirculo = { x: containerX, y: containerY };
     setCirculos([...circulos, nuevoCirculo]);
+
   }
 
   const maskImgComps = layersDef
@@ -75,7 +97,7 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
   return (
     <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>
       <Box className="image-box" sx={{ position: 'relative' }}>
-        <img src={baseImg} alt="base_image" onClick={handleImageClick}/>
+        <img src={baseImg} alt="base_image" onClick={handlePointAndClick}/>
         {circulos.map((circulo, index) => (
         <div
           key={index}

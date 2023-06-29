@@ -144,6 +144,7 @@ def point_and_click(data: PointAndClickXData):
     elif layer_selected not in layer_coords:
         layer_coords[layer_selected] = [[x_coord, y_coord]]
     print(layer_coords)
+    print(x_coord)
 
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 

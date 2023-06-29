@@ -10,6 +10,7 @@ const initialLayer = {
   visibility: true,
   imgUrl: null,
   hsl: [],
+  layerCoords: [],
 };
 
 export function Editor() {
@@ -59,19 +60,34 @@ export function Editor() {
   }
 
   function handleCoordsRewriting(layerId) {
+    /*
+    const newLayersDef = [...layersDef];
+    const layerPos = layersDef.findIndex((l) => l.id === layerId);
+    // update hsl in layer definition
+    newLayersDef[layerPos].layersCoords = newLayersDef[layerPos].layer;
+    */
     const layer = layerId;
     const data = { layer };
-  
     axios.post('http://localhost:8000/api/selected_layer', data)
       .then(() => {
         return axios.get('http://localhost:8000/api/circles', { responseType: 'json' });
       })
       .then(response => {
-        console.log(response.data.message); // Aquí se mostrarán los datos de la respuesta
-        // Hacer algo con los datos de la respuesta
-      })}
-  
+        console.log(response.data.message);
+      })};
 
+
+  function handleSelectLayer(layerId) {
+    // deselect layer if it has already been selected
+    if (layerId === selectedLayer) {
+      setSelectedLayer('');
+      return;
+    }
+    setSelectedLayer(layerId);
+    handleCoordsRewriting(layerId)
+  }
+  
+  
   return [
     <ImageEditorDrawer
       key="side_nav"
@@ -79,16 +95,20 @@ export function Editor() {
       layersDef={layersDef}
       selectedLayer={selectedLayer}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
-      onNewLayerSelected={(newLayerSelected) => setSelectedLayer(newLayerSelected)}
       onImageUpload={(imgFile) => handleImageUpload(imgFile)}
       onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
       handleCoordsRewriting={(layerId) => handleCoordsRewriting(layerId)}
+      onSelectLayer={(layerId) => handleSelectLayer(layerId) }
     />,
     <ImageEditor
       key="img_editor"
       baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
+      selectedLayer={selectedLayer}
+      onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       layersDef={layersDef}
+      handleCoordsRewriting={(layerId) => handleCoordsRewriting(layerId)}
+      onSelectLayer={(layerId) => handleSelectLayer(layerId) }
     />,
     <ImageUploader 
     key="upload_img" 

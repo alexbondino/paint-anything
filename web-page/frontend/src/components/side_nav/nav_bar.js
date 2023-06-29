@@ -86,10 +86,9 @@ export function ImageEditorDrawer({
   layersDef,
   selectedLayer,
   onNewLayerDef,
-  onNewLayerSelected,
-  handleCoordsRewriting,
   onImageUpload,
   onHSLChange,
+  onSelectLayer,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -129,20 +128,13 @@ export function ImageEditorDrawer({
     }
   };
 
-  function handleSelectLayer(layerId) {
-    // deselect layer if it has already been selected
-    if (layerId === selectedLayer) {
-      onNewLayerSelected('');
-      return;
-    }
-    onNewLayerSelected(layerId);
-    handleCoordsRewriting(layerId)
-  }
+
+
 
   function handleLayerDelete(layerId) {
     const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
     if (selectedLayer === layerId) {
-      onNewLayerSelected('');
+      onSelectLayer(layerId);
     }
     onNewLayerDef(newLayerDef);
   }
@@ -236,7 +228,7 @@ export function ImageEditorDrawer({
             <Layers
               layersDef={layersDef}
               selectedLayer={selectedLayer}
-              onSelectLayer={handleSelectLayer}
+              onSelectLayer={onSelectLayer}
               onDeleteLayer={handleLayerDelete}
               onVisibilityClicked={handleLayerVisibilityClick}
               onHSLChange={onHSLChange}
