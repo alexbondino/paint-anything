@@ -5,7 +5,8 @@ import './image-editor.scss';
 /*
  * Image editor
  */
-export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
+// TODO: image highlighting is very hacky :p, should find a more efficient way
+export default function ImageEditor({ baseImg, sidebarVisibility, layersDef, selectedLayer }) {
   // construct mask images dynamically from layer definitions
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null)
@@ -21,6 +22,10 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef }) {
               width: '100%',
               height: '100%',
               visibility: layer.visibility ? 'visible' : 'hidden',
+              filter:
+                layer.id === selectedLayer
+                  ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
+                  : 'none',
             }}
           />
         );

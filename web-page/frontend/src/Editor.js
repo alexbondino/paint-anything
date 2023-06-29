@@ -7,8 +7,8 @@ import ImageEditor from './components/image-editor/image_editor.js';
 const initialLayer = {
   id: 0,
   visibility: true,
-  imgUrl: null,
-  hsl: [],
+  imgUrl: 'https://www.textures4photoshop.com/tex/thumbs/solid-circle-png-thumb16.png',
+  hsl: [250, 50, 50],
 };
 
 export function Editor() {
@@ -73,6 +73,7 @@ export function Editor() {
       baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
+      selectedLayer={selectedLayer}
     />,
     <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
   ];

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import './layers.scss';
 
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
@@ -58,7 +59,7 @@ function hslToHex(h, s, l) {
  */
 const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   return (
-    <Box className="sliders-box" sx={{ display: 'flex', flexDirection: 'column', mt: 0, mx: 3 }}>
+    <Box className="sliders-box">
       <Typography variant="button" id="input-slider" gutterBottom>
         Hue
       </Typography>
