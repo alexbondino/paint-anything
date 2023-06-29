@@ -11,7 +11,6 @@ export default function ImageEditor({
   sidebarVisibility, 
   layersDef, 
   selectedLayer,
-  onSelectLayer,
   onNewLayerDef,
   }) {
   // construct mask images dynamically from layer definitions
@@ -29,9 +28,6 @@ export default function ImageEditor({
     axios.post('http://localhost:8000/api/point_&_click', data);
   
   }, [coordinateX, coordinateY]);
-  
-
-  const [circulos, setCirculos] = useState([])
 
 
   async function handlePointAndClick(event) {
@@ -59,17 +55,14 @@ export default function ImageEditor({
     setCoordinateX(imageX);
     setCoordinateY(imageY);
 
-    if (!newLayerDef[layerPos].layerCoords) {
-      newLayerDef[layerPos].layerCoords = [];
+    if (!newLayerDef[layerPos].layerTrueCoords) {
+      newLayerDef[layerPos].layerTrueCoords = [];
     }
   
 
-    newLayerDef[layerPos].layerCoords.push([imageX, imageY]);
+    newLayerDef[layerPos].layerTrueCoords.push([imageX, imageY]);
     onNewLayerDef(newLayerDef);
-    console.log(newLayerDef[layerPos].layerCoords);
-
-    const nuevoCirculo = { x: containerX, y: containerY };
-    setCirculos([...circulos, nuevoCirculo]);
+    console.log(newLayerDef[layerPos].layerTrueCoords);
   }
 
   const maskImgComps = layersDef
@@ -100,20 +93,6 @@ export default function ImageEditor({
     <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>
       <Box className="image-box" sx={{ position: 'relative' }}>
         <img src={baseImg} alt="base_image" onClick={handlePointAndClick}/>
-        {circulos.map((circulo, index) => (
-        <div
-          key={index}
-          style={{
-            position: 'absolute',
-            top: circulo.y,
-            left: circulo.x,
-            width: '10px',
-            height: '10px',
-            borderRadius: '50%',
-            background: 'red',
-          }}
-        ></div>
-        ))}
         {maskImgComps}
       </Box>
     </Box>

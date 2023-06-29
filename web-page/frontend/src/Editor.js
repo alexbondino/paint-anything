@@ -10,7 +10,8 @@ const initialLayer = {
   visibility: true,
   imgUrl: null,
   hsl: [],
-  layerCoords: [],
+  layerTrueCoords: [],
+  layerFalseCoords: []
 };
 
 export function Editor() {
@@ -59,24 +60,6 @@ export function Editor() {
     setLayersDef(newLayersDef);
   }
 
-  function handleCoordsRewriting(layerId) {
-    /*
-    const newLayersDef = [...layersDef];
-    const layerPos = layersDef.findIndex((l) => l.id === layerId);
-    // update hsl in layer definition
-    newLayersDef[layerPos].layersCoords = newLayersDef[layerPos].layer;
-    */
-    const layer = layerId;
-    const data = { layer };
-    axios.post('http://localhost:8000/api/selected_layer', data)
-      .then(() => {
-        return axios.get('http://localhost:8000/api/circles', { responseType: 'json' });
-      })
-      .then(response => {
-        console.log(response.data.message);
-      })};
-
-
   function handleSelectLayer(layerId) {
     // deselect layer if it has already been selected
     if (layerId === selectedLayer) {
@@ -84,7 +67,6 @@ export function Editor() {
       return;
     }
     setSelectedLayer(layerId);
-    handleCoordsRewriting(layerId)
   }
   
   
@@ -97,18 +79,16 @@ export function Editor() {
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       onImageUpload={(imgFile) => handleImageUpload(imgFile)}
       onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
-      handleCoordsRewriting={(layerId) => handleCoordsRewriting(layerId)}
+
       onSelectLayer={(layerId) => handleSelectLayer(layerId) }
     />,
     <ImageEditor
       key="img_editor"
       baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
+      layersDef={layersDef}
       selectedLayer={selectedLayer}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
-      layersDef={layersDef}
-      handleCoordsRewriting={(layerId) => handleCoordsRewriting(layerId)}
-      onSelectLayer={(layerId) => handleSelectLayer(layerId) }
     />,
     <ImageUploader 
     key="upload_img" 
