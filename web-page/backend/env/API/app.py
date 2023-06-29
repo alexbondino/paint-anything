@@ -131,20 +131,19 @@ class PointAndClickXData(BaseModel):
 
 
 layer_selected = 0
-layer_coords = {}
+positive_layer_coords = {}
+negative_layer_coords = {}
 
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickXData):
     x_coord = data.x_coord
     y_coord = data.y_coord
-    print(x_coord,".." ,y_coord)
-    print(layer_selected)
-    if layer_selected in layer_coords:
-        layer_coords[layer_selected].append([x_coord, y_coord])
-    elif layer_selected not in layer_coords:
-        layer_coords[layer_selected] = [[x_coord, y_coord]]
-    print(layer_coords)
-    print(x_coord)
+    if layer_selected in positive_layer_coords:
+        positive_layer_coords[layer_selected].append([x_coord, y_coord])
+    elif layer_selected not in positive_layer_coords:
+        positive_layer_coords[layer_selected] = [[x_coord, y_coord]]
+    print("el layer seleccionado es: ", layer_selected)
+    print("los puntos positivos son: ",positive_layer_coords[layer_selected])
 
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
@@ -166,12 +165,13 @@ class NegPointAndClickData(BaseModel):
 def neg_point_and_click(data: NegPointAndClickData):
     x_coord = data.x_coord
     y_coord = data.y_coord
-    if layer_selected in layer_coords:
-        layer_coords[layer_selected].append([x_coord, y_coord])
-    elif layer_selected not in layer_coords:
-        layer_coords[layer_selected] = [[x_coord, y_coord]]
-
-    print(x_coord)
+    if layer_selected in negative_layer_coords:
+        negative_layer_coords[layer_selected].append([x_coord, y_coord])
+    elif layer_selected not in negative_layer_coords:
+        negative_layer_coords[layer_selected] = [[x_coord, y_coord]]
+        
+    print("el layer seleccionado es: ", layer_selected)
+    print("los puntos negativos son: ",negative_layer_coords[layer_selected])
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
 
