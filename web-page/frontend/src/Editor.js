@@ -60,6 +60,7 @@ export function Editor() {
   return [
     <ImageEditorDrawer
       key="side_nav"
+      baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
       selectedLayer={selectedLayer}

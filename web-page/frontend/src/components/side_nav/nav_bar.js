@@ -2,15 +2,20 @@ import * as React from 'react';
 import { useRef } from 'react';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
+import './nav-bar.scss';
+
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
+import Dialog from '@mui/material/Dialog';
 import MuiAppBar from '@mui/material/AppBar';
+import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import CssBaseline from '@mui/material/CssBaseline';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
+import Slide from '@mui/material/Slide';
 import Layers from './layers';
 import axios from 'axios';
 
@@ -32,6 +37,8 @@ import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
+import PreviewIcon from '@mui/icons-material/Preview';
+import CloseIcon from '@mui/icons-material/Close';
 
 // controls the width of the drawer
 const drawerWidth = 280;
@@ -72,6 +79,63 @@ const TitleBar = styled(MuiAppBar, {
   }),
 }));
 
+const PreviewTransition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+function PreviewDialog({ layersDef, baseImg }) {
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const maskImgComps = layersDef
+    .filter((l) => l.imgUrl !== null)
+    .map((layer) => {
+      try {
+        return (
+          <img
+            key={layer.id}
+            src={layer.imgUrl}
+            alt={`mask_image_${layer.id}`}
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        );
+      } catch {
+        console.log(`Image for layer ${layer.id} not found`);
+        return;
+      }
+    });
+
+  return [
+    <ListItemButton onClick={handleOpen}>
+      <ListItemIcon>
+        <PreviewIcon />
+      </ListItemIcon>
+      <ListItemText primary="See Preview" />
+    </ListItemButton>,
+    <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={PreviewTransition}>
+      <AppBar>
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography variant="h4" component="div" sx={{ justifyContent: 'center' }}>
+            Result Preview
+          </Typography>
+          <IconButton color="inherit" onClick={handleClose} aria-label="close">
+            <CloseIcon />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+      <Box className="preview-image" sx={{ position: 'relative' }}>
+        <img src={baseImg} alt="base_image" />
+        {maskImgComps}
+      </Box>
+    </Dialog>,
+  ];
+}
+
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -82,6 +146,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 export function ImageEditorDrawer({
+  baseImg,
   sidebarVisibility,
   layersDef,
   selectedLayer,
@@ -257,6 +322,9 @@ export function ImageEditorDrawer({
               onHSLChange={onHSLChange}
             />
           </Collapse>
+          <ListItem key="open_preview" disablePadding>
+            <PreviewDialog layersDef={layersDef} baseImg={baseImg} />
+          </ListItem>
           <ListItem key="download_result" disablePadding>
             <ListItemButton onClick={handleDownloadButtonClick}>
               <ListItemIcon>
