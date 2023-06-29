@@ -59,15 +59,17 @@ export default function ImageEditor({
     setCoordinateX(imageX);
     setCoordinateY(imageY);
 
-    
+    if (!newLayerDef[layerPos].layerCoords) {
+      newLayerDef[layerPos].layerCoords = [];
+    }
+  
 
-    newLayerDef[layerPos].layerCoords = [imageX, imageY];
+    newLayerDef[layerPos].layerCoords.push([imageX, imageY]);
     onNewLayerDef(newLayerDef);
     console.log(newLayerDef[layerPos].layerCoords);
 
     const nuevoCirculo = { x: containerX, y: containerY };
     setCirculos([...circulos, nuevoCirculo]);
-
   }
 
   const maskImgComps = layersDef
