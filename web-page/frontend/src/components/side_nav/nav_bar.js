@@ -137,11 +137,27 @@ export function ImageEditorDrawer({
     onNewLayerSelected(layerId);
   }
 
-  function handleLayerDelete(layerId) {
+  async function handleLayerDelete(layerId) {
     const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
     if (selectedLayer === layerId) {
       onNewLayerSelected('');
     }
+    fetch(
+      'http://localhost:8000/api/delete-mask?' +
+        new URLSearchParams({
+          layer_id: layerId,
+        })
+    )
+      .then((response) => {
+        if (response.status == 200) {
+          console.log('layer file successfully deleted');
+        } else {
+          console.log('failed deleting mask file with error: ', response.message);
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting mask file ', error);
+      });
     onNewLayerDef(newLayerDef);
   }
 
@@ -149,16 +165,17 @@ export function ImageEditorDrawer({
     fileInputRef.current.click();
   }
 
-  async function handleDownloadButtonClick(){
+  async function handleDownloadButtonClick() {
     try {
-      const response = await axios.get('http://localhost:8000/api/image_downloader', {responseType:'blob'});
+      const response = await axios.get('http://localhost:8000/api/image_downloader', {
+        responseType: 'blob',
+      });
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'image/png' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'imagen.png');
       document.body.appendChild(link);
       link.click();
-
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }

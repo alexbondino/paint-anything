@@ -90,6 +90,16 @@ async def fetch_mask(layer_id: int):
         raise HTTPException(status_code=400, detail="Image not found")
 
 
+@app.get("/api/delete-mask")
+async def delete_mask(layer_id: int):
+    """Deletes mask associated to specified layer id"""
+    try:
+        os.remove(os.path.join(temp_dir, f"{layer_id}.png"))
+        return {"message": "file successfully deleted"}
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="layer mask file not found")
+
+
 @app.post("/api/cleanup")
 def cleanup_temp_dir():
     global temp_dir
@@ -99,12 +109,13 @@ def cleanup_temp_dir():
         return {"message": "Temporary directory cleaned up."}
     else:
         return {"message": "No temporary directory to clean up."}
-    
+
+
 @app.get("/api/image_downloader")
 async def image_downloader():
     from PIL import Image
 
-    # Relative Paths must be changed in future to adapt to layers. As we are not generating images as layers yet 
+    # Relative Paths must be changed in future to adapt to layers. As we are not generating images as layers yet
     # this will remain still.
 
     relative_path = os.path.dirname(current_dir)
@@ -112,17 +123,18 @@ async def image_downloader():
     relative_path = os.path.dirname(relative_path)
     relative_path = os.path.join(relative_path, "frontend", "src", "assets")
 
-
     print(relative_path)
 
-
-    img1 = Image.open(os.path.join(relative_path,"house.jpg"))
-    img2 = Image.open(os.path.join(relative_path,"luffy.jpg"))
+    img1 = Image.open(os.path.join(relative_path, "house.jpg"))
+    img2 = Image.open(os.path.join(relative_path, "luffy.jpg"))
     img2 = img2.convert("RGBA")
 
-    img1.paste(img2, (0,0), mask = img2)
-    img1.save(os.path.join(relative_path,"downloadable.png"))
-    return FileResponse(os.path.join(relative_path,"downloadable.png"), media_type="image/png")
+    img1.paste(img2, (0, 0), mask=img2)
+    img1.save(os.path.join(relative_path, "downloadable.png"))
+    return FileResponse(
+        os.path.join(relative_path, "downloadable.png"), media_type="image/png"
+    )
+
 
 if __name__ == "__main__":
     import uvicorn
