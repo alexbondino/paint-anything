@@ -119,7 +119,7 @@ export function ImageEditorDrawer({
     // by default, each layer is created with the name as the index of last layer created + 1
     const newLayersDef = [
       ...layersDef,
-      { id: lastLayerId + 1, visibility: true, imgUrl: null, hsl: [] },
+      { id: lastLayerId + 1, visibility: true, imgUrl: null, hsl: [], layerTrueCoords: [], layerFalseCoords: [] },
     ];
     onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
@@ -127,8 +127,6 @@ export function ImageEditorDrawer({
       setExpandLayers(!expandLayers);
     }
   };
-
-
 
 
   function handleLayerDelete(layerId) {

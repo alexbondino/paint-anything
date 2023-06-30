@@ -48,9 +48,6 @@ export default function ImageEditor({
     setCoordinateY(imageY);
   
     if (event.type === 'click' && layerPos!==-1) {
-      if (!newLayerDef[layerPos].layerTrueCoords) {
-        newLayerDef[layerPos].layerTrueCoords = [];
-      }
   
       newLayerDef[layerPos].layerTrueCoords.push([imageX, imageY]);
       onNewLayerDef(newLayerDef);
@@ -66,9 +63,6 @@ export default function ImageEditor({
       }
     } else if (event.type === 'contextmenu' && layerPos!==-1) {
       event.preventDefault();
-      if (!newLayerDef[layerPos].layerFalseCoords) {
-        newLayerDef[layerPos].layerFalseCoords = [];
-      }
   
       newLayerDef[layerPos].layerFalseCoords.push([imageX, imageY]);
       onNewLayerDef(newLayerDef);

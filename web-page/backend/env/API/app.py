@@ -13,6 +13,21 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 
 temp_dir = tempfile.mkdtemp()  # Global variable to store the temporary directory path
 
+layer_selected = 0
+positive_layer_coords = {}
+negative_layer_coords = {}
+
+class PointAndClickXData(BaseModel):
+    x_coord: int
+    y_coord: int
+
+class SelectedLayer(BaseModel):
+    layerId: int
+
+class NegPointAndClickData(BaseModel):
+    x_coord: int
+    y_coord: int
+
 app = FastAPI()
 
 ## CORS dependencies
@@ -126,16 +141,6 @@ async def image_downloader():
     )
 
 
-class PointAndClickXData(BaseModel):
-    x_coord: int
-    y_coord: int
-
-
-layer_selected = 0
-positive_layer_coords = {}
-negative_layer_coords = {}
-
-
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickXData):
     x_coord = data.x_coord
@@ -150,8 +155,7 @@ def point_and_click(data: PointAndClickXData):
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
 
-class SelectedLayer(BaseModel):
-    layerId: int
+
 
 
 @app.post("/api/selected_layer")
@@ -161,10 +165,6 @@ def selected_layer(data: SelectedLayer):
     layer_selected = layerId
     return {"message": f"{layerId}"}
 
-
-class NegPointAndClickData(BaseModel):
-    x_coord: int
-    y_coord: int
 
 
 @app.post("/api/neg_point_&_click")
