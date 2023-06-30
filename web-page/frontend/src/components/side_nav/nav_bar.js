@@ -86,9 +86,9 @@ export function ImageEditorDrawer({
   layersDef,
   selectedLayer,
   onNewLayerDef,
-  onNewLayerSelected,
   onImageUpload,
   onHSLChange,
+  onSelectLayer,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -119,7 +119,7 @@ export function ImageEditorDrawer({
     // by default, each layer is created with the name as the index of last layer created + 1
     const newLayersDef = [
       ...layersDef,
-      { id: lastLayerId + 1, visibility: true, imgUrl: null, hsl: [] },
+      { id: lastLayerId + 1, visibility: true, imgUrl: null, hsl: [], layerTrueCoords: [], layerFalseCoords: [] },
     ];
     onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
@@ -128,19 +128,19 @@ export function ImageEditorDrawer({
     }
   };
 
-  function handleSelectLayer(layerId) {
-    // deselect layer if it has already been selected
-    if (layerId === selectedLayer) {
-      onNewLayerSelected('');
-      return;
-    }
-    onNewLayerSelected(layerId);
-  }
 
-  function handleLayerDelete(layerId) {
+  async function handleLayerDelete(layerId) {
     const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
     if (selectedLayer === layerId) {
-      onNewLayerSelected('');
+      onSelectLayer(layerId);
+
+      const data = { layerId };
+      try{
+        await axios.post('http://localhost:8000/api/delete_point_&_click', data);
+      } catch(error){
+        console.error('Error al eliminar coordenadas:', error);
+      }
+      
     }
     onNewLayerDef(newLayerDef);
   }
@@ -234,7 +234,7 @@ export function ImageEditorDrawer({
             <Layers
               layersDef={layersDef}
               selectedLayer={selectedLayer}
-              onSelectLayer={handleSelectLayer}
+              onSelectLayer={onSelectLayer}
               onDeleteLayer={handleLayerDelete}
               onVisibilityClicked={handleLayerVisibilityClick}
               onHSLChange={onHSLChange}
