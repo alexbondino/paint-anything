@@ -69,7 +69,11 @@ export function Editor() {
     setSelectedLayer(layerId);
 
     const data = { layerId };
-    axios.post('http://localhost:8000/api/selected_layer', data);
+    try {
+      axios.post('http://localhost:8000/api/selected_layer', data);
+    } catch(error){
+      console.error('Error al enviar la layer seleccionada:', error);
+    }
   }
   
   

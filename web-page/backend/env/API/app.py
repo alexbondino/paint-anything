@@ -99,12 +99,13 @@ def cleanup_temp_dir():
         return {"message": "Temporary directory cleaned up."}
     else:
         return {"message": "No temporary directory to clean up."}
-    
+
+
 @app.get("/api/image_downloader")
 async def image_downloader():
     from PIL import Image
 
-    # Relative Paths must be changed in future to adapt to layers. As we are not generating images as layers yet 
+    # Relative Paths must be changed in future to adapt to layers. As we are not generating images as layers yet
     # this will remain still.
 
     relative_path = os.path.dirname(current_dir)
@@ -112,17 +113,17 @@ async def image_downloader():
     relative_path = os.path.dirname(relative_path)
     relative_path = os.path.join(relative_path, "frontend", "src", "assets")
 
-
     print(relative_path)
 
-
-    img1 = Image.open(os.path.join(relative_path,"house.jpg"))
-    img2 = Image.open(os.path.join(relative_path,"luffy.jpg"))
+    img1 = Image.open(os.path.join(relative_path, "house.jpg"))
+    img2 = Image.open(os.path.join(relative_path, "luffy.jpg"))
     img2 = img2.convert("RGBA")
 
-    img1.paste(img2, (0,0), mask = img2)
-    img1.save(os.path.join(relative_path,"downloadable.png"))
-    return FileResponse(os.path.join(relative_path,"downloadable.png"), media_type="image/png")
+    img1.paste(img2, (0, 0), mask=img2)
+    img1.save(os.path.join(relative_path, "downloadable.png"))
+    return FileResponse(
+        os.path.join(relative_path, "downloadable.png"), media_type="image/png"
+    )
 
 
 class PointAndClickXData(BaseModel):
@@ -134,6 +135,7 @@ layer_selected = 0
 positive_layer_coords = {}
 negative_layer_coords = {}
 
+
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickXData):
     x_coord = data.x_coord
@@ -143,12 +145,14 @@ def point_and_click(data: PointAndClickXData):
     elif layer_selected not in positive_layer_coords:
         positive_layer_coords[layer_selected] = [[x_coord, y_coord]]
     print("el layer seleccionado es: ", layer_selected)
-    print("los puntos positivos son: ",positive_layer_coords[layer_selected])
+    print("los puntos positivos son: ", positive_layer_coords[layer_selected])
 
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
+
 class SelectedLayer(BaseModel):
     layerId: int
+
 
 @app.post("/api/selected_layer")
 def selected_layer(data: SelectedLayer):
@@ -157,9 +161,11 @@ def selected_layer(data: SelectedLayer):
     layer_selected = layerId
     return {"message": f"{layerId}"}
 
+
 class NegPointAndClickData(BaseModel):
     x_coord: int
     y_coord: int
+
 
 @app.post("/api/neg_point_&_click")
 def neg_point_and_click(data: NegPointAndClickData):
@@ -169,10 +175,11 @@ def neg_point_and_click(data: NegPointAndClickData):
         negative_layer_coords[layer_selected].append([x_coord, y_coord])
     elif layer_selected not in negative_layer_coords:
         negative_layer_coords[layer_selected] = [[x_coord, y_coord]]
-        
+
     print("el layer seleccionado es: ", layer_selected)
-    print("los puntos negativos son: ",negative_layer_coords[layer_selected])
+    print("los puntos negativos son: ", negative_layer_coords[layer_selected])
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
+
 
 @app.post("/api/delete_point_&_click")
 def delete_point_and_click(data: SelectedLayer):

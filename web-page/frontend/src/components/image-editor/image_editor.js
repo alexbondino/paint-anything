@@ -48,7 +48,7 @@ export default function ImageEditor({
     setCoordinateX(imageX);
     setCoordinateY(imageY);
   
-    if (event.type === 'click' && layerPos!=-1) {
+    if (event.type === 'click' && layerPos!==-1) {
       if (!newLayerDef[layerPos].layerTrueCoords) {
         newLayerDef[layerPos].layerTrueCoords = [];
       }
@@ -60,8 +60,12 @@ export default function ImageEditor({
       const x_coord = imageX;
       const y_coord = imageY;
       const data = { x_coord, y_coord };
-      axios.post('http://localhost:8000/api/point_&_click', data);
-    } else if (event.type === 'contextmenu' && layerPos!=-1) {
+      try {
+        axios.post('http://localhost:8000/api/point_&_click', data);
+      } catch (error){
+        console.error('Error al enviar coordenadas positivas:', error);
+      }
+    } else if (event.type === 'contextmenu' && layerPos!==-1) {
       event.preventDefault();
       if (!newLayerDef[layerPos].layerFalseCoords) {
         newLayerDef[layerPos].layerFalseCoords = [];
@@ -74,7 +78,12 @@ export default function ImageEditor({
       const x_coord = imageX;
       const y_coord = imageY;
       const data = { x_coord, y_coord };
-      axios.post('http://localhost:8000/api/neg_point_&_click', data);
+      try {
+        axios.post('http://localhost:8000/api/neg_point_&_click', data);
+      } catch (error){
+        console.error('Error al eliminar coordenadas negativas:', error);
+      }
+
     }
   };
 
