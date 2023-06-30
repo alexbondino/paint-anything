@@ -174,6 +174,16 @@ def neg_point_and_click(data: NegPointAndClickData):
     print("los puntos negativos son: ",negative_layer_coords[layer_selected])
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
+@app.post("/api/delete_point_&_click")
+def delete_point_and_click(data: SelectedLayer):
+    global negative_layer_coords
+    global positive_layer_coords
+    layerId = data.layerId
+    if layerId in negative_layer_coords or layerId in positive_layer_coords:
+        del negative_layer_coords[layerId]
+        del positive_layer_coords[layerId]
+    return {"message": f"Coordenadas eliminadas correctamente: {layerId}"}
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -48,7 +48,7 @@ export default function ImageEditor({
     setCoordinateX(imageX);
     setCoordinateY(imageY);
   
-    if (event.type === 'click') {
+    if (event.type === 'click' && layerPos!=-1) {
       if (!newLayerDef[layerPos].layerTrueCoords) {
         newLayerDef[layerPos].layerTrueCoords = [];
       }
@@ -61,7 +61,7 @@ export default function ImageEditor({
       const y_coord = imageY;
       const data = { x_coord, y_coord };
       axios.post('http://localhost:8000/api/point_&_click', data);
-    } else if (event.type === 'contextmenu') {
+    } else if (event.type === 'contextmenu' && layerPos!=-1) {
       event.preventDefault();
       if (!newLayerDef[layerPos].layerFalseCoords) {
         newLayerDef[layerPos].layerFalseCoords = [];
