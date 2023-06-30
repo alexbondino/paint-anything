@@ -23,7 +23,7 @@ export default function ImageEditor({
   
   }, [coordinateX, coordinateY]);
 
-  const handlePointAndClick = (event) => {
+  const handlePointAndClick = async (event) => {
     // Obtain the true image coords
     const { clientX, clientY } = event;
   
@@ -57,7 +57,7 @@ export default function ImageEditor({
       const y_coord = imageY;
       const data = { x_coord, y_coord };
       try {
-        axios.post('http://localhost:8000/api/point_&_click', data);
+        await axios.post('http://localhost:8000/api/point_&_click', data);
       } catch (error){
         console.error('Error al enviar coordenadas positivas:', error);
       }
@@ -72,7 +72,7 @@ export default function ImageEditor({
       const y_coord = imageY;
       const data = { x_coord, y_coord };
       try {
-        axios.post('http://localhost:8000/api/neg_point_&_click', data);
+        await axios.post('http://localhost:8000/api/neg_point_&_click', data);
       } catch (error){
         console.error('Error al eliminar coordenadas negativas:', error);
       }

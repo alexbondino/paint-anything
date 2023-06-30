@@ -60,7 +60,7 @@ export function Editor() {
     setLayersDef(newLayersDef);
   }
 
-  function handleSelectLayer(layerId) {
+  async function handleSelectLayer(layerId) {
     // deselect layer if it has already been selected
     if (layerId === selectedLayer) {
       setSelectedLayer('');
@@ -70,12 +70,11 @@ export function Editor() {
 
     const data = { layerId };
     try {
-      axios.post('http://localhost:8000/api/selected_layer', data);
+      await axios.post('http://localhost:8000/api/selected_layer', data);
     } catch(error){
       console.error('Error al enviar la layer seleccionada:', error);
     }
   }
-  
   
   return [
     <ImageEditorDrawer

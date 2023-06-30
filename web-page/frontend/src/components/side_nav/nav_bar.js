@@ -129,14 +129,14 @@ export function ImageEditorDrawer({
   };
 
 
-  function handleLayerDelete(layerId) {
+  async function handleLayerDelete(layerId) {
     const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
     if (selectedLayer === layerId) {
       onSelectLayer(layerId);
 
       const data = { layerId };
       try{
-        axios.post('http://localhost:8000/api/delete_point_&_click', data);
+        await axios.post('http://localhost:8000/api/delete_point_&_click', data);
       } catch(error){
         console.error('Error al eliminar coordenadas:', error);
       }
