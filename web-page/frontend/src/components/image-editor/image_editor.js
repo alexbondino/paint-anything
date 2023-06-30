@@ -36,8 +36,8 @@ export default function ImageEditor({ baseImg, sidebarVisibility, layersDef, sel
     });
 
   return (
-    <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>
-      <Box className="image-box" sx={{ position: 'relative' }}>
+    <Box className="background-full" sx={{ display: sidebarVisibility }}>
+      <Box className="image-box">
         <img src={baseImg} alt="base_image" />
         {maskImgComps}
       </Box>

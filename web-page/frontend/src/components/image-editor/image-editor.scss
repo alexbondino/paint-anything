@@ -1,7 +1,7 @@
 // TODO: fix component placement when window is resized
 
 .background-full {
-    display: grid;
+    flex-direction: column;
 }
 
 .image-box {
@@ -9,6 +9,7 @@
     height: 600px;
     margin: auto;
     text-align: center;
+    position: relative;
     display: flex;
     justify-content: center;
 }
