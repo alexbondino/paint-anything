@@ -21,11 +21,10 @@ export default function ImageEditor({
   useEffect(() => {
     console.log('Coordenadas:', coordinateX, coordinateY);
   
-    // Resto del código que deseas ejecutar con las coordenadas actualizadas
   }, [coordinateX, coordinateY]);
 
   const handlePointAndClick = (event) => {
-    // Obtener el desplazamiento del contenedor de la imagen
+    // Obtain the true image coords
     const { clientX, clientY } = event;
   
     const newLayerDef = [...layersDef];
@@ -36,12 +35,12 @@ export default function ImageEditor({
     const containerX = clientX - boxRect.left;
     const containerY = clientY - boxRect.top;
   
-    // Obtener las dimensiones de la imagen
+    // Obtain the image width and height
     const imgElement = document.querySelector('.image-box img');
     const imageWidth = imgElement.naturalWidth;
     const imageHeight = imgElement.naturalHeight;
   
-    // Calcular las coordenadas relativas a la imagen
+    // Calculate relative image coordinates
     const imageX = (containerX / boxRect.width) * imageWidth;
     const imageY = (containerY / boxRect.height) * imageHeight;
   
