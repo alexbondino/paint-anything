@@ -19,8 +19,8 @@
   },
   "scripts": {
     "start": "react-scripts start --port 3000",
-    "serve": "concurrently \"npm run start\" \"python3 ../backend/env/API/app.py\" \"python3 ../backend/env/API/app.py\"",
-    "build": "react-scripts build",
+    "serve": "concurrently \"npm run start\" \"source venv/bin/activate && python3 ../backend/env/API/app.py\"",
+    "build": "concurrently \"react-scripts build\" \"python3 -m venv venv\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
