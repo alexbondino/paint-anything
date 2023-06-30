@@ -77,13 +77,7 @@ async def upload_image(image: UploadFile = None):
 
 @app.get("/api/fetch-mask")
 async def fetch_mask(layer_id: int):
-    """returns the mask of specified layer id
-    Args:
-        layer_id (int): id of mask, based on layer
-
-    Raises:
-        HTTPException: when mask was not found
-    """
+    """returns the mask of specified layer id"""
     try:
         return FileResponse(os.path.join(temp_dir, f"{layer_id}.png"))
     except:
