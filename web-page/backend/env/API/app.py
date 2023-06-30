@@ -1,6 +1,5 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, UploadFile, HTTPException, File
-from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, FileResponse
 import os
@@ -8,12 +7,19 @@ import tempfile
 import shutil
 from pydantic import BaseModel
 from PIL import Image
+from fastapi.staticfiles import StaticFiles
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
+react_dir = os.path.dirname(current_dir)
+react_dir = os.path.dirname(react_dir)
+react_dir = os.path.dirname(react_dir)
+react_dir = os.path.join(react_dir, "frontend/build")
 
-temp_dir = tempfile.mkdtemp()  # Global variable to store the temporary directory path
 
 app = FastAPI()
+
+temp_dir = tempfile.mkdtemp()
 
 ## CORS dependencies
 origins = [
@@ -128,3 +134,4 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run("app:app", reload=True, port=8000)
+
