@@ -7,9 +7,8 @@ import ImageEditor from './components/image-editor/image_editor.js';
 const initialLayer = {
   id: 0,
   visibility: true,
-  imgUrl:
-    'https://upload.wikimedia.org/wikipedia/en/thumb/2/26/Paul_Rudish_Mickey_Mouse.png/220px-Paul_Rudish_Mickey_Mouse.png',
-  hsl: [250, 50, 50],
+  imgUrl: null,
+  hsl: [],
 };
 
 export function Editor() {
@@ -17,7 +16,7 @@ export function Editor() {
   // base image to be edited
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
-  const [layersDef, setLayersDef] = React.useState([initialLayer]);
+  const [layersDef, setLayersDef] = React.useState([]);
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
 

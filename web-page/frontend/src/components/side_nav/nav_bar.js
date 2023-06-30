@@ -36,7 +36,7 @@ import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 // project module
 import Layers from './layers';
-import { PreviewDialog } from './preview';
+import PreviewDialog from './preview';
 
 // controls the width of the drawer
 const drawerWidth = 280;

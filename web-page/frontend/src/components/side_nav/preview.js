@@ -18,7 +18,7 @@ const PreviewTransition = React.forwardRef(function Transition(props, ref) {
 });
 
 // TODO: fix button focus after exiting preview with escape key
-export function PreviewDialog({ layersDef, baseImg }) {
+export default function PreviewDialog({ layersDef, baseImg }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
