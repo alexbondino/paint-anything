@@ -7,7 +7,8 @@ import ImageEditor from './components/image-editor/image_editor.js';
 const initialLayer = {
   id: 0,
   visibility: true,
-  imgUrl: 'https://www.textures4photoshop.com/tex/thumbs/solid-circle-png-thumb16.png',
+  imgUrl:
+    'https://upload.wikimedia.org/wikipedia/en/thumb/2/26/Paul_Rudish_Mickey_Mouse.png/220px-Paul_Rudish_Mickey_Mouse.png',
   hsl: [250, 50, 50],
 };
 

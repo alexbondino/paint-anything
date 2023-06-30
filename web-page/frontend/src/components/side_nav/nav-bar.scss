@@ -1,14 +1,14 @@
-.preview-image {
-    background-color: #EBEBEB;
-    width: 65%;
-    height: 600px;
+// TODO: fix component placement when window is resized
+
+.preview-image-box {
+    width: 80%;
+    height: 80%;
     margin: auto;
-    text-align: center;
     display: flex;
     justify-content: center;
 }
 
-.preview-image img {
+.preview-image-box img {
     object-fit:contain;
     max-height: 100%;
     max-width: 100%;

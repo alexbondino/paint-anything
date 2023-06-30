@@ -98,9 +98,13 @@ function PreviewDialog({ layersDef, baseImg }) {
             src={layer.imgUrl}
             alt={`mask_image_${layer.id}`}
             style={{
+              objectFit: 'contain',
               position: 'absolute',
               width: '100%',
               height: '100%',
+              display: 'block',
+              marginLeft: 'auto',
+              marginRight: 'auto',
             }}
           />
         );
@@ -128,7 +132,7 @@ function PreviewDialog({ layersDef, baseImg }) {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Box className="preview-image" sx={{ position: 'relative' }}>
+      <Box className="preview-image-box" sx={{ position: 'relative' }}>
         <img src={baseImg} alt="base_image" />
         {maskImgComps}
       </Box>
