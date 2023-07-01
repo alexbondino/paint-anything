@@ -125,7 +125,14 @@ export function ImageEditorDrawer({
     // by default, each layer is created with the name as the index of last layer created + 1
     const newLayersDef = [
       ...layersDef,
-      { id: lastLayerId + 1, visibility: true, imgUrl: null, hsl: [], layerTrueCoords: [], layerFalseCoords: [] },
+      {
+        id: lastLayerId + 1,
+        visibility: true,
+        imgUrl: null,
+        hsl: [],
+        layerTrueCoords: [],
+        layerFalseCoords: [],
+      },
     ];
     onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
@@ -134,19 +141,17 @@ export function ImageEditorDrawer({
     }
   };
 
-
   async function handleLayerDelete(layerId) {
     const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
     if (selectedLayer === layerId) {
       onSelectLayer(layerId);
 
       const data = { layerId };
-      try{
+      try {
         await axios.post('http://localhost:8000/api/delete_point_&_click', data);
-      } catch(error){
+      } catch (error) {
         console.error('Error al eliminar coordenadas:', error);
       }
-      
     }
     // erase mask from disk
     fetch(
@@ -156,7 +161,7 @@ export function ImageEditorDrawer({
         })
     )
       .then((response) => {
-        if (response.status == 200) {
+        if (response.status === 200) {
           console.log('layer file successfully deleted');
         } else {
           console.log('failed deleting mask file with error: ', response.message);
