@@ -20,6 +20,7 @@ export default function ImageEditor({
   const [coordinateX, setCoordinateX] = useState(0)
   const [coordinateY, setCoordinateY] = useState(0)
   const [truePoints, setTruePoints] = useState([]);
+  const [falsePoints, setFalsePoints] = useState([]);
 
   useEffect(() => {
     console.log('Coordenadas:', coordinateX, coordinateY);
@@ -31,9 +32,11 @@ export default function ImageEditor({
     const layerPos = newLayerDef.findIndex((l) => l.id === selectedLayer);
     if (layerPos !== -1) {
       setTruePoints(layersDef[layerPos].layerTrueCoords);
+      setFalsePoints(layersDef[layerPos].layerFalseCoords);
     }
     else {
-      setTruePoints([{}])
+      setTruePoints([{}]);
+      setFalsePoints([{}]);
     }
   }, [selectedLayer]);
 
@@ -89,11 +92,10 @@ export default function ImageEditor({
       } catch (error){
         console.error('Error al eliminar coordenadas negativas:', error);
       }
+      setFalsePoints(layersDef[layerPos].layerFalseCoords);
 
     }
   };
-
-  
 
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null)
@@ -135,6 +137,22 @@ export default function ImageEditor({
               backgroundColor: 'red',
               borderRadius: '50%',
               backgroundColor: 'green',
+              border: '1px solid white',
+            }}
+          />
+        ))}
+        {falsePoints.length > 0 && falsePoints[0][1] && falsePoints[0][0] && falsePoints.map((falsePoint, index) => (
+          <Box
+            key={index}
+            sx={{
+              position: 'absolute',
+              top: falsePoint[1] - 5,
+              left: falsePoint[0] - 5,
+              width: '10px',
+              height: '10px',
+              backgroundColor: 'red',
+              borderRadius: '50%',
+              backgroundColor: 'red',
               border: '1px solid white',
             }}
           />

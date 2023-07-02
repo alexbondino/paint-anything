@@ -188,7 +188,9 @@ def delete_point_and_click(data: SelectedLayer):
     layerId = data.layerId
     if layerId in negative_layer_coords or layerId in positive_layer_coords:
         del negative_layer_coords[layerId]
+        del negative_layer_coords[-1]
         del positive_layer_coords[layerId]
+        del positive_layer_coords[-1]
     return {"message": f"Coordenadas eliminadas correctamente: {layerId}"}
 
 
