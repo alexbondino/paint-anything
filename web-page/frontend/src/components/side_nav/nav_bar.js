@@ -145,13 +145,13 @@ export function ImageEditorDrawer({
     const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
     if (selectedLayer === layerId) {
       onSelectLayer(layerId);
+    }
 
-      const data = { layerId };
-      try {
-        await axios.post('http://localhost:8000/api/delete_point_&_click', data);
-      } catch (error) {
-        console.error('Error al eliminar coordenadas:', error);
-      }
+    const data = { layerId };
+    try {
+      await axios.post('http://localhost:8000/api/delete_point_&_click', data);
+    } catch (error) {
+      console.error('Error al eliminar coordenadas:', error);
     }
     // erase mask from disk
     fetch(

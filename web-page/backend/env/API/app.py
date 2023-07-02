@@ -23,7 +23,7 @@ class PointAndClickXData(BaseModel):
     y_coord: int
 
 
-class SelectedLayer(BaseModel):
+class Layer(BaseModel):
     layerId: int
 
 
@@ -164,7 +164,7 @@ def point_and_click(data: PointAndClickXData):
 
 
 @app.post("/api/selected_layer")
-def selected_layer(data: SelectedLayer):
+def selected_layer(data: Layer):
     global layer_selected
     layerId = data.layerId
     layer_selected = layerId
@@ -186,14 +186,13 @@ def neg_point_and_click(data: NegPointAndClickData):
 
 
 @app.post("/api/delete_point_&_click")
-def delete_point_and_click(data: SelectedLayer):
+def delete_point_and_click(data: Layer):
     global negative_layer_coords
     global positive_layer_coords
-    layerId = data.layerId
-    if layerId in negative_layer_coords or layerId in positive_layer_coords:
-        del negative_layer_coords[layerId]
-        del positive_layer_coords[layerId]
-    return {"message": f"Coordenadas eliminadas correctamente: {layerId}"}
+    layer_id = data.layerId
+    positive_layer_coords.pop(layer_id, None)
+    negative_layer_coords.pop(layer_id, None)
+    return {"message": f"Coordenadas eliminadas correctamente: {layer_id}"}
 
 
 if __name__ == "__main__":

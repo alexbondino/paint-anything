@@ -110,7 +110,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
  * @param {function} onSelected hook for layer selection
  * @param {function} onDelete hook for layer elimination
  * @param {function} onVisClick hook for visibility change
- * @param {} onHSLChange hook for changes in any hsl value
+ * @param {function} onHSLChange hook for changes in any hsl value
  * @returns the navigation layer item
  */
 const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, onHSLChange }) => {

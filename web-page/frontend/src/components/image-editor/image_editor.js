@@ -16,12 +16,12 @@ function getBaseImageSize() {
 }
 
 /**
- * Renders mask images, returning an array of html images
+ * Renders mask images
  * @param {Array} layersDef array with layer definitions
  * @param {int} selectedLayer id of selected layer
  * @param {Array} imgSize [width, height] for image rendering
  * @param {function} onPointAndClick trigger for when image is selected and click is performed
- * @returns
+ * @returns array of html images for masks
  */
 const MaskImages = ({ layersDef, selectedLayer, imgSize, onPointAndClick }) => {
   return layersDef.map((layer) => {
