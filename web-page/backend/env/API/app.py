@@ -8,31 +8,10 @@ import tempfile
 import shutil
 from pydantic import BaseModel
 from PIL import Image
-from fastapi.staticfiles import StaticFiles
-
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
-
-
-layer_selected = 0
-positive_layer_coords = {}
-negative_layer_coords = {}
-
-
-class PointAndClickXData(BaseModel):
-    x_coord: int
-    y_coord: int
-
-
-class Layer(BaseModel):
-    layerId: int
-
-
-class NegPointAndClickData(BaseModel):
-    x_coord: int
-    y_coord: int
-
+temp_dir = tempfile.mkdtemp()  # Global variable to store the temporary directory path
 
 layer_selected = 0
 positive_layer_coords = {}
@@ -54,8 +33,6 @@ class NegPointAndClickData(BaseModel):
 
 
 app = FastAPI()
-
-temp_dir = tempfile.mkdtemp()
 
 ## CORS dependencies
 origins = [
@@ -222,4 +199,3 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run("app:app", reload=True, port=8000)
-
