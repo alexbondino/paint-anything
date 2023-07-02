@@ -30,7 +30,7 @@ export default function ImageEditor({
   useEffect(() => {
     const newLayerDef = [...layersDef];
     const layerPos = newLayerDef.findIndex((l) => l.id === selectedLayer);
-    if (layerPos !== -1) {
+    if (layerPos !== -1 && layersDef[layerPos].visibility === true) {
       setTruePoints(layersDef[layerPos].layerTrueCoords);
       setFalsePoints(layersDef[layerPos].layerFalseCoords);
     }

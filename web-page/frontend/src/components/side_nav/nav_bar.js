@@ -128,7 +128,6 @@ export function ImageEditorDrawer({
     }
   };
 
-
   async function handleLayerDelete(layerId) {
     const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
     if (selectedLayer === layerId) {
