@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
+import axios from 'axios';
 
 // initial layer shown after image is uploaded
 const initialLayer = {
@@ -9,6 +10,8 @@ const initialLayer = {
   visibility: true,
   imgUrl: null,
   hsl: [],
+  layerTrueCoords: [],
+  layerFalseCoords: [],
 };
 
 export function Editor() {
@@ -16,7 +19,7 @@ export function Editor() {
   // base image to be edited
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
-  const [layersDef, setLayersDef] = React.useState([initialLayer]);
+  const [layersDef, setLayersDef] = React.useState([]);
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
 
@@ -57,22 +60,41 @@ export function Editor() {
     setLayersDef(newLayersDef);
   }
 
+  async function handleSelectLayer(layerId) {
+    // deselect layer if it has already been selected
+    if (layerId === selectedLayer) {
+      setSelectedLayer('');
+      return;
+    }
+    setSelectedLayer(layerId);
+
+    const data = { layerId };
+    try {
+      await axios.post('http://localhost:8000/api/selected_layer', data);
+    } catch (error) {
+      console.error('Error al enviar la layer seleccionada:', error);
+    }
+  }
+
   return [
     <ImageEditorDrawer
       key="side_nav"
+      baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
-      onNewLayerSelected={(newLayerSelected) => setSelectedLayer(newLayerSelected)}
       onImageUpload={(imgFile) => handleImageUpload(imgFile)}
       onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
+      onSelectLayer={(layerId) => handleSelectLayer(layerId)}
     />,
     <ImageEditor
       key="img_editor"
       baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
+      selectedLayer={selectedLayer}
+      onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
     />,
     <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
   ];
