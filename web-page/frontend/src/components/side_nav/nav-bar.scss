@@ -1,20 +1,14 @@
 // TODO: fix component placement when window is resized
 
-.background-full {
-    flex-direction: column;
-}
-
-.image-box {
-    width: 65%;
-    height: 600px;
+.preview-image-box {
+    width: 80%;
+    height: 80%;
     margin: auto;
-    text-align: center;
-    position: relative;
     display: flex;
     justify-content: center;
 }
 
-.image-box img {
+.preview-image-box img {
     object-fit:contain;
     max-height: 100%;
     max-width: 100%;

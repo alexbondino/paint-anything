@@ -2,6 +2,8 @@ import * as React from 'react';
 import { useRef } from 'react';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
+import './nav-bar.scss';
+
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import MuiAppBar from '@mui/material/AppBar';
@@ -11,7 +13,6 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
-import Layers from './layers';
 import axios from 'axios';
 
 // list components
@@ -32,6 +33,10 @@ import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
+
+// project module
+import Layers from './layers';
+import PreviewDialog from './preview';
 
 // controls the width of the drawer
 const drawerWidth = 280;
@@ -82,6 +87,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 export function ImageEditorDrawer({
+  baseImg,
   sidebarVisibility,
   layersDef,
   selectedLayer,
@@ -119,7 +125,14 @@ export function ImageEditorDrawer({
     // by default, each layer is created with the name as the index of last layer created + 1
     const newLayersDef = [
       ...layersDef,
-      { id: lastLayerId + 1, visibility: true, imgUrl: null, hsl: [], layerTrueCoords: [], layerFalseCoords: [] },
+      {
+        id: lastLayerId + 1,
+        visibility: true,
+        imgUrl: null,
+        hsl: [],
+        layerTrueCoords: [],
+        layerFalseCoords: [],
+      },
     ];
     onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
@@ -128,20 +141,35 @@ export function ImageEditorDrawer({
     }
   };
 
-
   async function handleLayerDelete(layerId) {
     const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
     if (selectedLayer === layerId) {
       onSelectLayer(layerId);
-
-      const data = { layerId };
-      try{
-        await axios.post('http://localhost:8000/api/delete_point_&_click', data);
-      } catch(error){
-        console.error('Error al eliminar coordenadas:', error);
-      }
-      
     }
+
+    const data = { layerId };
+    try {
+      await axios.post('http://localhost:8000/api/delete_point_&_click', data);
+    } catch (error) {
+      console.error('Error al eliminar coordenadas:', error);
+    }
+    // erase mask from disk
+    fetch(
+      'http://localhost:8000/api/delete-mask?' +
+        new URLSearchParams({
+          layer_id: layerId,
+        })
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('layer file successfully deleted');
+        } else {
+          console.log('failed deleting mask file with error: ', response.message);
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting mask file ', error);
+      });
     onNewLayerDef(newLayerDef);
   }
 
@@ -149,16 +177,17 @@ export function ImageEditorDrawer({
     fileInputRef.current.click();
   }
 
-  async function handleDownloadButtonClick(){
+  async function handleDownloadButtonClick() {
     try {
-      const response = await axios.get('http://localhost:8000/api/image_downloader', {responseType:'blob'});
+      const response = await axios.get('http://localhost:8000/api/image_downloader', {
+        responseType: 'blob',
+      });
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'image/png' }));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'imagen.png');
       document.body.appendChild(link);
       link.click();
-
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
@@ -240,6 +269,9 @@ export function ImageEditorDrawer({
               onHSLChange={onHSLChange}
             />
           </Collapse>
+          <ListItem key="open_preview" disablePadding>
+            <PreviewDialog layersDef={layersDef} baseImg={baseImg} />
+          </ListItem>
           <ListItem key="download_result" disablePadding>
             <ListItemButton onClick={handleDownloadButtonClick}>
               <ListItemIcon>

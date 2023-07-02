@@ -11,7 +11,7 @@ const initialLayer = {
   imgUrl: null,
   hsl: [],
   layerTrueCoords: [],
-  layerFalseCoords: []
+  layerFalseCoords: [],
 };
 
 export function Editor() {
@@ -19,7 +19,7 @@ export function Editor() {
   // base image to be edited
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
-  const [layersDef, setLayersDef] = React.useState([initialLayer]);
+  const [layersDef, setLayersDef] = React.useState([]);
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
 
@@ -71,22 +71,22 @@ export function Editor() {
     const data = { layerId };
     try {
       await axios.post('http://localhost:8000/api/selected_layer', data);
-    } catch(error){
+    } catch (error) {
       console.error('Error al enviar la layer seleccionada:', error);
     }
   }
-  
+
   return [
     <ImageEditorDrawer
       key="side_nav"
+      baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       onImageUpload={(imgFile) => handleImageUpload(imgFile)}
       onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
-
-      onSelectLayer={(layerId) => handleSelectLayer(layerId) }
+      onSelectLayer={(layerId) => handleSelectLayer(layerId)}
     />,
     <ImageEditor
       key="img_editor"
@@ -96,8 +96,6 @@ export function Editor() {
       selectedLayer={selectedLayer}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
     />,
-    <ImageUploader 
-    key="upload_img" 
-    onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
+    <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
   ];
 }
