@@ -1,13 +1,11 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, UploadFile, HTTPException, File, Request
+from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, FileResponse
+from fastapi.responses import FileResponse
 import os
 import tempfile
 import shutil
 from pydantic import BaseModel
-from PIL import Image
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
