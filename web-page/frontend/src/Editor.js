@@ -8,8 +8,8 @@ import axios from 'axios';
 const initialLayer = {
   id: 0,
   visibility: true,
-  imgUrl: 'https://upload.wikimedia.org/wikipedia/en/d/d4/Mickey_Mouse.png',
-  hsl: [100, 50, 50],
+  imgUrl: null,
+  hsl: [],
   layerTrueCoords: [],
   layerFalseCoords: [],
 };
