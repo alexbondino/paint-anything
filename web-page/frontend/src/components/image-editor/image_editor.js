@@ -7,11 +7,11 @@ import axios from 'axios';
  * Extracts base image size. Don't call this unless image is loaded
  * @returns [width, height]
  */
-function getBaseImageSize() {
+function getBaseImageSize(type) {
   // Obtain the image width and height
   const imgElement = document.querySelector('.image-box img');
-  const imageWidth = imgElement.naturalWidth;
-  const imageHeight = imgElement.naturalHeight;
+  const imageWidth = type === 'natural' ? imgElement.naturalWidth : imgElement.width;
+  const imageHeight = type === 'natural' ? imgElement.naturalHeight : imgElement.height;
   return [imageWidth, imageHeight];
 }
 
@@ -36,12 +36,10 @@ const MaskImages = ({ layersDef, selectedLayer, imgSize, onPointAndClick }) => {
               : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
           }
           alt={`mask_image_${layer.id}`}
-          width={imgSize[0]}
-          height={imgSize[1]}
+          width={`${imgSize[0]}px`}
+          height={`${imgSize[1]}px`}
           style={{
             position: 'absolute',
-            width: '100%',
-            height: '100%',
             visibility: layer.visibility ? 'visible' : 'hidden',
             // if image is selected, this highlights it
             filter:
@@ -78,7 +76,7 @@ export default function ImageEditor({
   useEffect(() => {}, [coordinateX, coordinateY]);
 
   const handleOnBaseImageLoad = () => {
-    const newImageSize = getBaseImageSize();
+    const newImageSize = getBaseImageSize('display');
     setBaseImgSize(newImageSize);
   };
 
@@ -94,9 +92,12 @@ export default function ImageEditor({
     const containerX = clientX - boxRect.left;
     const containerY = clientY - boxRect.top;
 
+    // get natural image size
+    const naturalSize = getBaseImageSize('natural');
+
     // Calculate relative image coordinates
-    const imageX = (containerX / boxRect.width) * baseImgSize[0];
-    const imageY = (containerY / boxRect.height) * baseImgSize[1];
+    const imageX = (containerX / boxRect.width) * naturalSize[0];
+    const imageY = (containerY / boxRect.height) * naturalSize[1];
 
     setCoordinateX(imageX);
     setCoordinateY(imageY);
