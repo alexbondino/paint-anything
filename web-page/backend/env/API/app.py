@@ -1,13 +1,11 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, UploadFile, HTTPException, File, Request
+from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, FileResponse
+from fastapi.responses import FileResponse
 import os
 import tempfile
 import shutil
 from pydantic import BaseModel
-from PIL import Image
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -17,16 +15,20 @@ layer_selected = 0
 positive_layer_coords = {}
 negative_layer_coords = {}
 
+
 class PointAndClickXData(BaseModel):
     x_coord: int
     y_coord: int
 
-class SelectedLayer(BaseModel):
+
+class Layer(BaseModel):
     layerId: int
+
 
 class NegPointAndClickData(BaseModel):
     x_coord: int
     y_coord: int
+
 
 app = FastAPI()
 
@@ -92,17 +94,21 @@ async def upload_image(image: UploadFile = None):
 
 @app.get("/api/fetch-mask")
 async def fetch_mask(layer_id: int):
-    """returns the mask of specified layer id
-    Args:
-        layer_id (int): id of mask, based on layer
-
-    Raises:
-        HTTPException: when mask was not found
-    """
+    """returns the mask of specified layer id"""
     try:
         return FileResponse(os.path.join(temp_dir, f"{layer_id}.png"))
     except:
         raise HTTPException(status_code=400, detail="Image not found")
+
+
+@app.get("/api/delete-mask")
+async def delete_mask(layer_id: int):
+    """Deletes mask associated to specified layer id"""
+    try:
+        os.remove(os.path.join(temp_dir, f"{layer_id}.png"))
+        return {"message": "file successfully deleted"}
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="layer mask file not found")
 
 
 @app.post("/api/cleanup")
@@ -155,16 +161,12 @@ def point_and_click(data: PointAndClickXData):
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
 
-
-
-
 @app.post("/api/selected_layer")
-def selected_layer(data: SelectedLayer):
+def selected_layer(data: Layer):
     global layer_selected
     layerId = data.layerId
     layer_selected = layerId
     return {"message": f"{layerId}"}
-
 
 
 @app.post("/api/neg_point_&_click")
@@ -182,14 +184,14 @@ def neg_point_and_click(data: NegPointAndClickData):
 
 
 @app.post("/api/delete_point_&_click")
-def delete_point_and_click(data: SelectedLayer):
+def delete_point_and_click(data: Layer):
     global negative_layer_coords
     global positive_layer_coords
     layerId = data.layerId
     if layerId in negative_layer_coords or layerId in positive_layer_coords:
         del negative_layer_coords[layerId]
-        del negative_layer_coords[-1]
         del positive_layer_coords[layerId]
+        del negative_layer_coords[-1]
         del positive_layer_coords[-1]
     return {"message": f"Coordenadas eliminadas correctamente: {layerId}"}
 

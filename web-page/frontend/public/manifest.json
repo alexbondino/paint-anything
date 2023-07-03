@@ -1,0 +1,15 @@
+{
+    "name": "Mi Aplicación",
+    "short_name": "MiApp",
+    "description": "Una descripción de mi aplicación",
+    "start_url": "/",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "display": "standalone",
+    "orientation": "portrait",
+    "scope": "/",
+    "serviceworker": {
+      "src": "service-worker.js"
+    }
+  }
+  
