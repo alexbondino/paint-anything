@@ -187,13 +187,10 @@ def neg_point_and_click(data: NegPointAndClickData):
 def delete_point_and_click(data: Layer):
     global negative_layer_coords
     global positive_layer_coords
-    layerId = data.layerId
-    if layerId in negative_layer_coords or layerId in positive_layer_coords:
-        del negative_layer_coords[layerId]
-        del positive_layer_coords[layerId]
-        del negative_layer_coords[-1]
-        del positive_layer_coords[-1]
-    return {"message": f"Coordenadas eliminadas correctamente: {layerId}"}
+    layer_id = data.layerId
+    positive_layer_coords.pop(layer_id, None)
+    negative_layer_coords.pop(layer_id, None)
+    return {"message": f"Coordenadas eliminadas correctamente: {layer_id}"}
 
 
 if __name__ == "__main__":

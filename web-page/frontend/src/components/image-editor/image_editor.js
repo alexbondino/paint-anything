@@ -132,6 +132,7 @@ export default function ImageEditor({
       } catch (error) {
         console.error('Error al enviar coordenadas positivas:', error);
       }
+      setTruePoints(layersDef[layerPos].layerTrueCoords);
     } else if (event.type === 'contextmenu' && layerPos !== -1) {
       event.preventDefault();
 
@@ -163,6 +164,7 @@ export default function ImageEditor({
             imgSize={baseImgSize}
             onPointAndClick={handlePointAndClick}
           />
+          ) : null}
         {truePoints.length > 0 && truePoints[0][1] && truePoints[0][0] && truePoints.map((truePoint, index) => (
           <Box
             key={index}
@@ -172,7 +174,6 @@ export default function ImageEditor({
               left: truePoint[0] - 5,
               width: '10px',
               height: '10px',
-              backgroundColor: 'red',
               borderRadius: '50%',
               backgroundColor: 'green',
               border: '1px solid white',
@@ -188,14 +189,12 @@ export default function ImageEditor({
               left: falsePoint[0] - 5,
               width: '10px',
               height: '10px',
-              backgroundColor: 'red',
               borderRadius: '50%',
               backgroundColor: 'red',
               border: '1px solid white',
             }}
           />
         ))}
-        ) : null}
       </Box>
     </Box>
   );
