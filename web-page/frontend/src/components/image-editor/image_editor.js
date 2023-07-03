@@ -96,7 +96,6 @@ export default function ImageEditor({
   }, [selectedLayer]);
 
 
-
   const handlePointAndClick = async (event) => {
     // Obtain the true image coords
     const { clientX, clientY } = event;
@@ -119,7 +118,7 @@ export default function ImageEditor({
     setCoordinateX(imageX);
     setCoordinateY(imageY);
 
-    if (event.type === 'click' && layerPos !== -1) {
+    if (event.type === 'click' && layerPos !== -1 && layersDef[layerPos].visibility === true) {
       newLayerDef[layerPos].layerTrueCoords.push([imageX, imageY]);
       onNewLayerDef(newLayerDef);
       console.log('layerTrueCoords:', newLayerDef[layerPos].layerTrueCoords);
@@ -133,7 +132,7 @@ export default function ImageEditor({
         console.error('Error al enviar coordenadas positivas:', error);
       }
       setTruePoints(layersDef[layerPos].layerTrueCoords);
-    } else if (event.type === 'contextmenu' && layerPos !== -1) {
+    } else if (event.type === 'contextmenu' && layerPos !== -1 && layersDef[layerPos].visibility === true) {
       event.preventDefault();
 
       newLayerDef[layerPos].layerFalseCoords.push([imageX, imageY]);
