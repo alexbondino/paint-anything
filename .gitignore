@@ -83,6 +83,9 @@ jspm_packages/
 # next.js build output
 .next
 
+# virtual environment
+venv/
+
 # Lerna
 lerna-debug.log
 
