@@ -95,6 +95,7 @@ export function ImageEditorDrawer({
   onImageUpload,
   onHSLChange,
   onSelectLayer,
+  onHandleLayerVisibilityClick,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -115,10 +116,7 @@ export function ImageEditorDrawer({
   };
 
   function handleLayerVisibilityClick(layerId) {
-    const newLayerDef = [...layersDef];
-    const layerPos = newLayerDef.findIndex((l) => l.id === layerId);
-    newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
-    onNewLayerDef(newLayerDef);
+    onHandleLayerVisibilityClick(layerId)
   }
 
   const handleAddLayer = async () => {

@@ -67,6 +67,7 @@ export default function ImageEditor({
   layersDef,
   selectedLayer,
   onNewLayerDef,
+  layerVisibility,
 }) {
   // construct mask images dynamically from layer definitions
   const [coordinateX, setCoordinateX] = useState(0);
@@ -93,7 +94,7 @@ export default function ImageEditor({
       setTruePoints([{}]);
       setFalsePoints([{}]);
     }
-  }, [selectedLayer]);
+  }, [selectedLayer, layerVisibility]);
 
 
   const handlePointAndClick = async (event) => {
