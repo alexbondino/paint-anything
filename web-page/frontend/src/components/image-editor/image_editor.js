@@ -85,16 +85,15 @@ export default function ImageEditor({
   useEffect(() => {}, [coordinateX, coordinateY]);
 
   useEffect(() => {
-    const newLayerDef = [...layersDef];
-    const layerPos = newLayerDef.findIndex((l) => l.id === selectedLayer);
-    if (layerPos !== -1 && newLayerDef[layerPos].visibility === true) {
-      setTruePoints(newLayerDef[layerPos].layerTrueCoords);
-      setFalsePoints(newLayerDef[layerPos].layerFalseCoords);
+    const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
+    if (layerPos !== -1 && layersDef[layerPos].visibility === true) {
+      setTruePoints(layersDef[layerPos].layerTrueCoords);
+      setFalsePoints(layersDef[layerPos].layerFalseCoords);
       setShowPoints(true);
     } else {
       setShowPoints(false);
     }
-  }, [selectedLayer, layerVisibility]);
+  }, [selectedLayer, layerVisibility, layersDef]);
 
 
   const handlePointAndClick = async (event) => {
@@ -151,7 +150,6 @@ export default function ImageEditor({
       }
       setFalsePoints(layersDef[layerPos].layerFalseCoords);
       setShowPoints(true);
-
     }
   };
 

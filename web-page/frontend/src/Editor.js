@@ -36,11 +36,13 @@ export function Editor() {
 
   function handleImageUpload(imgFile) {
     setSidebarVisibility('flex');
-    setLayersDef([initialLayer]);
+    const newInitialLayer = { ...initialLayer, layerTrueCoords: [], layerFalseCoords: [] };
+    const newLayersDef = [newInitialLayer];
+    setLayersDef(newLayersDef);
     setSelectedLayer(0);
     const imgObjectURL = URL.createObjectURL(imgFile);
     setBaseImg(imgObjectURL);
-  }
+  }  
 
   const updateLayerUrl = (layerId, url) => {
     const newLayersDef = [...layersDef];
