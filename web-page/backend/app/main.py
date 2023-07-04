@@ -6,14 +6,24 @@ import os
 import tempfile
 import shutil
 from pydantic import BaseModel
+from masking.predictor import create_sam, gen_new_mask
+from segment_anything import SamPredictor
+from PIL import Image
+import numpy as np
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 temp_dir = tempfile.mkdtemp()  # Global variable to store the temporary directory path
 
+# layer vars
 layer_selected = 0
 positive_layer_coords = {}
 negative_layer_coords = {}
+
+# segment anything model
+print("-> loading sam predictor")
+predictor = SamPredictor(create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth"))
+print("-> sam predictor successfully loaded")
 
 
 class PointAndClickXData(BaseModel):
@@ -45,6 +55,36 @@ app.add_middleware(
     allow_methods=["POST"],
     allow_headers=["*"],
 )
+
+
+def load_image(img_path: str) -> np.array:
+    img = Image.open(img_path).convert("RGB")
+    img = np.array(img)
+    return img
+
+
+# TEST predictor
+print("generating image embeddings")
+img = load_image("assets/house_2.jpg")
+predictor.set_image(img)
+print("image embeddings successfully generated")
+
+
+def update_mask(layer_id: int):
+    # positive_points = positive_layer_coords[layer_id]
+    # negative_points = negative_layer_coords[layer_id]
+    positive_points = [
+        [402, 42],
+        [309, 106],
+        [495, 298],
+        [188, 126],
+        [812, 266],
+        [388, 243],
+        [447, 143],
+    ]
+    negative_points = [[227, 176], [53, 286], [438, 310], [688, 249]]
+    mask_img = gen_new_mask(img, positive_points, negative_points, predictor)
+    mask_img.save(os.path.join(temp_dir, f"{layer_id}.png"))
 
 
 # Get image
@@ -157,12 +197,12 @@ def point_and_click(data: PointAndClickXData):
         positive_layer_coords[layer_selected] = [[x_coord, y_coord]]
     print("el layer seleccionado es: ", layer_selected)
     print("los puntos positivos son: ", positive_layer_coords[layer_selected])
-
+    update_mask(layer_selected)
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
 
 @app.post("/api/selected_layer")
-def selected_layer(data: Layer):
+def set_selected_layer(data: Layer):
     global layer_selected
     layerId = data.layerId
     layer_selected = layerId
@@ -180,6 +220,7 @@ def neg_point_and_click(data: NegPointAndClickData):
 
     print("el layer seleccionado es: ", layer_selected)
     print("los puntos negativos son: ", negative_layer_coords[layer_selected])
+    update_mask(layer_selected)
     return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
 
 
@@ -191,9 +232,3 @@ def delete_point_and_click(data: Layer):
     positive_layer_coords.pop(layer_id, None)
     negative_layer_coords.pop(layer_id, None)
     return {"message": f"Coordenadas eliminadas correctamente: {layer_id}"}
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run("app:app", reload=True, port=8000)

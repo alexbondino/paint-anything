@@ -1,0 +1,10 @@
+--extra-index-url https://download.pytorch.org/whl/cu113
+Pillow==9.5
+opencv-python>=4.7,<4.8
+matplotlib>=3.6,<3.9
+fastapi>=0.95,<0.96
+python-multipart>=0.0.6
+uvicorn>=0.22,<0.23
+torch==1.12.1+cu113 
+torchvision==0.13.1+cu113 
+git+https://github.com/facebookresearch/segment-anything.git

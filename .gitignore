@@ -92,7 +92,8 @@ lerna-debug.log
 # System Files
 .DS_Store
 Thumbs.db
-**/web-page/frontend/src/assets
+
+assets/
 
 
 # Python comments
@@ -102,3 +103,5 @@ web-page/frontend/src/assets/house.avif
 web-page/frontend/src/assets/house.jpeg
 web-page/frontend/src/assets/house.jpg
 web-page/frontend/src/assets/house.png
+
+
