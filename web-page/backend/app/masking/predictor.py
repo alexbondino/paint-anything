@@ -5,13 +5,11 @@ import torch
 from typing import List
 from PIL import Image
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# device = torch.device(
-#     "cuda"
-#     if torch.cuda.is_available() and torch.cuda.mem_get_info()[0] / (10**9) >= 8.0
-#     else "cpu"
-# )
-device = torch.device("cuda")
+device = torch.device(
+    "cuda"
+    if torch.cuda.is_available() and torch.cuda.mem_get_info()[0] / (10**9) >= 5.0
+    else "cpu"
+)
 
 
 ## Defining the mask and the points
@@ -92,20 +90,3 @@ def gen_new_mask(
     mask_img = Image.fromarray(mask_img)
     mask_img.putalpha(Image.fromarray(alpha_channel))
     return mask_img
-
-
-if __name__ == "__main__":
-    sam_test = create_sam()
-    predictor = SamPredictor(sam_test)
-    set_image_on_model(predictor, "")
-
-    input_point = np.array([[50, 65], [50, 100], [123, 50]])
-    input_label = np.array([1, 0, 1])
-
-    masks_test = points_to_mask(input_point, input_label, predictor)
-
-    # plt.imshow(image)
-    # show_mask(masks_test, plt.gca())
-    # show_points(input_point, input_label, plt.gca())
-    # plt.axis("on")
-    # plt.show()

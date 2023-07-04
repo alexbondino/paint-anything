@@ -7,6 +7,7 @@ import tempfile
 import shutil
 from pydantic import BaseModel
 from masking.predictor import create_sam, gen_new_mask
+from color_transform.transform import extract_median_h_sat, hsl_cv2_2_js
 from segment_anything import SamPredictor
 from PIL import Image
 import numpy as np
@@ -83,12 +84,10 @@ def update_mask(layer_id: int):
     mask_img.save(os.path.join(temp_dir, f"{layer_id}.png"))
 
 
-def set_new_img(img_path: str):
+def set_new_img(img_path: str) -> SamPredictor:
     global img
-    print("generating image embeddings")
     img = load_image(img_path)
     predictor.set_image(img)
-    print("image embeddings successfully generated")
 
 
 # Get image
@@ -125,7 +124,6 @@ async def upload_image(image: UploadFile = None):
     Returns:
         dict: File_path of the temporary directory when the api is called by the frontend
     """
-
     if image is None:
         raise HTTPException(status_code=400, detail="No image provided.")
 
@@ -136,7 +134,17 @@ async def upload_image(image: UploadFile = None):
     return {"message": "Image uploaded successfully."}
 
 
-@app.get("/api/fetch-mask")
+@app.get("/api/mask-base-hsl")
+async def mask_base_hsl(layer_id: int):
+    """returns the mask base hsl values"""
+    img = np.array(Image.open(os.path.join(temp_dir, f"{layer_id}.png")))
+    mask = img[:, :, -1] > 0
+    hue, saturation = extract_median_h_sat(img, mask)
+    hue, saturation, _ = hsl_cv2_2_js(hue, saturation, 0)
+    return {"hsl": [int(hue), int(saturation), 50]}
+
+
+@app.get("/api/mask-img")
 async def fetch_mask(layer_id: int):
     """returns the mask of specified layer id"""
     try:

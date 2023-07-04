@@ -31,27 +31,6 @@ export function Editor() {
     setBaseImg(imgObjectURL);
   }
 
-  const updateLayerUrl = (layerId, url) => {
-    const newLayersDef = [...layersDef];
-    const layerPos = layersDef.findIndex((l) => l.id === layerId);
-    // update url in layer definition
-    newLayersDef[layerPos].imgUrl = url;
-    setLayersDef(newLayersDef);
-  };
-
-  async function handleMaskUpdate(layerId) {
-    // fetch mask for this layer from backend
-    const imgResponse = await fetch(
-      'http://localhost:8000/api/fetch-mask?' +
-        new URLSearchParams({
-          layer_id: layerId,
-        })
-    );
-    // parse image and construct url
-    const imgUrl = URL.createObjectURL(await imgResponse.blob());
-    updateLayerUrl(layerId, imgUrl);
-  }
-
   function handleHSLChange(newHSL, layerId) {
     const newLayersDef = [...layersDef];
     const layerPos = layersDef.findIndex((l) => l.id === layerId);
@@ -74,6 +53,41 @@ export function Editor() {
     } catch (error) {
       console.error('Error al enviar la layer seleccionada:', error);
     }
+  }
+
+  async function handleMaskUpdate(layerId) {
+    const newLayersDef = [...layersDef];
+    const layerPos = layersDef.findIndex((l) => l.id === layerId);
+    // fetch mask for this layer from backend
+    try {
+      const imgResponse = await fetch(
+        'http://localhost:8000/api/mask-img?' +
+          new URLSearchParams({
+            layer_id: layerId,
+          })
+      );
+      // parse image and construct url
+      const url = URL.createObjectURL(await imgResponse.blob());
+      // update url in layer definition
+      newLayersDef[layerPos].imgUrl = url;
+    } catch (error) {
+      console.error('failed trying to update mask data');
+      return;
+    }
+    // set initial hsl with base img values if not set
+    if (newLayersDef[layerPos].hsl.length === 0) {
+      try {
+        const hslResponse = await axios.get('http://localhost:8000/api/mask-base-hsl', {
+          params: { layer_id: layerId },
+        });
+        const newHSL = hslResponse.data.hsl;
+        newLayersDef[layerPos].hsl = newHSL;
+        console.log(newHSL);
+      } catch (error) {
+        console.error('failed trying to set initial hsl');
+      }
+    }
+    setLayersDef(newLayersDef);
   }
 
   return [
