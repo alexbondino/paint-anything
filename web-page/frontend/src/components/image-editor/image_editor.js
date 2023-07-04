@@ -75,24 +75,24 @@ export default function ImageEditor({
   const [baseImgSize, setBaseImgSize] = useState([]);
   const [truePoints, setTruePoints] = useState([]);
   const [falsePoints, setFalsePoints] = useState([]);
-
-  useEffect(() => {}, [coordinateX, coordinateY]);
+  const [showPoints, setShowPoints] = useState(true);
 
   const handleOnBaseImageLoad = () => {
     const newImageSize = getBaseImageSize('display');
     setBaseImgSize(newImageSize);
   };
 
+  useEffect(() => {}, [coordinateX, coordinateY]);
+
   useEffect(() => {
     const newLayerDef = [...layersDef];
     const layerPos = newLayerDef.findIndex((l) => l.id === selectedLayer);
-    if (layerPos !== -1 && layersDef[layerPos].visibility === true) {
-      setTruePoints(layersDef[layerPos].layerTrueCoords);
-      setFalsePoints(layersDef[layerPos].layerFalseCoords);
-    }
-    else {
-      setTruePoints([{}]);
-      setFalsePoints([{}]);
+    if (layerPos !== -1 && newLayerDef[layerPos].visibility === true) {
+      setTruePoints(newLayerDef[layerPos].layerTrueCoords);
+      setFalsePoints(newLayerDef[layerPos].layerFalseCoords);
+      setShowPoints(true);
+    } else {
+      setShowPoints(false);
     }
   }, [selectedLayer, layerVisibility]);
 
@@ -133,6 +133,7 @@ export default function ImageEditor({
         console.error('Error al enviar coordenadas positivas:', error);
       }
       setTruePoints(layersDef[layerPos].layerTrueCoords);
+      setShowPoints(true)
     } else if (event.type === 'contextmenu' && layerPos !== -1 && layersDef[layerPos].visibility === true) {
       event.preventDefault();
 
@@ -149,6 +150,7 @@ export default function ImageEditor({
         console.error('Error al eliminar coordenadas negativas:', error);
       }
       setFalsePoints(layersDef[layerPos].layerFalseCoords);
+      setShowPoints(true);
 
     }
   };
@@ -165,7 +167,7 @@ export default function ImageEditor({
             onPointAndClick={handlePointAndClick}
           />
           ) : null}
-        {truePoints.length > 0 && truePoints[0][1] && truePoints[0][0] && truePoints.map((truePoint, index) => (
+        {truePoints.length > 0 && truePoints.map((truePoint, index) => (
           <Box
             key={index}
             sx={{
@@ -177,10 +179,11 @@ export default function ImageEditor({
               borderRadius: '50%',
               backgroundColor: 'green',
               border: '1px solid white',
+              visibility: showPoints ? 'visible' : 'hidden',
             }}
           />
         ))}
-        {falsePoints.length > 0 && falsePoints[0][1] && falsePoints[0][0] && falsePoints.map((falsePoint, index) => (
+        {falsePoints.length > 0 && falsePoints.map((falsePoint, index) => (
           <Box
             key={index}
             sx={{
@@ -192,6 +195,7 @@ export default function ImageEditor({
               borderRadius: '50%',
               backgroundColor: 'red',
               border: '1px solid white',
+              visibility: showPoints ? 'visible' : 'hidden',
             }}
           />
         ))}

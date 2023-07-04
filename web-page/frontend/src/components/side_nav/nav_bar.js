@@ -115,9 +115,6 @@ export function ImageEditorDrawer({
     setOpen(false);
   };
 
-  function handleLayerVisibilityClick(layerId) {
-    onHandleLayerVisibilityClick(layerId)
-  }
 
   const handleAddLayer = async () => {
     // by default, each layer is created with the name as the index of last layer created + 1
@@ -262,7 +259,7 @@ export function ImageEditorDrawer({
               selectedLayer={selectedLayer}
               onSelectLayer={onSelectLayer}
               onDeleteLayer={handleLayerDelete}
-              onVisibilityClicked={handleLayerVisibilityClick}
+              onVisibilityClicked={onHandleLayerVisibilityClick}
               onHSLChange={onHSLChange}
             />
           </Collapse>
