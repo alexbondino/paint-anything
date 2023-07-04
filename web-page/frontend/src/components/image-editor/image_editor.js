@@ -67,6 +67,7 @@ export default function ImageEditor({
   layersDef,
   selectedLayer,
   onNewLayerDef,
+  onMaskUpdate,
 }) {
   // construct mask images dynamically from layer definitions
   const [coordinateX, setCoordinateX] = useState(0);
@@ -112,7 +113,10 @@ export default function ImageEditor({
       const data = { x_coord, y_coord };
       axios
         .post('http://localhost:8000/api/point_&_click', data)
-        .then((response) => console.log('pos updated nicely'))
+        .then((response) => {
+          console.log('pos updated nicely');
+          onMaskUpdate(layerPos);
+        })
         .catch((error) => console.error('Error al enviar coordenadas positivas:', error));
     } else if (event.type === 'contextmenu' && layerPos !== -1) {
       event.preventDefault();
@@ -126,7 +130,10 @@ export default function ImageEditor({
       const data = { x_coord, y_coord };
       axios
         .post('http://localhost:8000/api/neg_point_&_click', data)
-        .then((response) => console.log('neg updated nicely'))
+        .then((response) => {
+          console.log('neg updated nicely');
+          onMaskUpdate(layerPos);
+        })
         .catch((error) => console.error('Error al enviare coordenadas negativas:', error));
     }
   };

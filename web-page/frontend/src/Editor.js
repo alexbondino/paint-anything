@@ -95,6 +95,7 @@ export function Editor() {
       layersDef={layersDef}
       selectedLayer={selectedLayer}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
+      onMaskUpdate={handleMaskUpdate}
     />,
     <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
   ];
