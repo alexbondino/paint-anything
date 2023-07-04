@@ -20,6 +20,9 @@ layer_selected = 0
 positive_layer_coords = {}
 negative_layer_coords = {}
 
+# image to edit
+img = None
+
 # segment anything model
 print("-> loading sam predictor")
 predictor = SamPredictor(create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth"))
@@ -63,13 +66,6 @@ def load_image(img_path: str) -> np.array:
     return img
 
 
-# TEST predictor
-print("generating image embeddings")
-img = load_image("assets/house_2.jpg")
-predictor.set_image(img)
-print("image embeddings successfully generated")
-
-
 def update_mask(layer_id: int):
     # positive_points = positive_layer_coords[layer_id]
     # negative_points = negative_layer_coords[layer_id]
@@ -85,6 +81,14 @@ def update_mask(layer_id: int):
     negative_points = [[227, 176], [53, 286], [438, 310], [688, 249]]
     mask_img = gen_new_mask(img, positive_points, negative_points, predictor)
     mask_img.save(os.path.join(temp_dir, f"{layer_id}.png"))
+
+
+def set_new_img(img_path: str):
+    global img
+    print("generating image embeddings")
+    img = load_image(img_path)
+    predictor.set_image(img)
+    print("image embeddings successfully generated")
 
 
 # Get image
@@ -128,7 +132,7 @@ async def upload_image(image: UploadFile = None):
     file_path = os.path.join(temp_dir, "image.jpg")
     with open(file_path, "wb") as file:
         file.write(await image.read())
-
+    set_new_img(file_path)
     return {"message": "Image uploaded successfully."}
 
 
