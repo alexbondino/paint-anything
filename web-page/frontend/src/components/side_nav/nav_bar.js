@@ -144,6 +144,7 @@ export function ImageEditorDrawer({
     const data = { layerId };
     try {
       await axios.post('http://localhost:8000/api/delete_point_&_click', data);
+      console.log("Eliminación de layer enviada correctamente")
     } catch (error) {
       console.error('Error al eliminar coordenadas:', error);
     }
@@ -182,6 +183,7 @@ export function ImageEditorDrawer({
       link.setAttribute('download', 'imagen.png');
       document.body.appendChild(link);
       link.click();
+      console.log("imagen descargada correctamente")
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }

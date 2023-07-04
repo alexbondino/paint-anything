@@ -128,6 +128,7 @@ export default function ImageEditor({
       const data = { x_coord, y_coord };
       try {
         await axios.post('http://localhost:8000/api/point_&_click', data);
+        console.log("Coords sended correctly");
       } catch (error) {
         console.error('Error al enviar coordenadas positivas:', error);
       }
@@ -165,7 +166,7 @@ export default function ImageEditor({
             onPointAndClick={handlePointAndClick}
           />
           ) : null}
-        {truePoints.length > 0 && truePoints.map((truePoint, index) => (
+        {truePoints.map((truePoint, index) => (
           <Box
             key={index}
             sx={{
@@ -181,7 +182,7 @@ export default function ImageEditor({
             }}
           />
         ))}
-        {falsePoints.length > 0 && falsePoints.map((falsePoint, index) => (
+        {falsePoints.map((falsePoint, index) => (
           <Box
             key={index}
             sx={{
