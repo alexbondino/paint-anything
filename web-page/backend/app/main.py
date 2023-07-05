@@ -31,8 +31,8 @@ print("-> sam predictor successfully loaded")
 
 
 class PointAndClickXData(BaseModel):
-    x_coord: int
-    y_coord: int
+    x_coord: float
+    y_coord: float
 
 
 class Layer(BaseModel):
@@ -68,26 +68,18 @@ def load_image(img_path: str) -> np.array:
 
 
 def update_mask(layer_id: int):
-    # positive_points = positive_layer_coords[layer_id]
-    # negative_points = negative_layer_coords[layer_id]
-    positive_points = [
-        [402, 42],
-        [309, 106],
-        [495, 298],
-        [188, 126],
-        [812, 266],
-        [388, 243],
-        [447, 143],
-    ]
-    negative_points = [[227, 176], [53, 286], [438, 310], [688, 249]]
+    positive_points = positive_layer_coords.get(layer_id, [])
+    negative_points = negative_layer_coords.get(layer_id, [])
     mask_img = gen_new_mask(img, positive_points, negative_points, predictor)
     mask_img.save(os.path.join(temp_dir, f"{layer_id}.png"))
 
 
 def set_new_img(img_path: str) -> SamPredictor:
     global img
+    print("-> generating embeddings for base image ...")
     img = load_image(img_path)
     predictor.set_image(img)
+    print("-> embeddings generated")
 
 
 # Get image
@@ -204,9 +196,13 @@ def point_and_click(data: PointAndClickXData):
     x_coord = data.x_coord
     y_coord = data.y_coord
     if layer_selected in positive_layer_coords:
-        positive_layer_coords[layer_selected].append([x_coord, y_coord])
+        positive_layer_coords[layer_selected].append(
+            [x_coord * img.shape[0], y_coord * img.shape[1]]
+        )
     elif layer_selected not in positive_layer_coords:
-        positive_layer_coords[layer_selected] = [[x_coord, y_coord]]
+        positive_layer_coords[layer_selected] = [
+            [x_coord * img.shape[0], y_coord * img.shape[1]]
+        ]
     print("el layer seleccionado es: ", layer_selected)
     print("los puntos positivos son: ", positive_layer_coords[layer_selected])
     update_mask(layer_selected)

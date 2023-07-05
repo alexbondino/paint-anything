@@ -19,11 +19,10 @@ function getBaseImageSize(type) {
  * Renders mask images
  * @param {Array} layersDef array with layer definitions
  * @param {int} selectedLayer id of selected layer
- * @param {Array} imgSize [width, height] for image rendering
  * @param {function} onPointAndClick trigger for when image is selected and click is performed
  * @returns array of html images for masks
  */
-const MaskImages = ({ layersDef, selectedLayer, imgSize, onPointAndClick }) => {
+const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
@@ -82,7 +81,7 @@ export default function ImageEditor({
   };
 
   useEffect(() => {
-    if ((selectedLayer === -1) | (layersDef.length == 0)) {
+    if ((selectedLayer === -1) | (layersDef.length === 0)) {
       setShowPoints(false);
       return;
     }
@@ -98,28 +97,25 @@ export default function ImageEditor({
   }, [selectedLayer, layerVisibility, layersDef]);
 
   const handlePointAndClick = async (event) => {
-    // Obtain the true image coords
     const { clientX, clientY } = event;
-
-    const newLayerDef = [...layersDef];
-
+    //  current component bounds
     const boxElement = document.querySelector('img');
     const boxRect = boxElement.getBoundingClientRect();
-    const imageX = clientX;
-    const imageY = clientY;
-
-    const xPercent = (imageX - boxRect.left - 5) / (boxRect.right - boxRect.left);
-    const yPercent = (imageY - boxRect.top - 5) / (boxRect.bottom - boxRect.top);
-    console.log(`realX: ${xPercent} ; realY: ${yPercent}`);
-    const data = { x_coord: xPercent, y_coord: yPercent };
+    // computes click point as 0.0-1.0 image coordinates
+    const xPercent = (clientX - boxRect.left - 5) / (boxRect.right - boxRect.left);
+    const yPercent = (clientY - boxRect.top - 5) / (boxRect.bottom - boxRect.top);
 
     const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
-
+    const newLayerDef = [...layersDef];
+    // payload for api is point coordinates in [0-1] range
+    const data = { x_coord: xPercent, y_coord: yPercent };
     event.preventDefault();
     if (event.type === 'click' && layerPos !== -1) {
+      // update positive coords
       newLayerDef[layerPos].layerTrueCoords.push([xPercent * 100, yPercent * 100]);
       onNewLayerDef(newLayerDef);
       console.log('layerTrueCoords:', newLayerDef[layerPos].layerTrueCoords);
+      // send new point to backend
       axios
         .post('http://localhost:8000/api/point_&_click', data)
         .then((response) => {
@@ -127,9 +123,11 @@ export default function ImageEditor({
         })
         .catch((error) => console.error('Error al enviar coordenadas positivas:', error));
     } else if (event.type === 'contextmenu' && layerPos !== -1) {
+      // update negative coords
       newLayerDef[layerPos].layerFalseCoords.push([xPercent * 100, yPercent * 100]);
       onNewLayerDef(newLayerDef);
       console.log('layerFalseCoords:', newLayerDef[layerPos].layerFalseCoords);
+      // send new point to backend
       axios
         .post('http://localhost:8000/api/neg_point_&_click', data)
         .then((response) => {
@@ -151,7 +149,6 @@ export default function ImageEditor({
         <MaskImages
           layersDef={layersDef}
           selectedLayer={selectedLayer}
-          imgSize={getBaseImageSize('display')}
           onPointAndClick={handlePointAndClick}
         />
       ) : null}
