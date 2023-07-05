@@ -5,21 +5,15 @@
 }
 
 .image-box {
-    width: 65%;
-    height: 600px;
     margin: auto;
     text-align: center;
-    position: relative;
     display: flex;
     justify-content: center;
 }
 
-.image-box img {
-    object-fit:contain;
+.img {
+    border: 1px solid gray;
     max-height: 100%;
     max-width: 100%;
-    margin-left: auto;
-    margin-right: auto;
     display: block;
-
 }

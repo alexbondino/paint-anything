@@ -9,10 +9,19 @@ import axios from 'axios';
  */
 function getBaseImageSize(type) {
   // Obtain the image width and height
-  const imgElement = document.querySelector('.image-box img');
+  const imgElement = document.querySelector('img');
   const imageWidth = type === 'natural' ? imgElement.naturalWidth : imgElement.width;
   const imageHeight = type === 'natural' ? imgElement.naturalHeight : imgElement.height;
   return [imageWidth, imageHeight];
+}
+
+function imgPointToDisplayPoint(x, y, naturalSize) {
+  console.log('caca');
+  const boxElement = document.querySelector('img');
+  const boxRect = boxElement.getBoundingClientRect();
+  const newX = (x * (boxRect.right - boxRect.left)) / naturalSize[0];
+  const newY = (y * (boxRect.bottom - boxRect.top)) / naturalSize[1];
+  return [newX, newY];
 }
 
 /**
@@ -24,6 +33,7 @@ function getBaseImageSize(type) {
  * @returns array of html images for masks
  */
 const MaskImages = ({ layersDef, selectedLayer, imgSize, onPointAndClick }) => {
+  console.log(imgSize);
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
@@ -38,15 +48,20 @@ const MaskImages = ({ layersDef, selectedLayer, imgSize, onPointAndClick }) => {
                 : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
             }
             alt={`mask_image_${layer.id}`}
-            width={`${imgSize[0]}px`}
-            height={`${imgSize[1]}px`}
             style={{
+              objectFit: 'contain',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+              display: 'block',
               position: 'absolute',
+              width: '100%',
+              height: '100%',
               // if image is selected, this highlights it
               filter:
                 layer.id === selectedLayer && layer.imgUrl !== null
                   ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
                   : 'none',
+              border: '1px solid yellow',
             }}
             onClick={layer.id === selectedLayer && layer.visibility ? onPointAndClick : null}
             onContextMenu={layer.id === selectedLayer && layer.visibility ? onPointAndClick : null}
@@ -74,14 +89,14 @@ export default function ImageEditor({
   // construct mask images dynamically from layer definitions
   const [coordinateX, setCoordinateX] = useState(0);
   const [coordinateY, setCoordinateY] = useState(0);
-  const [baseImgSize, setBaseImgSize] = useState([]);
+  const [naturalImgSize, setNaturalImgSize] = useState([]);
   const [truePoints, setTruePoints] = useState([]);
   const [falsePoints, setFalsePoints] = useState([]);
   const [showPoints, setShowPoints] = useState(true);
 
   const handleOnBaseImageLoad = () => {
-    const newImageSize = getBaseImageSize('display');
-    setBaseImgSize(newImageSize);
+    const newImageSize = getBaseImageSize('natural');
+    setNaturalImgSize(newImageSize);
   };
 
   useEffect(() => {}, [coordinateX, coordinateY]);
@@ -108,20 +123,24 @@ export default function ImageEditor({
 
     const newLayerDef = [...layersDef];
 
-    const boxElement = document.querySelector('.image-box');
+    const boxElement = document.querySelector('img');
     const boxRect = boxElement.getBoundingClientRect();
     const imageX = clientX - boxRect.left;
     const imageY = clientY - boxRect.top;
 
+    const realX = (imageX / (boxRect.right - boxRect.left)) * naturalImgSize[0];
+    const realY = (imageY / (boxRect.bottom - boxRect.top)) * naturalImgSize[1];
+    console.log(`realX: ${realX} ; realY: ${realY}`);
     const data = { x_coord: imageX, y_coord: imageY };
 
-    setCoordinateX(imageX);
-    setCoordinateY(imageY);
+    setCoordinateX(realX);
+    setCoordinateY(realY);
 
     const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
-    newLayerDef[layerPos].layerTrueCoords.push([imageX, imageY]);
+    newLayerDef[layerPos].layerTrueCoords.push([realX, realY]);
     onNewLayerDef(newLayerDef);
 
+    event.preventDefault();
     if (event.type === 'click' && layerPos !== -1) {
       console.log('layerTrueCoords:', newLayerDef[layerPos].layerTrueCoords);
       axios
@@ -131,7 +150,6 @@ export default function ImageEditor({
         })
         .catch((error) => console.error('Error al enviar coordenadas positivas:', error));
     } else if (event.type === 'contextmenu' && layerPos !== -1) {
-      event.preventDefault();
       console.log('layerFalseCoords:', newLayerDef[layerPos].layerFalseCoords);
       axios
         .post('http://localhost:8000/api/neg_point_&_click', data)
@@ -144,24 +162,36 @@ export default function ImageEditor({
   };
 
   return (
-    <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>
-      <Box className="image-box" sx={{ position: 'relative' }}>
-        <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
-        {baseImgSize.length === 2 ? (
-          <MaskImages
-            layersDef={layersDef}
-            selectedLayer={selectedLayer}
-            imgSize={baseImgSize}
-            onPointAndClick={handlePointAndClick}
-          />
-        ) : null}
-        {truePoints.map((truePoint, index) => (
+    <Box
+      className="background-full"
+      sx={{
+        display: sidebarVisibility,
+        flexDirection: 'column',
+        width: '70%',
+        height: '70%',
+        position: 'relative',
+        border: '4px solid red',
+        margin: 'auto',
+      }}
+    >
+      <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
+      {naturalImgSize.length === 2 ? (
+        <MaskImages
+          layersDef={layersDef}
+          selectedLayer={selectedLayer}
+          imgSize={getBaseImageSize('display')}
+          onPointAndClick={handlePointAndClick}
+        />
+      ) : null}
+      {truePoints.map((truePoint, index) => {
+        const displayPoint = imgPointToDisplayPoint(truePoint[0], truePoint[1], naturalImgSize);
+        return (
           <Box
             key={index}
             sx={{
               position: 'absolute',
-              top: truePoint[1] - 5,
-              left: truePoint[0] - 5,
+              top: displayPoint[1] - 5,
+              left: displayPoint[0] - 5,
               width: '10px',
               height: '10px',
               borderRadius: '50%',
@@ -170,14 +200,17 @@ export default function ImageEditor({
               visibility: showPoints ? 'visible' : 'hidden',
             }}
           />
-        ))}
-        {falsePoints.map((falsePoint, index) => (
+        );
+      })}
+      {falsePoints.map((falsePoint, index) => {
+        const displayPoint = imgPointToDisplayPoint(falsePoint[0], falsePoint[1], naturalImgSize);
+        return (
           <Box
             key={index}
             sx={{
               position: 'absolute',
-              top: falsePoint[1] - 5,
-              left: falsePoint[0] - 5,
+              top: displayPoint[1] - 5,
+              left: displayPoint[0] - 5,
               width: '10px',
               height: '10px',
               borderRadius: '50%',
@@ -186,8 +219,8 @@ export default function ImageEditor({
               visibility: showPoints ? 'visible' : 'hidden',
             }}
           />
-        ))}
-      </Box>
+        );
+      })}
     </Box>
   );
 }
