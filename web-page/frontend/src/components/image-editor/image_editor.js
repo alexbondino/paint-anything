@@ -38,6 +38,7 @@ const MaskImages = ({ layersDef, selectedLayer, imgSize, onPointAndClick }) => {
                 : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
             }
             alt={`mask_image_${layer.id}`}
+            draggable={false}
             style={{
               objectFit: 'contain',
               marginLeft: 'auto',
