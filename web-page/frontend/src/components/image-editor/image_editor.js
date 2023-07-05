@@ -15,15 +15,6 @@ function getBaseImageSize(type) {
   return [imageWidth, imageHeight];
 }
 
-function imgPointToDisplayPoint(x, y, naturalSize) {
-  console.log('caca');
-  const boxElement = document.querySelector('img');
-  const boxRect = boxElement.getBoundingClientRect();
-  const newX = (x * (boxRect.right - boxRect.left)) / naturalSize[0];
-  const newY = (y * (boxRect.bottom - boxRect.top)) / naturalSize[1];
-  return [newX, newY];
-}
-
 /**
  * Renders mask images
  * @param {Array} layersDef array with layer definitions
@@ -33,7 +24,6 @@ function imgPointToDisplayPoint(x, y, naturalSize) {
  * @returns array of html images for masks
  */
 const MaskImages = ({ layersDef, selectedLayer, imgSize, onPointAndClick }) => {
-  console.log(imgSize);
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
@@ -87,8 +77,6 @@ export default function ImageEditor({
   layerVisibility,
 }) {
   // construct mask images dynamically from layer definitions
-  const [coordinateX, setCoordinateX] = useState(0);
-  const [coordinateY, setCoordinateY] = useState(0);
   const [naturalImgSize, setNaturalImgSize] = useState([]);
   const [truePoints, setTruePoints] = useState([]);
   const [falsePoints, setFalsePoints] = useState([]);
@@ -98,8 +86,6 @@ export default function ImageEditor({
     const newImageSize = getBaseImageSize('natural');
     setNaturalImgSize(newImageSize);
   };
-
-  useEffect(() => {}, [coordinateX, coordinateY]);
 
   useEffect(() => {
     if ((selectedLayer === -1) | (layersDef.length == 0)) {
@@ -125,23 +111,20 @@ export default function ImageEditor({
 
     const boxElement = document.querySelector('img');
     const boxRect = boxElement.getBoundingClientRect();
-    const imageX = clientX - boxRect.left;
-    const imageY = clientY - boxRect.top;
+    const imageX = clientX;
+    const imageY = clientY;
 
-    const realX = (imageX / (boxRect.right - boxRect.left)) * naturalImgSize[0];
-    const realY = (imageY / (boxRect.bottom - boxRect.top)) * naturalImgSize[1];
-    console.log(`realX: ${realX} ; realY: ${realY}`);
-    const data = { x_coord: imageX, y_coord: imageY };
-
-    setCoordinateX(realX);
-    setCoordinateY(realY);
+    const xPercent = (imageX - boxRect.left - 5) / (boxRect.right - boxRect.left);
+    const yPercent = (imageY - boxRect.top - 5) / (boxRect.bottom - boxRect.top);
+    console.log(`realX: ${xPercent} ; realY: ${yPercent}`);
+    const data = { x_coord: xPercent, y_coord: yPercent };
 
     const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
-    newLayerDef[layerPos].layerTrueCoords.push([realX, realY]);
-    onNewLayerDef(newLayerDef);
 
     event.preventDefault();
     if (event.type === 'click' && layerPos !== -1) {
+      newLayerDef[layerPos].layerTrueCoords.push([xPercent * 100, yPercent * 100]);
+      onNewLayerDef(newLayerDef);
       console.log('layerTrueCoords:', newLayerDef[layerPos].layerTrueCoords);
       axios
         .post('http://localhost:8000/api/point_&_click', data)
@@ -150,6 +133,8 @@ export default function ImageEditor({
         })
         .catch((error) => console.error('Error al enviar coordenadas positivas:', error));
     } else if (event.type === 'contextmenu' && layerPos !== -1) {
+      newLayerDef[layerPos].layerFalseCoords.push([xPercent * 100, yPercent * 100]);
+      onNewLayerDef(newLayerDef);
       console.log('layerFalseCoords:', newLayerDef[layerPos].layerFalseCoords);
       axios
         .post('http://localhost:8000/api/neg_point_&_click', data)
@@ -160,7 +145,6 @@ export default function ImageEditor({
     }
     setShowPoints(true);
   };
-
   return (
     <Box
       className="background-full"
@@ -184,14 +168,13 @@ export default function ImageEditor({
         />
       ) : null}
       {truePoints.map((truePoint, index) => {
-        const displayPoint = imgPointToDisplayPoint(truePoint[0], truePoint[1], naturalImgSize);
         return (
           <Box
             key={index}
             sx={{
               position: 'absolute',
-              top: displayPoint[1] - 5,
-              left: displayPoint[0] - 5,
+              left: `${truePoint[0]}%`,
+              top: `${truePoint[1]}%`,
               width: '10px',
               height: '10px',
               borderRadius: '50%',
@@ -203,14 +186,13 @@ export default function ImageEditor({
         );
       })}
       {falsePoints.map((falsePoint, index) => {
-        const displayPoint = imgPointToDisplayPoint(falsePoint[0], falsePoint[1], naturalImgSize);
         return (
           <Box
             key={index}
             sx={{
               position: 'absolute',
-              top: displayPoint[1] - 5,
-              left: displayPoint[0] - 5,
+              left: `${falsePoint[0]}%`,
+              top: `${falsePoint[1]}%`,
               width: '10px',
               height: '10px',
               borderRadius: '50%',
