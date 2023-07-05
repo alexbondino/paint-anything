@@ -37,22 +37,15 @@ const MaskImages = ({ layersDef, selectedLayer, imgSize, onPointAndClick }) => {
                 ? layer.imgUrl
                 : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
             }
+            className={'mask-img'}
             alt={`mask_image_${layer.id}`}
             draggable={false}
             style={{
-              objectFit: 'contain',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-              display: 'block',
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
               // if image is selected, this highlights it
               filter:
                 layer.id === selectedLayer && layer.imgUrl !== null
                   ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
                   : 'none',
-              border: '1px solid yellow',
             }}
             onClick={layer.id === selectedLayer && layer.visibility ? onPointAndClick : null}
             onContextMenu={layer.id === selectedLayer && layer.visibility ? onPointAndClick : null}
@@ -148,15 +141,9 @@ export default function ImageEditor({
   };
   return (
     <Box
-      className="background-full"
+      className="image-box"
       sx={{
         display: sidebarVisibility,
-        flexDirection: 'column',
-        width: '70%',
-        height: '70%',
-        position: 'relative',
-        border: '4px solid red',
-        margin: 'auto',
       }}
     >
       <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
@@ -171,16 +158,11 @@ export default function ImageEditor({
       {truePoints.map((truePoint, index) => {
         return (
           <Box
+            className="true-point"
             key={index}
             sx={{
-              position: 'absolute',
               left: `${truePoint[0]}%`,
               top: `${truePoint[1]}%`,
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: 'green',
-              border: '1px solid white',
               visibility: showPoints ? 'visible' : 'hidden',
             }}
           />
@@ -189,16 +171,11 @@ export default function ImageEditor({
       {falsePoints.map((falsePoint, index) => {
         return (
           <Box
+            className="false-point"
             key={index}
             sx={{
-              position: 'absolute',
               left: `${falsePoint[0]}%`,
               top: `${falsePoint[1]}%`,
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: 'red',
-              border: '1px solid white',
               visibility: showPoints ? 'visible' : 'hidden',
             }}
           />
