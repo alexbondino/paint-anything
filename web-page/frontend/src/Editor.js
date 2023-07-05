@@ -21,8 +21,7 @@ export function Editor() {
     newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
     setLayersDef(newLayerDef);
     setLayerVisibility(newLayerDef[layerPos].visibility);
-  }  
-
+  }
 
   function handleImageUpload(imgFile) {
     // initial layer shown after image is uploaded
@@ -34,14 +33,14 @@ export function Editor() {
       layerTrueCoords: [],
       layerFalseCoords: [],
     };
-    console.log("Se ingresó a handle Image uploade")
+    console.log('Se ingresó a handle Image uploade');
     setSidebarVisibility('flex');
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setSelectedLayer(0);
     const imgObjectURL = URL.createObjectURL(imgFile);
     setBaseImg(imgObjectURL);
-  }  
+  }
 
   function handleHSLChange(newHSL, layerId) {
     const newLayersDef = [...layersDef];
@@ -54,7 +53,7 @@ export function Editor() {
   async function handleSelectLayer(layerId) {
     // deselect layer if it has already been selected
     if (layerId === selectedLayer) {
-      setSelectedLayer('');
+      setSelectedLayer(-1);
       return;
     }
     setSelectedLayer(layerId);
@@ -62,7 +61,7 @@ export function Editor() {
     const data = { layerId };
     try {
       await axios.post('http://localhost:8000/api/selected_layer', data);
-      console.log("Layer enviada correctamente")
+      console.log('Layer enviada correctamente');
     } catch (error) {
       console.error('Error al enviar la layer seleccionada:', error);
     }

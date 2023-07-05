@@ -24,38 +24,39 @@ function getBaseImageSize(type) {
  * @returns array of html images for masks
  */
 const MaskImages = ({ layersDef, selectedLayer, imgSize, onPointAndClick }) => {
-  return layersDef.map((layer) => {
-    try {
-      return (
-        <img
-          key={layer.id}
-          // If image file has not been defined, loads full transparent image
-          src={
-            layer.imgUrl !== null
-              ? layer.imgUrl
-              : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-          }
-          alt={`mask_image_${layer.id}`}
-          width={`${imgSize[0]}px`}
-          height={`${imgSize[1]}px`}
-          style={{
-            position: 'absolute',
-            visibility: layer.visibility ? 'visible' : 'hidden',
-            // if image is selected, this highlights it
-            filter:
-              layer.id === selectedLayer && layer.imgUrl !== null
-                ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
-                : 'none',
-          }}
-          onClick={onPointAndClick}
-          onContextMenu={onPointAndClick}
-        />
-      );
-    } catch {
-      console.log(`Image for layer ${layer.id} not found`);
-      return;
-    }
-  });
+  return layersDef
+    .filter((l) => l.visibility)
+    .map((layer) => {
+      try {
+        return (
+          <img
+            key={layer.id}
+            // If image file has not been defined, loads full transparent image
+            src={
+              layer.imgUrl !== null
+                ? layer.imgUrl
+                : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+            }
+            alt={`mask_image_${layer.id}`}
+            width={`${imgSize[0]}px`}
+            height={`${imgSize[1]}px`}
+            style={{
+              position: 'absolute',
+              // if image is selected, this highlights it
+              filter:
+                layer.id === selectedLayer && layer.imgUrl !== null
+                  ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
+                  : 'none',
+            }}
+            onClick={layer.id === selectedLayer && layer.visibility ? onPointAndClick : null}
+            onContextMenu={layer.id === selectedLayer && layer.visibility ? onPointAndClick : null}
+          />
+        );
+      } catch {
+        console.log(`Image for layer ${layer.id} not found`);
+        return;
+      }
+    });
 };
 
 /*
@@ -86,8 +87,13 @@ export default function ImageEditor({
   useEffect(() => {}, [coordinateX, coordinateY]);
 
   useEffect(() => {
+    if ((selectedLayer === -1) | (layersDef.length == 0)) {
+      setShowPoints(false);
+      return;
+    }
+
     const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
-    if (layerPos !== -1 && layersDef[layerPos].visibility === true) {
+    if (layersDef[layerPos].visibility === true) {
       setTruePoints(layersDef[layerPos].layerTrueCoords);
       setFalsePoints(layersDef[layerPos].layerFalseCoords);
       setShowPoints(true);
@@ -101,7 +107,6 @@ export default function ImageEditor({
     const { clientX, clientY } = event;
 
     const newLayerDef = [...layersDef];
-    const layerPos = newLayerDef.findIndex((l) => l.id === selectedLayer);
 
     const boxElement = document.querySelector('.image-box');
     const boxRect = boxElement.getBoundingClientRect();
@@ -113,35 +118,29 @@ export default function ImageEditor({
     setCoordinateX(imageX);
     setCoordinateY(imageY);
 
-    if (event.type === 'click' && layerPos !== -1 && layersDef[layerPos].visibility === true) {
-      newLayerDef[layerPos].layerTrueCoords.push([imageX, imageY]);
-      onNewLayerDef(newLayerDef);
+    const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
+    newLayerDef[layerPos].layerTrueCoords.push([imageX, imageY]);
+    onNewLayerDef(newLayerDef);
+
+    if (event.type === 'click' && layerPos !== -1) {
       console.log('layerTrueCoords:', newLayerDef[layerPos].layerTrueCoords);
       axios
         .post('http://localhost:8000/api/point_&_click', data)
         .then((response) => {
-          console.log('pos updated nicely');
           onMaskUpdate(layerPos);
         })
         .catch((error) => console.error('Error al enviar coordenadas positivas:', error));
-      setTruePoints(layersDef[layerPos].layerTrueCoords);
-      setShowPoints(true);
     } else if (event.type === 'contextmenu' && layerPos !== -1) {
       event.preventDefault();
-
-      newLayerDef[layerPos].layerFalseCoords.push([imageX, imageY]);
-      onNewLayerDef(newLayerDef);
       console.log('layerFalseCoords:', newLayerDef[layerPos].layerFalseCoords);
       axios
         .post('http://localhost:8000/api/neg_point_&_click', data)
         .then((response) => {
-          console.log('neg updated nicely');
           onMaskUpdate(layerPos);
         })
         .catch((error) => console.error('Error al enviare coordenadas negativas:', error));
-      setFalsePoints(layersDef[layerPos].layerFalseCoords);
-      setShowPoints(true);
     }
+    setShowPoints(true);
   };
 
   return (
