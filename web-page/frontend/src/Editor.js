@@ -4,16 +4,6 @@ import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 import axios from 'axios';
 
-// initial layer shown after image is uploaded
-const initialLayer = {
-  id: 0,
-  visibility: true,
-  imgUrl: null,
-  hsl: [],
-  layerTrueCoords: [],
-  layerFalseCoords: [],
-};
-
 export function Editor() {
   const [sidebarVisibility, setSidebarVisibility] = useState('none');
   // base image to be edited
@@ -35,9 +25,18 @@ export function Editor() {
 
 
   function handleImageUpload(imgFile) {
+    // initial layer shown after image is uploaded
+    const initialLayer = {
+      id: 0,
+      visibility: true,
+      imgUrl: null,
+      hsl: [],
+      layerTrueCoords: [],
+      layerFalseCoords: [],
+    };
+    console.log("Se ingresó a handle Image uploade")
     setSidebarVisibility('flex');
-    const newInitialLayer = { ...initialLayer, layerTrueCoords: [], layerFalseCoords: [] };
-    const newLayersDef = [newInitialLayer];
+    const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setSelectedLayer(0);
     const imgObjectURL = URL.createObjectURL(imgFile);
