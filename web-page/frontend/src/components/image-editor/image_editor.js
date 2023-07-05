@@ -68,18 +68,33 @@ export default function ImageEditor({
   selectedLayer,
   onNewLayerDef,
   onMaskUpdate,
+  layerVisibility,
 }) {
   // construct mask images dynamically from layer definitions
   const [coordinateX, setCoordinateX] = useState(0);
   const [coordinateY, setCoordinateY] = useState(0);
   const [baseImgSize, setBaseImgSize] = useState([]);
-
-  useEffect(() => {}, [coordinateX, coordinateY]);
+  const [truePoints, setTruePoints] = useState([]);
+  const [falsePoints, setFalsePoints] = useState([]);
+  const [showPoints, setShowPoints] = useState(true);
 
   const handleOnBaseImageLoad = () => {
     const newImageSize = getBaseImageSize('display');
     setBaseImgSize(newImageSize);
   };
+
+  useEffect(() => {}, [coordinateX, coordinateY]);
+
+  useEffect(() => {
+    const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
+    if (layerPos !== -1 && layersDef[layerPos].visibility === true) {
+      setTruePoints(layersDef[layerPos].layerTrueCoords);
+      setFalsePoints(layersDef[layerPos].layerFalseCoords);
+      setShowPoints(true);
+    } else {
+      setShowPoints(false);
+    }
+  }, [selectedLayer, layerVisibility, layersDef]);
 
   const handlePointAndClick = async (event) => {
     // Obtain the true image coords
@@ -97,13 +112,13 @@ export default function ImageEditor({
     const naturalSize = getBaseImageSize('natural');
 
     // Calculate relative image coordinates
-    const imageX = (containerX / boxRect.width) * naturalSize[0];
-    const imageY = (containerY / boxRect.height) * naturalSize[1];
+    const imageX = containerX;
+    const imageY = containerY;
 
     setCoordinateX(imageX);
     setCoordinateY(imageY);
 
-    if (event.type === 'click' && layerPos !== -1) {
+    if (event.type === 'click' && layerPos !== -1 && layersDef[layerPos].visibility === true) {
       newLayerDef[layerPos].layerTrueCoords.push([imageX, imageY]);
       onNewLayerDef(newLayerDef);
       console.log('layerTrueCoords:', newLayerDef[layerPos].layerTrueCoords);
@@ -118,6 +133,8 @@ export default function ImageEditor({
           onMaskUpdate(layerPos);
         })
         .catch((error) => console.error('Error al enviar coordenadas positivas:', error));
+      setTruePoints(layersDef[layerPos].layerTrueCoords);
+      setShowPoints(true);
     } else if (event.type === 'contextmenu' && layerPos !== -1) {
       event.preventDefault();
 
@@ -135,13 +152,15 @@ export default function ImageEditor({
           onMaskUpdate(layerPos);
         })
         .catch((error) => console.error('Error al enviare coordenadas negativas:', error));
+      setFalsePoints(layersDef[layerPos].layerFalseCoords);
+      setShowPoints(true);
     }
   };
 
   return (
     <Box className="background-full" sx={{ display: sidebarVisibility, flexDirection: 'column' }}>
       <Box className="image-box" sx={{ position: 'relative' }}>
-        <img src={baseImg} alt="base_image" onLoad={handleOnBaseImageLoad} />
+        <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
         {baseImgSize.length === 2 ? (
           <MaskImages
             layersDef={layersDef}
@@ -150,6 +169,38 @@ export default function ImageEditor({
             onPointAndClick={handlePointAndClick}
           />
         ) : null}
+        {truePoints.map((truePoint, index) => (
+          <Box
+            key={index}
+            sx={{
+              position: 'absolute',
+              top: truePoint[1] - 5,
+              left: truePoint[0] - 5,
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: 'green',
+              border: '1px solid white',
+              visibility: showPoints ? 'visible' : 'hidden',
+            }}
+          />
+        ))}
+        {falsePoints.map((falsePoint, index) => (
+          <Box
+            key={index}
+            sx={{
+              position: 'absolute',
+              top: falsePoint[1] - 5,
+              left: falsePoint[0] - 5,
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: 'red',
+              border: '1px solid white',
+              visibility: showPoints ? 'visible' : 'hidden',
+            }}
+          />
+        ))}
       </Box>
     </Box>
   );
