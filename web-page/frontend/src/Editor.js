@@ -4,16 +4,6 @@ import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 import axios from 'axios';
 
-// initial layer shown after image is uploaded
-const initialLayer = {
-  id: 0,
-  visibility: true,
-  imgUrl: null,
-  hsl: [],
-  layerTrueCoords: [],
-  layerFalseCoords: [],
-};
-
 export function Editor() {
   const [sidebarVisibility, setSidebarVisibility] = useState('none');
   // base image to be edited
@@ -22,14 +12,36 @@ export function Editor() {
   const [layersDef, setLayersDef] = React.useState([]);
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
+  // layerVisibility
+  const [layerVisibility, setLayerVisibility] = React.useState();
+
+  function handleLayerVisibilityClick(layerId) {
+    const newLayerDef = [...layersDef];
+    const layerPos = newLayerDef.findIndex((l) => l.id === layerId);
+    newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
+    setLayersDef(newLayerDef);
+    setLayerVisibility(newLayerDef[layerPos].visibility);
+  }  
+
 
   function handleImageUpload(imgFile) {
+    // initial layer shown after image is uploaded
+    const initialLayer = {
+      id: 0,
+      visibility: true,
+      imgUrl: null,
+      hsl: [],
+      layerTrueCoords: [],
+      layerFalseCoords: [],
+    };
+    console.log("Se ingresó a handle Image uploade")
     setSidebarVisibility('flex');
-    setLayersDef([initialLayer]);
+    const newLayersDef = [initialLayer];
+    setLayersDef(newLayersDef);
     setSelectedLayer(0);
     const imgObjectURL = URL.createObjectURL(imgFile);
     setBaseImg(imgObjectURL);
-  }
+  }  
 
   const updateLayerUrl = (layerId, url) => {
     const newLayersDef = [...layersDef];
@@ -71,6 +83,7 @@ export function Editor() {
     const data = { layerId };
     try {
       await axios.post('http://localhost:8000/api/selected_layer', data);
+      console.log("Layer enviada correctamente")
     } catch (error) {
       console.error('Error al enviar la layer seleccionada:', error);
     }
@@ -83,16 +96,19 @@ export function Editor() {
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
+      layerVisibility={layerVisibility}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       onImageUpload={(imgFile) => handleImageUpload(imgFile)}
       onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
       onSelectLayer={(layerId) => handleSelectLayer(layerId)}
+      onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
     />,
     <ImageEditor
       key="img_editor"
       baseImg={baseImg}
       sidebarVisibility={sidebarVisibility}
       layersDef={layersDef}
+      layerVisibility={layerVisibility}
       selectedLayer={selectedLayer}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
     />,
