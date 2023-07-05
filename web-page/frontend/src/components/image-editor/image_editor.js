@@ -105,15 +105,10 @@ export default function ImageEditor({
 
     const boxElement = document.querySelector('.image-box');
     const boxRect = boxElement.getBoundingClientRect();
-    const containerX = clientX - boxRect.left;
-    const containerY = clientY - boxRect.top;
+    const imageX = clientX - boxRect.left;
+    const imageY = clientY - boxRect.top;
 
-    // get natural image size
-    const naturalSize = getBaseImageSize('natural');
-
-    // Calculate relative image coordinates
-    const imageX = containerX;
-    const imageY = containerY;
+    const data = { x_coord: imageX, y_coord: imageY };
 
     setCoordinateX(imageX);
     setCoordinateY(imageY);
@@ -122,10 +117,6 @@ export default function ImageEditor({
       newLayerDef[layerPos].layerTrueCoords.push([imageX, imageY]);
       onNewLayerDef(newLayerDef);
       console.log('layerTrueCoords:', newLayerDef[layerPos].layerTrueCoords);
-
-      const x_coord = imageX;
-      const y_coord = imageY;
-      const data = { x_coord, y_coord };
       axios
         .post('http://localhost:8000/api/point_&_click', data)
         .then((response) => {
@@ -141,10 +132,6 @@ export default function ImageEditor({
       newLayerDef[layerPos].layerFalseCoords.push([imageX, imageY]);
       onNewLayerDef(newLayerDef);
       console.log('layerFalseCoords:', newLayerDef[layerPos].layerFalseCoords);
-
-      const x_coord = imageX;
-      const y_coord = imageY;
-      const data = { x_coord, y_coord };
       axios
         .post('http://localhost:8000/api/neg_point_&_click', data)
         .then((response) => {
