@@ -197,7 +197,8 @@ def set_selected_layer(data: Layer):
 
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickData):
-    new_point = [int(data.x_coord * img.shape[1]), int(data.y_coord * img.shape[0])]
+    # coordinates must be transformed to real image coordinates
+    new_point = [data.x_coord * img.shape[1], data.y_coord * img.shape[0]]
     if layer_selected in positive_layer_coords:
         positive_layer_coords[layer_selected].append(new_point)
     else:
@@ -217,7 +218,8 @@ def point_and_click(data: PointAndClickData):
 
 @app.post("/api/neg_point_&_click")
 def neg_point_and_click(data: PointAndClickData):
-    new_point = [int(data.x_coord * img.shape[1]), int(data.y_coord * img.shape[0])]
+    # coordinates must be transformed to real image coordinates
+    new_point = [data.x_coord * img.shape[1], data.y_coord * img.shape[0]]
     if layer_selected in negative_layer_coords:
         negative_layer_coords[layer_selected].append(new_point)
     else:
