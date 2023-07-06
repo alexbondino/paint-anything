@@ -104,7 +104,7 @@ export default function ImageEditor({
   const handlePointAndClick = async (event) => {
     const { clientX, clientY } = event;
     //  current component bounds
-    const boxElement = document.querySelector('img');
+    const boxElement = document.querySelector('.image-box img');
     const boxRect = boxElement.getBoundingClientRect();
     // computes click point as 0.0-1.0 image coordinates
     const xPercent = (clientX - boxRect.left - 5) / (boxRect.right - boxRect.left);

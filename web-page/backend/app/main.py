@@ -197,7 +197,7 @@ def set_selected_layer(data: Layer):
 
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickData):
-    new_point = [int(data.x_coord * img.shape[0]), int(data.y_coord * img.shape[1])]
+    new_point = [int(data.x_coord * img.shape[1]), int(data.y_coord * img.shape[0])]
     if layer_selected in positive_layer_coords:
         positive_layer_coords[layer_selected].append(new_point)
     else:
@@ -217,7 +217,7 @@ def point_and_click(data: PointAndClickData):
 
 @app.post("/api/neg_point_&_click")
 def neg_point_and_click(data: PointAndClickData):
-    new_point = [int(data.x_coord * img.shape[0]), int(data.y_coord * img.shape[1])]
+    new_point = [int(data.x_coord * img.shape[1]), int(data.y_coord * img.shape[0])]
     if layer_selected in negative_layer_coords:
         negative_layer_coords[layer_selected].append(new_point)
     else:
@@ -233,8 +233,4 @@ def neg_point_and_click(data: PointAndClickData):
         negative_layer_coords,
         temp_dir,
     )
-    pil_img = Image.fromarray(img)
-    pil_draw = ImageDraw.Draw(pil_img)
-    pil_draw.point(new_point, fill="red")
-    pil_img.show()
     return {"message": f"Coordenadas pasadas correctamente: {new_point}"}
