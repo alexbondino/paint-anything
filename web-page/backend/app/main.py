@@ -7,7 +7,7 @@ import tempfile
 import shutil
 from pydantic import BaseModel, Field
 from masking.predictor import create_sam, update_stored_mask
-from utils import load_image, clean_mask_files
+from utils import load_image, clean_mask_files, save_output
 from color_transform.transform import extract_median_h_sat, hsl_cv2_2_js
 from segment_anything import SamPredictor
 from PIL import Image
@@ -179,27 +179,8 @@ def cleanup():
 
 @app.get("/api/image_downloader")
 def image_downloader():
-    from PIL import Image
-
-    # Relative Paths must be changed in future to adapt to layers. As we are not generating images as layers yet
-    # this will remain still.
-
-    relative_path = os.path.dirname(current_dir)
-    relative_path = os.path.dirname(relative_path)
-    relative_path = os.path.dirname(relative_path)
-    relative_path = os.path.join(relative_path, "frontend", "src", "assets")
-
-    print(relative_path)
-
-    img1 = Image.open(os.path.join(relative_path, "house.jpg"))
-    img2 = Image.open(os.path.join(relative_path, "luffy.jpg"))
-    img2 = img2.convert("RGBA")
-
-    img1.paste(img2, (0, 0), mask=img2)
-    img1.save(os.path.join(relative_path, "downloadable.png"))
-    return FileResponse(
-        os.path.join(relative_path, "downloadable.png"), media_type="image/png"
-    )
+    output_path = save_output(temp_dir)
+    return FileResponse(output_path, media_type="image/png")
 
 
 @app.post("/api/selected_layer")
