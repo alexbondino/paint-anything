@@ -289,7 +289,7 @@ export function ImageEditorDrawer({
               <input
                 hidden
                 type="file"
-                onSubmit={(event) => onImageUpload(event.target.files[0])}
+                onChange={(event) => onImageUpload(event.target.files[0])}
                 onClick={(event) => {
                   event.target.value = null;
                   event.stopPropagation();
