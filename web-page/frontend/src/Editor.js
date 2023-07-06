@@ -5,7 +5,7 @@ import ImageEditor from './components/image-editor/image_editor.js';
 import axios from 'axios';
 
 export function Editor() {
-  const [sidebarVisibility, setSidebarVisibility] = useState('none');
+  const [sidebarVisibility, setSidebarVisibility] = useState(false);
   // base image to be edited
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
@@ -36,7 +36,7 @@ export function Editor() {
       layerFalseCoords: [],
     };
     console.log('Se ingresó a handle Image uploade');
-    setSidebarVisibility('flex');
+    setSidebarVisibility(true);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setSelectedLayer(0);
@@ -103,22 +103,24 @@ export function Editor() {
     }
     setLayersDef(newLayersDef);
   }
-  const imgUploader = baseImg ? null : (
+  // render upload if no image has been loaded
+  const imgUploader = sidebarVisibility ? null : (
     <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />
   );
-
-  const imgEditor = baseImg ? (
-    <ImageEditor
-      key="img_editor"
-      baseImg={baseImg}
-      sidebarVisibility={sidebarVisibility}
-      layersDef={layersDef}
-      layerVisibility={layerVisibility}
-      selectedLayer={selectedLayer}
-      onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
-      onMaskUpdate={handleMaskUpdate}
-    />
-  ) : null;
+  // render image editor only when sidebar is visible
+  const imgEditor = sidebarVisibility
+    ? [
+        <ImageEditor
+          key="img_editor"
+          baseImg={baseImg}
+          layersDef={layersDef}
+          layerVisibility={layerVisibility}
+          selectedLayer={selectedLayer}
+          onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
+          onMaskUpdate={handleMaskUpdate}
+        />,
+      ]
+    : null;
 
   return (
     <div style={{ height: '80vh' }}>

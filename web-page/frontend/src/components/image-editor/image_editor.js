@@ -65,7 +65,6 @@ const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
  */
 export default function ImageEditor({
   baseImg,
-  sidebarVisibility,
   layersDef,
   selectedLayer,
   onNewLayerDef,
@@ -79,13 +78,15 @@ export default function ImageEditor({
   const [showPoints, setShowPoints] = useState(true);
 
   useEffect(() => {
+    // dont trigger effect if no layer is selected or layers are empty
     if ((selectedLayer === -1) | (layersDef.length === 0)) {
       setShowPoints(false);
       return;
     }
-
+    // points are shown only when visible
     const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
     if (layersDef[layerPos].visibility === true) {
+      // set points to show
       setTruePoints(layersDef[layerPos].layerTrueCoords);
       setFalsePoints(layersDef[layerPos].layerFalseCoords);
       setShowPoints(true);
@@ -94,6 +95,7 @@ export default function ImageEditor({
     }
   }, [selectedLayer, layerVisibility, layersDef]);
 
+  // sets image size when is loaded
   const handleOnBaseImageLoad = () => {
     const newImageSize = getBaseImageSize('natural');
     setNaturalImgSize(newImageSize);
@@ -144,7 +146,6 @@ export default function ImageEditor({
     <Box
       className="image-box"
       sx={{
-        display: 'flex',
         aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
         visibility: naturalImgSize ? 'visible' : 'hidden',
       }}

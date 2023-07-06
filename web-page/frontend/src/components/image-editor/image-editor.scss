@@ -1,21 +1,21 @@
-// TODO: fix component placement when window is resized
-
+// image container
 .image-box {
+    display: flex;
     flex-direction: column;
     max-width: 65%;
     height:auto;
     max-height:95%;
+    margin:auto;
     position: relative;
     border: 1px solid gray;
-    margin:auto;
 }
-
+// base image
 .image-box img {
     max-height: 100%;
     max-width: 100%;
     display: block;
 }
-
+// layer image
 .mask-img {
     object-fit: contain;
     display: block;
