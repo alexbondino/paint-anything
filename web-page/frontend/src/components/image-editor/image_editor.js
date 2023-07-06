@@ -63,6 +63,7 @@ const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
 /*
  * Image editor
  */
+// TODO: move useEffect from here to mask component, to avoid triggering it every time this larger component is updated
 export default function ImageEditor({
   baseImg,
   layersDef,

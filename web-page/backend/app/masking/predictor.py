@@ -5,6 +5,7 @@ import torch
 from typing import List, Dict
 from PIL import Image
 
+# TODO: restrict device choice based on available virtual RAM on gpu
 # use gpu if available
 device = torch.device(
     "cuda"

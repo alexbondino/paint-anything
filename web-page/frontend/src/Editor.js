@@ -4,6 +4,7 @@ import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 import axios from 'axios';
 
+// TODO: show loading status while image embeddings are being computed
 export function Editor() {
   const [sidebarVisibility, setSidebarVisibility] = useState(false);
   // base image to be edited

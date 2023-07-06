@@ -85,6 +85,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-start',
 }));
 
+// TODO: add item for choosing which SAM model to run
 export function ImageEditorDrawer({
   baseImg,
   sidebarVisibility,

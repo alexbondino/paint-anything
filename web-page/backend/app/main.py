@@ -25,6 +25,7 @@ negative_layer_coords = {}
 # image to edit
 img = None
 
+# TODO: choose which SAM variant can be used
 # segment anything model
 print("-> loading sam predictor")
 predictor = SamPredictor(create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth"))
