@@ -61,6 +61,15 @@ app.add_middleware(
 )
 
 
+def reset_points():
+    global negative_layer_coords
+    global positive_layer_coords
+    global layer_selected
+    positive_layer_coords = {}
+    negative_layer_coords = {}
+    layer_selected = 0
+
+
 def set_new_img(img_path: str) -> SamPredictor:
     global img
     print("-> generating embeddings for base image ...")
@@ -70,11 +79,11 @@ def set_new_img(img_path: str) -> SamPredictor:
 
 
 def delete_points(layer_id: int):
+    print("deleting poinnntss")
     global negative_layer_coords
     global positive_layer_coords
     positive_layer_coords.pop(layer_id, None)
     negative_layer_coords.pop(layer_id, None)
-    return {"message": f"Coordenadas eliminadas correctamente: {layer_id}"}
 
 
 # Get image
@@ -118,10 +127,7 @@ async def upload_image(image: UploadFile = None):
     with open(file_path, "wb") as file:
         file.write(await image.read())
     if img is not None:
-        global positive_layer_coords
-        global negative_layer_coords
-        positive_layer_coords = {}
-        negative_layer_coords = {}
+        reset_points()
         clean_mask_files(temp_dir)
     set_new_img(file_path)
     return {"message": "Image uploaded successfully."}
@@ -158,8 +164,10 @@ def delete_mask(layer_id: int):
 
 
 @app.post("/api/cleanup")
-def cleanup_temp_dir():
+def cleanup():
     global temp_dir
+    clean_mask_files(temp_dir)
+    reset_points()
     if temp_dir is not None:
         shutil.rmtree(temp_dir)
         temp_dir = tempfile.mkdtemp()

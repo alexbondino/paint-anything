@@ -138,7 +138,6 @@ export function ImageEditorDrawer({
     if (selectedLayer === layerId) {
       onSelectLayer(layerId);
     }
-    const data = { layerId };
     // erase mask from disk
     fetch(
       'http://localhost:8000/api/delete-mask?' +
