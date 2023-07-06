@@ -7,10 +7,10 @@ import tempfile
 import shutil
 from pydantic import BaseModel, Field
 from masking.predictor import create_sam, update_stored_mask
-from utils import load_image
+from utils import load_image, clean_mask_files
 from color_transform.transform import extract_median_h_sat, hsl_cv2_2_js
 from segment_anything import SamPredictor
-from PIL import Image, ImageDraw
+from PIL import Image
 import numpy as np
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -117,6 +117,12 @@ async def upload_image(image: UploadFile = None):
     file_path = os.path.join(temp_dir, "image.jpg")
     with open(file_path, "wb") as file:
         file.write(await image.read())
+    if img is not None:
+        global positive_layer_coords
+        global negative_layer_coords
+        positive_layer_coords = {}
+        negative_layer_coords = {}
+        clean_mask_files(temp_dir)
     set_new_img(file_path)
     return {"message": "Image uploaded successfully."}
 

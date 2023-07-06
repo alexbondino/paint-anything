@@ -192,7 +192,7 @@ export function ImageEditorDrawer({
             onClick={handleDrawerOpen}
             sx={{
               ...(open && { display: 'none' }),
-              display: sidebarVisibility,
+              display: sidebarVisibility ? 'flex' : 'none',
             }}
           >
             <MenuIcon />
@@ -289,7 +289,7 @@ export function ImageEditorDrawer({
               <input
                 hidden
                 type="file"
-                onChange={(event) => onImageUpload(event.target.files[0])}
+                onSubmit={(event) => onImageUpload(event.target.files[0])}
                 onClick={(event) => {
                   event.target.value = null;
                   event.stopPropagation();

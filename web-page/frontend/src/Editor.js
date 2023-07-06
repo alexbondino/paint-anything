@@ -14,8 +14,6 @@ export function Editor() {
   const [selectedLayer, setSelectedLayer] = React.useState(0);
   // layerVisibility
   const [layerVisibility, setLayerVisibility] = React.useState();
-  // const img size
-  const [imgSize, setImgSize] = React.useState();
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -26,6 +24,7 @@ export function Editor() {
   }
 
   function handleImageUpload(imgFile) {
+    console.log('el cacas');
     // initial layer shown after image is uploaded
     const initialLayer = {
       id: 0,
