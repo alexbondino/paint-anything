@@ -31,6 +31,7 @@
     border-radius: 50%;
     background-color: green;
     border: 1px solid white;
+    z-index: 101;
 }
 
 .false-point{
@@ -40,4 +41,5 @@
     border-radius: 50%;
     background-color: red;
     border: 1px solid white;
+    z-index: 101;
 }

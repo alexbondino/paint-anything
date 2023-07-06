@@ -29,6 +29,7 @@ const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
+      const isLayerSelected = layer.id === selectedLayer;
       try {
         return (
           <img
@@ -45,12 +46,13 @@ const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
             style={{
               // if image is selected, this highlights it
               filter:
-                layer.id === selectedLayer && layer.imgUrl !== null
+                isLayerSelected && layer.imgUrl !== null
                   ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
                   : 'none',
+              zIndex: isLayerSelected ? '100' : 'auto',
             }}
-            onClick={layer.id === selectedLayer && layer.visibility ? onPointAndClick : null}
-            onContextMenu={layer.id === selectedLayer && layer.visibility ? onPointAndClick : null}
+            onClick={isLayerSelected && layer.visibility ? onPointAndClick : null}
+            onContextMenu={isLayerSelected && layer.visibility ? onPointAndClick : null}
           />
         );
       } catch {
