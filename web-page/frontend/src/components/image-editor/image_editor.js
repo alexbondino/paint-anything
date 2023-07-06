@@ -4,15 +4,18 @@ import './image-editor.scss';
 import axios from 'axios';
 
 /**
- * Extracts base image size. Don't call this unless image is loaded
+ * Extracts base image size
  * @returns [width, height]
  */
 function getBaseImageSize(type) {
   // Obtain the image width and height
   const imgElement = document.querySelector('img');
-  const imageWidth = type === 'natural' ? imgElement.naturalWidth : imgElement.width;
-  const imageHeight = type === 'natural' ? imgElement.naturalHeight : imgElement.height;
-  return [imageWidth, imageHeight];
+  if (imgElement) {
+    const imageWidth = type === 'natural' ? imgElement.naturalWidth : imgElement.width;
+    const imageHeight = type === 'natural' ? imgElement.naturalHeight : imgElement.height;
+    return [imageWidth, imageHeight];
+  }
+  return null;
 }
 
 /**
@@ -75,11 +78,6 @@ export default function ImageEditor({
   const [falsePoints, setFalsePoints] = useState([]);
   const [showPoints, setShowPoints] = useState(true);
 
-  const handleOnBaseImageLoad = () => {
-    const newImageSize = getBaseImageSize('natural');
-    setNaturalImgSize(newImageSize);
-  };
-
   useEffect(() => {
     if ((selectedLayer === -1) | (layersDef.length === 0)) {
       setShowPoints(false);
@@ -95,6 +93,11 @@ export default function ImageEditor({
       setShowPoints(false);
     }
   }, [selectedLayer, layerVisibility, layersDef]);
+
+  const handleOnBaseImageLoad = () => {
+    const newImageSize = getBaseImageSize('natural');
+    setNaturalImgSize(newImageSize);
+  };
 
   const handlePointAndClick = async (event) => {
     const { clientX, clientY } = event;
@@ -141,7 +144,9 @@ export default function ImageEditor({
     <Box
       className="image-box"
       sx={{
-        display: sidebarVisibility,
+        display: 'flex',
+        aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
+        visibility: naturalImgSize ? 'visible' : 'hidden',
       }}
     >
       <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />

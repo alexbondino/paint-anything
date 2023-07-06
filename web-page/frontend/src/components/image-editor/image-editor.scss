@@ -2,11 +2,12 @@
 
 .image-box {
     flex-direction: column;
-    width: 70%;
-    height: 70%;
+    max-width: 65%;
+    height:auto;
+    max-height:95%;
     position: relative;
     border: 1px solid gray;
-    margin: auto;
+    margin:auto;
 }
 
 .image-box img {

@@ -30,7 +30,6 @@ export function ImageUploader({ onImageUpload }) {
       console.log('Imagen enviada correctamente.');
 
       setUploaderVisibility('none');
-
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }

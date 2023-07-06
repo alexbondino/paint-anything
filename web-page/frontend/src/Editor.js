@@ -14,6 +14,8 @@ export function Editor() {
   const [selectedLayer, setSelectedLayer] = React.useState(0);
   // layerVisibility
   const [layerVisibility, setLayerVisibility] = React.useState();
+  // const img size
+  const [imgSize, setImgSize] = React.useState();
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -101,21 +103,11 @@ export function Editor() {
     }
     setLayersDef(newLayersDef);
   }
+  const imgUploader = baseImg ? null : (
+    <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />
+  );
 
-  return [
-    <ImageEditorDrawer
-      key="side_nav"
-      baseImg={baseImg}
-      sidebarVisibility={sidebarVisibility}
-      layersDef={layersDef}
-      selectedLayer={selectedLayer}
-      layerVisibility={layerVisibility}
-      onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
-      onImageUpload={(imgFile) => handleImageUpload(imgFile)}
-      onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
-      onSelectLayer={(layerId) => handleSelectLayer(layerId)}
-      onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
-    />,
+  const imgEditor = baseImg ? (
     <ImageEditor
       key="img_editor"
       baseImg={baseImg}
@@ -125,7 +117,26 @@ export function Editor() {
       selectedLayer={selectedLayer}
       onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
       onMaskUpdate={handleMaskUpdate}
-    />,
-    <ImageUploader key="upload_img" onImageUpload={(imgFile) => handleImageUpload(imgFile)} />,
-  ];
+    />
+  ) : null;
+
+  return (
+    <div style={{ height: '80vh' }}>
+      <ImageEditorDrawer
+        key="side_nav"
+        baseImg={baseImg}
+        sidebarVisibility={sidebarVisibility}
+        layersDef={layersDef}
+        selectedLayer={selectedLayer}
+        layerVisibility={layerVisibility}
+        onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
+        onImageUpload={(imgFile) => handleImageUpload(imgFile)}
+        onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
+        onSelectLayer={(layerId) => handleSelectLayer(layerId)}
+        onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
+      />
+      {imgEditor}
+      {imgUploader}
+    </div>
+  );
 }

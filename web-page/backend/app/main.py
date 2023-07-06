@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 import os
 import tempfile
 import shutil
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from masking.predictor import create_sam, gen_new_mask
 from color_transform.transform import extract_median_h_sat, hsl_cv2_2_js
 from segment_anything import SamPredictor
@@ -30,18 +30,17 @@ predictor = SamPredictor(create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth"))
 print("-> sam predictor successfully loaded")
 
 
-class PointAndClickXData(BaseModel):
-    x_coord: float
-    y_coord: float
-
-
 class Layer(BaseModel):
     layerId: int
 
 
-class NegPointAndClickData(BaseModel):
-    x_coord: int
-    y_coord: int
+class PointAndClickData(BaseModel):
+    x_coord: float = Field(
+        description="Point x-coordinate, as ratio of total image width", ge=0.0, le=1.0
+    )
+    y_coord: float = Field(
+        description="Point y-coordinate, as ratio of total image height", ge=0.0, le=1.0
+    )
 
 
 app = FastAPI()
@@ -192,7 +191,7 @@ async def image_downloader():
 
 
 @app.post("/api/point_&_click")
-def point_and_click(data: PointAndClickXData):
+def point_and_click(data: PointAndClickData):
     x_coord = data.x_coord
     y_coord = data.y_coord
     if layer_selected in positive_layer_coords:
@@ -218,7 +217,7 @@ def set_selected_layer(data: Layer):
 
 
 @app.post("/api/neg_point_&_click")
-def neg_point_and_click(data: NegPointAndClickData):
+def neg_point_and_click(data: PointAndClickData):
     x_coord = data.x_coord
     y_coord = data.y_coord
     if layer_selected in negative_layer_coords:
