@@ -2,9 +2,10 @@ import numpy as np
 import os
 from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
 import torch
-from typing import List
+from typing import List, Dict
 from PIL import Image
 
+# use gpu if available
 device = torch.device(
     "cuda"
     if torch.cuda.is_available() and torch.cuda.mem_get_info()[0] / (10**9) >= 5.0
@@ -54,9 +55,9 @@ def create_sam(type: str, checkpoint_path: str):
 
 
 ## Generating the final mask
-def points_to_mask(
+def predict_mask(
     input_point: np.ndarray, input_label: np.ndarray, predictor: SamPredictor
-):
+) -> np.ndarray:
     """Uses the model over some given points to generate a chosen mask given the input data."""
     _, pre_scores, pre_logits = predictor.predict(
         point_coords=input_point,
@@ -64,14 +65,14 @@ def points_to_mask(
         multimask_output=True,
     )
     mask_input = pre_logits[np.argmax(pre_scores), :, :]
-    masks, _, _ = predictor.predict(
+    mask, _, _ = predictor.predict(
         point_coords=input_point,
         point_labels=input_label,
         mask_input=mask_input[None, :, :],
         multimask_output=False,
     )
-    masks = masks.squeeze()
-    return masks
+    mask = mask.squeeze()
+    return mask
 
 
 def gen_new_mask(
@@ -82,7 +83,7 @@ def gen_new_mask(
 ) -> Image:
     points = np.array(positive_points + negative_points)
     input_label = np.array([1] * len(positive_points) + [0] * len(negative_points))
-    mask = points_to_mask(points, input_label, predictor)
+    mask = predict_mask(points, input_label, predictor)
     mask_img = np.zeros(img.shape, dtype=np.uint8)
     mask_img[mask] = img[mask]
     alpha_channel = np.zeros(img.shape[:2], dtype=np.uint8)
@@ -90,3 +91,17 @@ def gen_new_mask(
     mask_img = Image.fromarray(mask_img)
     mask_img.putalpha(Image.fromarray(alpha_channel))
     return mask_img
+
+
+def update_stored_mask(
+    layer_id: int,
+    img: np.ndarray,
+    predictor: SamPredictor,
+    positive_layer_coords: Dict[str, List],
+    negative_layer_coords: Dict[str, List],
+    mask_dir: str,
+):
+    positive_points = positive_layer_coords.get(layer_id, [])
+    negative_points = negative_layer_coords.get(layer_id, [])
+    mask_img = gen_new_mask(img, positive_points, negative_points, predictor)
+    mask_img.save(os.path.join(mask_dir, f"{layer_id}.png"))

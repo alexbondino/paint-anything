@@ -6,10 +6,11 @@ import os
 import tempfile
 import shutil
 from pydantic import BaseModel, Field
-from masking.predictor import create_sam, gen_new_mask
+from masking.predictor import create_sam, update_stored_mask
+from utils import load_image
 from color_transform.transform import extract_median_h_sat, hsl_cv2_2_js
 from segment_anything import SamPredictor
-from PIL import Image
+from PIL import Image, ImageDraw
 import numpy as np
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -60,19 +61,6 @@ app.add_middleware(
 )
 
 
-def load_image(img_path: str) -> np.array:
-    img = Image.open(img_path).convert("RGB")
-    img = np.array(img)
-    return img
-
-
-def update_mask(layer_id: int):
-    positive_points = positive_layer_coords.get(layer_id, [])
-    negative_points = negative_layer_coords.get(layer_id, [])
-    mask_img = gen_new_mask(img, positive_points, negative_points, predictor)
-    mask_img.save(os.path.join(temp_dir, f"{layer_id}.png"))
-
-
 def set_new_img(img_path: str) -> SamPredictor:
     global img
     print("-> generating embeddings for base image ...")
@@ -81,9 +69,17 @@ def set_new_img(img_path: str) -> SamPredictor:
     print("-> embeddings generated")
 
 
+def delete_points(layer_id: int):
+    global negative_layer_coords
+    global positive_layer_coords
+    positive_layer_coords.pop(layer_id, None)
+    negative_layer_coords.pop(layer_id, None)
+    return {"message": f"Coordenadas eliminadas correctamente: {layer_id}"}
+
+
 # Get image
 @app.get("/api/image")
-async def get_image():
+def get_image():
     """
     Gets image from temp_dir. If there's no image, ErrorException will
     rise.
@@ -126,7 +122,7 @@ async def upload_image(image: UploadFile = None):
 
 
 @app.get("/api/mask-base-hsl")
-async def mask_base_hsl(layer_id: int):
+def mask_base_hsl(layer_id: int):
     """returns the mask base hsl values"""
     img = np.array(Image.open(os.path.join(temp_dir, f"{layer_id}.png")))
     mask = img[:, :, -1] > 0
@@ -136,7 +132,7 @@ async def mask_base_hsl(layer_id: int):
 
 
 @app.get("/api/mask-img")
-async def fetch_mask(layer_id: int):
+def fetch_mask(layer_id: int):
     """returns the mask of specified layer id"""
     try:
         return FileResponse(os.path.join(temp_dir, f"{layer_id}.png"))
@@ -145,9 +141,10 @@ async def fetch_mask(layer_id: int):
 
 
 @app.get("/api/delete-mask")
-async def delete_mask(layer_id: int):
+def delete_mask(layer_id: int):
     """Deletes mask associated to specified layer id"""
     try:
+        delete_points(layer_id)
         os.remove(os.path.join(temp_dir, f"{layer_id}.png"))
         return {"message": "file successfully deleted"}
     except FileNotFoundError:
@@ -166,7 +163,7 @@ def cleanup_temp_dir():
 
 
 @app.get("/api/image_downloader")
-async def image_downloader():
+def image_downloader():
     from PIL import Image
 
     # Relative Paths must be changed in future to adapt to layers. As we are not generating images as layers yet
@@ -190,24 +187,6 @@ async def image_downloader():
     )
 
 
-@app.post("/api/point_&_click")
-def point_and_click(data: PointAndClickData):
-    x_coord = data.x_coord
-    y_coord = data.y_coord
-    if layer_selected in positive_layer_coords:
-        positive_layer_coords[layer_selected].append(
-            [x_coord * img.shape[0], y_coord * img.shape[1]]
-        )
-    elif layer_selected not in positive_layer_coords:
-        positive_layer_coords[layer_selected] = [
-            [x_coord * img.shape[0], y_coord * img.shape[1]]
-        ]
-    print("el layer seleccionado es: ", layer_selected)
-    print("los puntos positivos son: ", positive_layer_coords[layer_selected])
-    update_mask(layer_selected)
-    return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
-
-
 @app.post("/api/selected_layer")
 def set_selected_layer(data: Layer):
     global layer_selected
@@ -216,26 +195,46 @@ def set_selected_layer(data: Layer):
     return {"message": f"{layerId}"}
 
 
+@app.post("/api/point_&_click")
+def point_and_click(data: PointAndClickData):
+    new_point = [int(data.x_coord * img.shape[0]), int(data.y_coord * img.shape[1])]
+    if layer_selected in positive_layer_coords:
+        positive_layer_coords[layer_selected].append(new_point)
+    else:
+        positive_layer_coords[layer_selected] = [new_point]
+    print("el layer seleccionado es: ", layer_selected)
+    print("los puntos positivos son: ", positive_layer_coords[layer_selected])
+    update_stored_mask(
+        layer_selected,
+        img,
+        predictor,
+        positive_layer_coords,
+        negative_layer_coords,
+        temp_dir,
+    )
+    return {"message": f"Coordenadas pasadas correctamente: {new_point}"}
+
+
 @app.post("/api/neg_point_&_click")
 def neg_point_and_click(data: PointAndClickData):
-    x_coord = data.x_coord
-    y_coord = data.y_coord
+    new_point = [int(data.x_coord * img.shape[0]), int(data.y_coord * img.shape[1])]
     if layer_selected in negative_layer_coords:
-        negative_layer_coords[layer_selected].append([x_coord, y_coord])
-    elif layer_selected not in negative_layer_coords:
-        negative_layer_coords[layer_selected] = [[x_coord, y_coord]]
+        negative_layer_coords[layer_selected].append(new_point)
+    else:
+        negative_layer_coords[layer_selected] = [new_point]
 
     print("el layer seleccionado es: ", layer_selected)
     print("los puntos negativos son: ", negative_layer_coords[layer_selected])
-    update_mask(layer_selected)
-    return {"message": f"Coordenadas pasadas correctamente: {x_coord} {y_coord}"}
-
-
-@app.post("/api/delete_point_&_click")
-def delete_point_and_click(data: Layer):
-    global negative_layer_coords
-    global positive_layer_coords
-    layer_id = data.layerId
-    positive_layer_coords.pop(layer_id, None)
-    negative_layer_coords.pop(layer_id, None)
-    return {"message": f"Coordenadas eliminadas correctamente: {layer_id}"}
+    update_stored_mask(
+        layer_selected,
+        img,
+        predictor,
+        positive_layer_coords,
+        negative_layer_coords,
+        temp_dir,
+    )
+    pil_img = Image.fromarray(img)
+    pil_draw = ImageDraw.Draw(pil_img)
+    pil_draw.point(new_point, fill="red")
+    pil_img.show()
+    return {"message": f"Coordenadas pasadas correctamente: {new_point}"}
