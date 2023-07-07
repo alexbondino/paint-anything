@@ -15,8 +15,15 @@ def __extract_hls_from_rgb(rgb_img: np.ndarray) -> Tuple[np.ndarray]:
     return cv2.split(hls_img)
 
 
+def hsl_cv2_2_js(hue: int, saturation: int, lightness: int):
+    """
+    Converts from opencv HSL range [0-180,0-255,0-255] to javascript HSL range [0-360, 0-100,0-100]
+    """
+    return hue / 180 * 360, saturation / 255 * 100, lightness / 255 * 100
+
+
 def extract_median_h_sat(
-    rgb_img: np.ndarray, roi_mask: np.array = None
+    rgb_img: np.ndarray, roi_mask: np.ndarray = []
 ) -> Tuple[int, int]:
     """Extracts median hue and saturation values from RGB image. Can also receive a
     mask, of the same dim than input img, to mask only relevant pixels
@@ -30,7 +37,7 @@ def extract_median_h_sat(
         Tuple[int, int]: median hue and median saturation
     """
     h, _, s = __extract_hls_from_rgb(rgb_img)
-    if roi_mask == None:
+    if len(roi_mask) == 0:
         return np.median(h), np.median(s)
     return np.median(h[roi_mask]), np.median(s[roi_mask])
 

@@ -3,8 +3,8 @@ import axios from 'axios';
 import { Button, Input } from '@mui/material';
 import Box from '@mui/material/Box';
 
+// TODO: replicate upload logic from here in nav bar component
 export function ImageUploader({ onImageUpload }) {
-  const [uploaderVisibility, setUploaderVisibility] = useState('block');
   const [selectedImage, setSelectedImage] = useState(null);
 
   function handleImageChange(event) {
@@ -18,22 +18,7 @@ export function ImageUploader({ onImageUpload }) {
       console.error('No se ha seleccionado ninguna imagen.');
       return;
     }
-
-    const formData = new FormData();
-    formData.append('image', selectedImage);
-
-    try {
-      // image is shown in ui before sending to backend
-      onImageUpload(selectedImage);
-      await axios.post('http://localhost:8000/api/image', formData);
-
-      console.log('Imagen enviada correctamente.');
-
-      setUploaderVisibility('none');
-
-    } catch (error) {
-      console.error('Error al enviar la imagen:', error);
-    }
+    onImageUpload(selectedImage);
   }
 
   return (
@@ -45,14 +30,14 @@ export function ImageUploader({ onImageUpload }) {
             type="file"
             onChange={handleImageChange}
             id="image_uploader"
-            sx={{ width: '500px', height: '55px', display: uploaderVisibility }}
+            sx={{ width: '500px', height: '55px' }}
           />
 
           <Button
             type="submit"
             variant="contained"
             size="large"
-            sx={{ fontSize: '20px', padding: '12px', display: uploaderVisibility }}
+            sx={{ fontSize: '20px', padding: '12px' }}
           >
             Submit
           </Button>
