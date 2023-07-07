@@ -16,7 +16,7 @@ export function LoadingComponent({
           transform: 'translate(-50%, -50%)',
         }}
       >
-        <h2>Cargando...</h2>
+        <CircularProgress size={80}/>
       </Box>
     );
   }

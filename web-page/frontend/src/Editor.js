@@ -43,6 +43,7 @@ export function Editor() {
     console.log('Se ingresó a handle Image uploade');
     setSidebarVisibility(true);
     setLoaderVisibility(true);
+    setImageVisibility(false);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setSelectedLayer(0);
