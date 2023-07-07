@@ -18,6 +18,8 @@ export function Editor() {
   const [layerVisibility, setLayerVisibility] = React.useState();
   // loader visibility
   const [loaderVisibility, setLoaderVisibility] = React.useState(false);
+  // image visibility
+  const [imageVisibility, setImageVisibility] = React.useState(false);
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -57,6 +59,8 @@ export function Editor() {
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
+    setLoaderVisibility(false);
+    setImageVisibility(true);
   }
 
   function handleHSLChange(newHSL, layerId) {
@@ -99,6 +103,7 @@ export function Editor() {
       const url = URL.createObjectURL(await imgResponse.blob());
       // update url in layer definition
       newLayersDef[layerPos].imgUrl = url;
+
     } catch (error) {
       console.error('failed trying to update mask data');
       return;
@@ -133,6 +138,7 @@ export function Editor() {
           baseImg={baseImg}
           layersDef={layersDef}
           layerVisibility={layerVisibility}
+          imageVisibility={imageVisibility}
           selectedLayer={selectedLayer}
           onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
           onMaskUpdate={handleMaskUpdate}

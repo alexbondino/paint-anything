@@ -73,6 +73,7 @@ export default function ImageEditor({
   onNewLayerDef,
   onMaskUpdate,
   layerVisibility,
+  imageVisibility,
 }) {
   // construct mask images dynamically from layer definitions
   const [naturalImgSize, setNaturalImgSize] = useState([]);
@@ -150,7 +151,7 @@ export default function ImageEditor({
       className="image-box"
       sx={{
         aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
-        visibility: naturalImgSize ? 'visible' : 'hidden',
+        visibility: naturalImgSize && imageVisibility === true ? 'visible' : 'hidden',
       }}
     >
       <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
