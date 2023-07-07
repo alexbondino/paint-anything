@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
+import LoadingComponent from './components/loading/loading.js';
 import axios from 'axios';
 
 // TODO: show loading status while image embeddings are being computed
@@ -15,6 +16,8 @@ export function Editor() {
   const [selectedLayer, setSelectedLayer] = React.useState(0);
   // layerVisibility
   const [layerVisibility, setLayerVisibility] = React.useState();
+  // loader visibility
+  const [loaderVisibility, setLoaderVisibility] = React.useState(false);
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -37,6 +40,7 @@ export function Editor() {
     };
     console.log('Se ingresó a handle Image uploade');
     setSidebarVisibility(true);
+    setLoaderVisibility(true);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setSelectedLayer(0);
@@ -153,6 +157,10 @@ export function Editor() {
       />
       {imgEditor}
       {imgUploader}
+      <LoadingComponent
+        loaderVisibility={loaderVisibility}
+      />
     </div>
+    
   );
 }
