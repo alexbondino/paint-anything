@@ -66,14 +66,6 @@ export function Editor() {
       return;
     }
     setSelectedLayer(layerId);
-
-    const data = { layerId };
-    try {
-      await axios.post('http://localhost:8000/api/selected_layer', data);
-      console.log('Layer enviada correctamente');
-    } catch (error) {
-      console.error('Error al enviar la layer seleccionada:', error);
-    }
   }
 
   async function handleMaskUpdate(layerId) {

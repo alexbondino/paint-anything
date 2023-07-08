@@ -19,7 +19,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 temp_dir = tempfile.mkdtemp()  # Global variable to store the temporary directory path
 
 # layer vars
-layer_selected = 0
 layer_coords = {}
 
 # image to edit
@@ -37,6 +36,7 @@ class Layer(BaseModel):
 
 
 class PointAndClickData(BaseModel):
+    layer_id: int = Field(description="Specifies layer id of point and click")
     x_coord: float = Field(
         description="Point x-coordinate, as ratio of total image width", ge=0.0, le=1.0
     )
@@ -67,9 +67,7 @@ app.add_middleware(
 
 def reset_points():
     global layer_coords
-    global layer_selected
     layer_coords = {}
-    layer_selected = 0
 
 
 def set_new_img(img_path: str) -> SamPredictor:
@@ -181,26 +179,18 @@ def image_downloader():
     return FileResponse(output_path, media_type="image/png")
 
 
-@app.post("/api/selected_layer")
-def set_selected_layer(data: Layer):
-    global layer_selected
-    layerId = data.layerId
-    layer_selected = layerId
-    return {"message": f"{layerId}"}
-
-
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickData):
     # coordinates must be transformed to real image coordinates
     new_point = [data.x_coord * img.shape[1], data.y_coord * img.shape[0], data.type]
-    if layer_selected in layer_coords:
-        layer_coords[layer_selected].append(new_point)
+    if data.layer_id in layer_coords:
+        layer_coords[data.layer_id].append(new_point)
     else:
-        layer_coords[layer_selected] = [new_point]
-    print("el layer seleccionado es: ", layer_selected)
-    print("los puntos son: ", layer_coords[layer_selected])
+        layer_coords[data.layer_id] = [new_point]
+    print("el layer seleccionado es: ", data.layer_id)
+    print("los puntos son: ", layer_coords[data.layer_id])
     update_stored_mask(
-        layer_selected,
+        data.layer_id,
         img,
         predictor,
         layer_coords,

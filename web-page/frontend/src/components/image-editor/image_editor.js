@@ -55,7 +55,7 @@ function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
     if (pointType === -1) {
       return;
     }
-    const data = { x_coord: xPercent, y_coord: yPercent, type: pointType };
+    const data = { layer_id: layerId, x_coord: xPercent, y_coord: yPercent, type: pointType };
     // update coordintes
     const newPoints = [...points, [xPercent * 100, yPercent * 100, pointType]];
     setPoints(newPoints);
