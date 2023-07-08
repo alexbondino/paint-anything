@@ -121,6 +121,7 @@ const MaskImages = ({ layersDef, selectedLayer, onMaskUpdate }) => {
       try {
         return (
           <Mask
+            key={`mask_${layer.id}`}
             layerId={layer.id}
             imgUrl={layer.imgUrl}
             isSelected={layer.id === selectedLayer}
