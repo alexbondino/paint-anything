@@ -24,22 +24,11 @@
     height: 100%;
 }
 
-.true-point{
+.mask-point{
     position: absolute;
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: green;
-    border: 1px solid white;
-    z-index: 101;
-}
-
-.false-point{
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: red;
     border: 1px solid white;
     z-index: 101;
 }

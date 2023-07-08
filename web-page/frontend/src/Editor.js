@@ -11,17 +11,15 @@ export function Editor() {
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
   const [layersDef, setLayersDef] = React.useState([]);
+
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
-  // layerVisibility
-  const [layerVisibility, setLayerVisibility] = React.useState();
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
     const layerPos = newLayerDef.findIndex((l) => l.id === layerId);
     newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
     setLayersDef(newLayerDef);
-    setLayerVisibility(newLayerDef[layerPos].visibility);
   }
 
   async function handleImageUpload(imgFile) {
@@ -32,8 +30,6 @@ export function Editor() {
       visibility: true,
       imgUrl: null,
       hsl: [],
-      layerTrueCoords: [],
-      layerFalseCoords: [],
     };
     console.log('Se ingresó a handle Image uploade');
     setSidebarVisibility(true);
@@ -128,9 +124,7 @@ export function Editor() {
           key="img_editor"
           baseImg={baseImg}
           layersDef={layersDef}
-          layerVisibility={layerVisibility}
           selectedLayer={selectedLayer}
-          onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
           onMaskUpdate={handleMaskUpdate}
         />,
       ]
@@ -144,7 +138,6 @@ export function Editor() {
         sidebarVisibility={sidebarVisibility}
         layersDef={layersDef}
         selectedLayer={selectedLayer}
-        layerVisibility={layerVisibility}
         onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
         onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
         onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
