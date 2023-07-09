@@ -64,6 +64,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         Hue
       </Typography>
       <Slider
+        id="rHue"
         aria-label="Hue"
         size="small"
         value={hue}
@@ -76,6 +77,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         Saturation
       </Typography>
       <Slider
+        id="rSat"
         aria-label="Saturation"
         value={saturation}
         size="small"
@@ -89,6 +91,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         Lightness
       </Typography>
       <Slider
+        id="rL"
         aria-label="Lightness"
         value={lightness}
         size="small"
@@ -98,6 +101,12 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         valueLabelFormat={valueLabelFormat}
         onChange={(e) => onHSLChange([hue, saturation, e.target.value], layerId)}
       ></Slider>
+      <div>
+      <Typography  variant="button" id="input-slider">
+        Use "color" instead:
+      </Typography>
+      <input type="checkbox" id="cColor"/>
+      </div>
     </Box>
   );
 };

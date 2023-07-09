@@ -26,20 +26,68 @@ function getBaseImageSize(type) {
  * @returns array of html images for masks
  */
 const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
+
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
       const isLayerSelected = layer.id === selectedLayer;
+      if (layer.visibility == true) {
+        const imgLayer =  document.getElementById("imgLayer");
+        const cColor = document.getElementById("cColor");
+        var ctx = imgLayer.getContext('2d');
+        var img = new Image(); img.onload = demo; img.src = layer.imgUrl !== null
+        ? layer.imgUrl
+        : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+        function demo() {imgLayer.width = this.width>>1; imgLayer.height = this.height>>1; render()}
+
+        function render() {
+          var hue = +layer.hsl[0];
+          var sat = +layer.hsl[1];
+          var light = +layer.hsl[2];
+          ctx.clearRect(0, 0, imgLayer.width, imgLayer.height);
+          ctx.globalCompositeOperation = "source-over";
+          ctx.drawImage(img, 0, 0, imgLayer.width, imgLayer.height);
+
+          if (!!cColor.checked) {
+            // use color blending mode
+            ctx.globalCompositeOperation = "color";
+            ctx.fillStyle = "hsl(" + hue + "," + sat + "%, 50%)";
+            ctx.fillRect(0, 0, imgLayer.width, imgLayer.height);
+          }
+          else {
+            // adjust "lightness"
+            ctx.globalCompositeOperation = light < 100 ? "color-burn" : "color-dodge";
+            // for common slider, to produce a valid value for both directions
+            light = light >= 100 ? light - 100 : 100 - (100 - light);
+            ctx.fillStyle = "hsl(0, 50%, " + light + "%)";
+            ctx.fillRect(0, 0, imgLayer.width, imgLayer.height);
+
+            // adjust saturation
+            ctx.globalCompositeOperation = "saturation";
+            ctx.fillStyle = "hsl(0," + sat + "%, 50%)";
+            ctx.fillRect(0, 0, imgLayer.width, imgLayer.height);
+
+            // adjust hue
+            ctx.globalCompositeOperation = "hue";
+            ctx.fillStyle = "hsl(" + hue + ",1%, 50%)";
+            ctx.fillRect(0, 0, imgLayer.width, imgLayer.height);
+          }
+
+          // clip
+          ctx.globalCompositeOperation = "destination-in";
+          ctx.drawImage(img, 0, 0, imgLayer.width, imgLayer.height);
+
+          // reset comp. mode to default
+          ctx.globalCompositeOperation = "source-over";
+        }
+        layer.hsl[0].oninput = layer.hsl[1].oninput = layer.hsl[2].oninput = cColor.onchange = render;
+      }
       try {
         return (
-          <img
+          <div>
+          <canvas
             key={layer.id}
-            // If image file has not been defined, loads full transparent image
-            src={
-              layer.imgUrl !== null
-                ? layer.imgUrl
-                : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-            }
+            id = "imgLayer"
             className={'mask-img'}
             alt={`mask_image_${layer.id}`}
             draggable={false}
@@ -53,7 +101,8 @@ const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
             }}
             onClick={isLayerSelected && layer.visibility ? onPointAndClick : null}
             onContextMenu={isLayerSelected && layer.visibility ? onPointAndClick : null}
-          />
+          ></canvas>
+          </div>
         );
       } catch {
         console.log(`Image for layer ${layer.id} not found`);
