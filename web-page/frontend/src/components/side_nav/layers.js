@@ -8,7 +8,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
 
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -167,7 +166,10 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
           <TextField
             defaultValue={layerName}
             variant={'standard'}
-            sx={{ input: { cursor: !openEditionMode ? 'pointer' : 'auto' } }}
+            sx={{
+              input: { cursor: !openEditionMode ? 'pointer' : 'auto' },
+            }}
+            multiline={true}
             InputProps={{
               disableUnderline: !openEditionMode,
               readOnly: !openEditionMode,
