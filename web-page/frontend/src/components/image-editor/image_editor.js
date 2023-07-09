@@ -34,54 +34,54 @@ const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
         const imgLayer =  document.getElementById("imgLayer") ?? null;
         if ((imgLayer) != null) {
           const cColor = document.getElementById("cColor");
-        var ctx = this.layerImg.current.getContext('2d');
-        var img = new Image(); img.onload = demo; img.src = layer.imgUrl !== null
-        ? layer.imgUrl
-        : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-        function demo() {this.layerImg.current.width = this.width>>1; this.layerImg.current.height = this.height>>1; render()}
+          var ctx = this.layerImg.current.getContext('2d');
+          var img = new Image(); img.onload = demo; img.src = layer.imgUrl !== null
+          ? layer.imgUrl
+          : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+          function demo() {this.layerImg.current.width = this.width>>1; this.layerImg.current.height = this.height>>1; render()}
 
-        function render() {
-          var hue = +layer.hsl[0];
-          var sat = +layer.hsl[1];
-          var light = +layer.hsl[2];
-          ctx.clearRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
-          ctx.globalCompositeOperation = "source-over";
-          ctx.drawImage(img, 0, 0, this.layerImg.current.width, this.layerImg.current.height);
+          function render() {
+            var hue = +layer.hsl[0];
+            var sat = +layer.hsl[1];
+            var light = +layer.hsl[2];
+            ctx.clearRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
+            ctx.globalCompositeOperation = "source-over";
+            ctx.drawImage(img, 0, 0, this.layerImg.current.width, this.layerImg.current.height);
 
-          if (!!cColor.checked) {
-            // use color blending mode
-            ctx.globalCompositeOperation = "color";
-            ctx.fillStyle = "hsl(" + hue + "," + sat + "%, 50%)";
-            ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
+            if (!!cColor.checked) {
+              // use color blending mode
+              ctx.globalCompositeOperation = "color";
+              ctx.fillStyle = "hsl(" + hue + "," + sat + "%, 50%)";
+              ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
+            }
+            else {
+              // adjust "lightness"
+              ctx.globalCompositeOperation = light < 100 ? "color-burn" : "color-dodge";
+              // for common slider, to produce a valid value for both directions
+              light = light >= 100 ? light - 100 : 100 - (100 - light);
+              ctx.fillStyle = "hsl(0, 50%, " + light + "%)";
+              ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
+
+              // adjust saturation
+              ctx.globalCompositeOperation = "saturation";
+              ctx.fillStyle = "hsl(0," + sat + "%, 50%)";
+              ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
+
+              // adjust hue
+              ctx.globalCompositeOperation = "hue";
+              ctx.fillStyle = "hsl(" + hue + ",1%, 50%)";
+              ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
+            }
+
+            // clip
+            ctx.globalCompositeOperation = "destination-in";
+            ctx.drawImage(img, 0, 0, this.layerImg.current.width, this.layerImg.current.height);
+
+            // reset comp. mode to default
+            ctx.globalCompositeOperation = "source-over";
           }
-          else {
-            // adjust "lightness"
-            ctx.globalCompositeOperation = light < 100 ? "color-burn" : "color-dodge";
-            // for common slider, to produce a valid value for both directions
-            light = light >= 100 ? light - 100 : 100 - (100 - light);
-            ctx.fillStyle = "hsl(0, 50%, " + light + "%)";
-            ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
-
-            // adjust saturation
-            ctx.globalCompositeOperation = "saturation";
-            ctx.fillStyle = "hsl(0," + sat + "%, 50%)";
-            ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
-
-            // adjust hue
-            ctx.globalCompositeOperation = "hue";
-            ctx.fillStyle = "hsl(" + hue + ",1%, 50%)";
-            ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
+          layer.hsl[0].oninput = layer.hsl[1].oninput = layer.hsl[2].oninput = cColor.onchange = render;
           }
-
-          // clip
-          ctx.globalCompositeOperation = "destination-in";
-          ctx.drawImage(img, 0, 0, this.layerImg.current.width, this.layerImg.current.height);
-
-          // reset comp. mode to default
-          ctx.globalCompositeOperation = "source-over";
-        }
-        layer.hsl[0].oninput = layer.hsl[1].oninput = layer.hsl[2].oninput = cColor.onchange = render;
-        }
       try {
         return (
           <div>
