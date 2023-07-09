@@ -110,17 +110,15 @@ export function Editor() {
     />
   );
   // render image editor only when sidebar is visible
-  const imgEditor = sidebarVisibility
-    ? [
-        <ImageEditor
-          key="img_editor"
-          baseImg={baseImg}
-          layersDef={layersDef}
-          selectedLayer={selectedLayer}
-          onMaskUpdate={handleMaskUpdate}
-        />,
-      ]
-    : null;
+  const imgEditor = sidebarVisibility ? (
+    <ImageEditor
+      key="img_editor"
+      baseImg={baseImg}
+      layersDef={layersDef}
+      selectedLayer={selectedLayer}
+      onMaskUpdate={handleMaskUpdate}
+    />
+  ) : null;
 
   return (
     <div style={{ height: '80vh' }}>

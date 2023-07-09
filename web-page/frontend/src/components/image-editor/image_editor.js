@@ -29,7 +29,9 @@ function getBaseImageSize(type) {
 }
 
 function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
+  console.log('rendering mask');
   const [points, setPoints, pointsHistory] = useStateHistory([]);
+  const [hasKeyListener, setHasKeyListener] = useState(false);
 
   const handlePointAndClick = async (event) => {
     event.preventDefault();
@@ -140,6 +142,7 @@ const MaskImages = ({ layersDef, selectedLayer, onMaskUpdate }) => {
  */
 // TODO: move useEffect from here to mask component, to avoid triggering it every time this larger component is updated
 export default function ImageEditor({ baseImg, layersDef, selectedLayer, onMaskUpdate }) {
+  console.log(layersDef);
   // construct mask images dynamically from layer definitions
   const [naturalImgSize, setNaturalImgSize] = useState([]);
 
