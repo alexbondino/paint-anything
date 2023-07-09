@@ -121,7 +121,7 @@ export function ImageEditorDrawer({
       {
         id: lastLayerId + 1,
         visibility: true,
-        imgUrl: 'https://upload.wikimedia.org/wikipedia/en/d/d4/Mickey_Mouse.png',
+        imgUrl: null,
         hsl: [],
         layerTrueCoords: [],
         layerFalseCoords: [],
