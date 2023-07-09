@@ -185,13 +185,15 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
             <VisibilityOffIcon fontSize="small" />
           )}
         </IconButton>
-        <IconButton>
-          {openEditionMode ? (
-            <CheckIcon fontSize="small" onClick={handleLayerEditClose} sx={{ color: 'green' }} />
-          ) : (
-            <EditIcon fontSize="small" onClick={handleLayerEditOpen} />
-          )}
-        </IconButton>
+        {openEditionMode ? (
+          <IconButton onClick={handleLayerEditClose}>
+            <CheckIcon fontSize="small" sx={{ color: 'green' }} />
+          </IconButton>
+        ) : (
+          <IconButton onClick={handleLayerEditOpen}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        )}
         <IconButton disableTouchRipple aria-label="delete layer" onClick={() => setOpenAlert(true)}>
           <DeleteIcon fontSize="small" />
         </IconButton>
