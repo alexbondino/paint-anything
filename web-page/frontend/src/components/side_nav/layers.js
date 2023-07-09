@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './layers.scss';
 
 import IconButton from '@mui/material/IconButton';
@@ -119,6 +119,19 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
   const [openAlert, setOpenAlert] = useState(false);
   const [openEditionMode, setEditionMode] = useState(false);
   const layerName = 'Layer ' + layerDef.id;
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  });
+
+  const handleKeyPress = (event) => {
+    if (openEditionMode && event.keyCode === 13) {
+      setEditionMode(false);
+    }
+  };
 
   const handleDeleteConfirmation = () => {
     setOpenAlert(false);
