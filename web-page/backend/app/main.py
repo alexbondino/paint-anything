@@ -86,7 +86,6 @@ def set_new_img(img_path: str) -> SamPredictor:
 
 
 def delete_points(layer_id: int):
-    print("deleting poinnnts")
     layer_coords.pop(layer_id, None)
 
 

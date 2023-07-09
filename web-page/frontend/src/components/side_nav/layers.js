@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import './layers.scss';
 
 import IconButton from '@mui/material/IconButton';
@@ -9,11 +9,14 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import TextField from '@mui/material/TextField';
 
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -114,13 +117,23 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
  * @returns the navigation layer item
  */
 const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, onHSLChange }) => {
-  const [openAlert, setOpenAlert] = React.useState(false);
+  const [openAlert, setOpenAlert] = useState(false);
+  const [openEditionMode, setEditionMode] = useState(false);
   const layerName = 'Layer ' + layerDef.id;
 
   const handleDeleteConfirmation = () => {
     setOpenAlert(false);
     onDelete(layerDef.id);
   };
+
+  const handleLayerEditOpen = () => {
+    setEditionMode(true);
+  };
+
+  const handleLayerEditClose = () => {
+    setEditionMode(false);
+  };
+
   return (
     <div>
       <ListItem>
@@ -128,9 +141,10 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
           id={layerDef.id}
           disableRipple
           selected={selectedLayer === layerDef.id}
-          onClick={() => onSelected(layerDef.id)}
+          onClick={() => (openEditionMode ? null : onSelected(layerDef.id))}
+          sx={{ borderRadius: '5%' }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: '30%' }}>
             {layerDef.hsl.length === 3 ? (
               <SquareRoundedIcon
                 sx={{
@@ -150,17 +164,36 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
               />
             )}
           </ListItemIcon>
-          <ListItemText primary={layerName} />
+          <TextField
+            defaultValue={layerName}
+            variant={'standard'}
+            sx={{ input: { cursor: !openEditionMode ? 'pointer' : 'auto' } }}
+            InputProps={{
+              disableUnderline: !openEditionMode,
+              readOnly: !openEditionMode,
+            }}
+          />
         </ListItemButton>
         <IconButton
           disableTouchRipple
           aria-label="layer visibility"
           onClick={() => onVisClick(layerDef.id)}
         >
-          {layerDef.visibility ? <VisibilityIcon /> : <VisibilityOffIcon />}
+          {layerDef.visibility ? (
+            <VisibilityIcon fontSize="small" />
+          ) : (
+            <VisibilityOffIcon fontSize="small" />
+          )}
+        </IconButton>
+        <IconButton>
+          {openEditionMode ? (
+            <CheckIcon fontSize="small" onClick={handleLayerEditClose} sx={{ color: 'green' }} />
+          ) : (
+            <EditIcon fontSize="small" onClick={handleLayerEditOpen} />
+          )}
         </IconButton>
         <IconButton disableTouchRipple aria-label="delete layer" onClick={() => setOpenAlert(true)}>
-          <DeleteIcon />
+          <DeleteIcon fontSize="small" />
         </IconButton>
         <Dialog
           open={openAlert}

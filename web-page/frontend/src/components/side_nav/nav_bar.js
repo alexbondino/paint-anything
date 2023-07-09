@@ -38,7 +38,7 @@ import Layers from './layers';
 import PreviewDialog from './preview';
 
 // controls the width of the drawer
-const drawerWidth = 280;
+const drawerWidth = 300;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -96,6 +96,7 @@ export function ImageEditorDrawer({
   onHSLChange,
   onSelectLayer,
   onHandleLayerVisibilityClick,
+  onDeleteLayer,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -123,8 +124,6 @@ export function ImageEditorDrawer({
         visibility: true,
         imgUrl: null,
         hsl: [],
-        layerTrueCoords: [],
-        layerFalseCoords: [],
       },
     ];
     onNewLayerDef(newLayersDef);
@@ -133,31 +132,6 @@ export function ImageEditorDrawer({
       setExpandLayers(!expandLayers);
     }
   };
-
-  async function handleLayerDelete(layerId) {
-    const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
-    if (selectedLayer === layerId) {
-      onSelectLayer(layerId);
-    }
-    // erase mask from disk
-    fetch(
-      'http://localhost:8000/api/delete-mask?' +
-        new URLSearchParams({
-          layer_id: layerId,
-        })
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('layer file successfully deleted');
-        } else {
-          console.log('failed deleting mask file with error: ', response.message);
-        }
-      })
-      .catch((error) => {
-        console.error('Error deleting mask', error);
-      });
-    onNewLayerDef(newLayerDef);
-  }
 
   async function handleDownloadButtonClick() {
     try {
@@ -250,7 +224,7 @@ export function ImageEditorDrawer({
               layersDef={layersDef}
               selectedLayer={selectedLayer}
               onSelectLayer={onSelectLayer}
-              onDeleteLayer={handleLayerDelete}
+              onDeleteLayer={onDeleteLayer}
               onVisibilityClicked={onHandleLayerVisibilityClick}
               onHSLChange={onHSLChange}
             />

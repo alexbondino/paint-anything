@@ -26,7 +26,6 @@ export function Editor() {
   }
 
   async function handleImageUpload(imgFile) {
-    console.log('el cacas');
     // initial layer shown after image is uploaded
     const initialLayer = {
       id: 0,
@@ -159,6 +158,33 @@ export function Editor() {
       .catch((error) => console.error('Error al enviar coordenadas:', error));
   }
 
+  async function handleLayerDelete(layerId) {
+    // erase mask from disk
+    fetch(
+      'http://localhost:8000/api/delete-mask?' +
+        new URLSearchParams({
+          layer_id: layerId,
+        })
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('layer file successfully deleted');
+        } else {
+          console.log('failed deleting mask file with error: ', response.message);
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting mask', error);
+      });
+    const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
+    const newLayerPoints = [...layerPoints.filter((l) => l.id !== layerId)];
+    if (selectedLayer === layerId) {
+      setSelectedLayer(-1);
+    }
+    setLayersDef(newLayerDef);
+    setLayerPoints(newLayerPoints);
+  }
+
   // render upload if no image has been loaded
   const imgUploader = sidebarVisibility ? null : (
     <ImageUploader
@@ -192,6 +218,7 @@ export function Editor() {
         onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
         onSelectLayer={(layerId) => handleSelectLayer(layerId)}
         onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
+        onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
       />
       {imgEditor}
       {imgUploader}
