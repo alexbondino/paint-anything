@@ -30,7 +30,6 @@ async function moveApiLayerPointer(layerId, pointer, onMaskUpdate) {
 }
 
 function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
-  console.log('rendering mask');
   const [points, setPoints, undoPoints, redoPoints, pointsHistory, pointer] = useHistoryState([]);
 
   useEffect(() => {
@@ -44,6 +43,14 @@ function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
     if (isSelected && event.keyCode === 90 && event.ctrlKey && pointer > 0) {
       undoPoints();
       await moveApiLayerPointer(layerId, pointer - 1, onMaskUpdate);
+    } else if (
+      isSelected &&
+      event.keyCode === 89 &&
+      event.ctrlKey &&
+      pointer < pointsHistory[pointsHistory.length - 1].length
+    ) {
+      redoPoints();
+      await moveApiLayerPointer(layerId, pointer + 1, onMaskUpdate);
     }
   }
 
@@ -156,7 +163,6 @@ const MaskImages = ({ layersDef, selectedLayer, onMaskUpdate }) => {
  */
 // TODO: move useEffect from here to mask component, to avoid triggering it every time this larger component is updated
 export default function ImageEditor({ baseImg, layersDef, selectedLayer, onMaskUpdate }) {
-  console.log(layersDef);
   // construct mask images dynamically from layer definitions
   const [naturalImgSize, setNaturalImgSize] = useState([]);
 
