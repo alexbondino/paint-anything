@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import './image-editor.scss';
 import axios from 'axios';
+import Canvas from './canvas';
 
 /**
  * Extracts base image size
@@ -18,6 +19,8 @@ function getBaseImageSize(type) {
   return null;
 }
 
+
+
 /**
  * Renders mask images
  * @param {Array} layersDef array with layer definitions
@@ -26,84 +29,52 @@ function getBaseImageSize(type) {
  * @returns array of html images for masks
  */
 const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
-
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
         const isLayerSelected = layer.id === selectedLayer;
-        const imgLayer =  document.getElementById("imgLayer") ?? null;
-        if ((imgLayer) != null) {
-          const cColor = document.getElementById("cColor");
-          var ctx = this.layerImg.current.getContext('2d');
-          var img = new Image(); img.onload = demo; img.src = layer.imgUrl !== null
-          ? layer.imgUrl
-          : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-          function demo() {this.layerImg.current.width = this.width>>1; this.layerImg.current.height = this.height>>1; render()}
+        const draw = (context, canvas) => {
+          const width = canvas.current.width;
+          const height = canvas.current.height;
+          var img = new Image();
+          img.onload = function(){
+            var hue = 180;
+            var sat= 50;
+            var l = 50;
+            // 50% lightness (L) will keep the original luma value.
+            // erase previous drawing
+            context.clearRect(0, 0, width, height);
+            // draw mask as is
+            context.globalCompositeOperation = 'source-over';
+            context.drawImage(img, 0, 0, width, height);
 
-          function render() {
-            var hue = +layer.hsl[0];
-            var sat = +layer.hsl[1];
-            var light = +layer.hsl[2];
-            ctx.clearRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
-            ctx.globalCompositeOperation = "source-over";
-            ctx.drawImage(img, 0, 0, this.layerImg.current.width, this.layerImg.current.height);
+            // adjust "lightness"
+            context.globalCompositeOperation = l < 100 ? 'color-burn' : 'color-dodge';
+            // for common slider, to produce a valid value for both directions
+            l = l >= 100 ? l - 100 : l;
+            context.fillStyle = 'hsl(0, 50%, ' + l + '%)';
+            context.fillRect(0, 0, width, height);
+            // change saturation
+            context.globalCompositeOperation = 'saturation';
+            context.fillStyle = 'hsl(0,' + sat + '%, 50%)'; // hue doesn't matter here
+            context.fillRect(0, 0, width, height);
 
-            if (!!cColor.checked) {
-              // use color blending mode
-              ctx.globalCompositeOperation = "color";
-              ctx.fillStyle = "hsl(" + hue + "," + sat + "%, 50%)";
-              ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
-            }
-            else {
-              // adjust "lightness"
-              ctx.globalCompositeOperation = light < 100 ? "color-burn" : "color-dodge";
-              // for common slider, to produce a valid value for both directions
-              light = light >= 100 ? light - 100 : 100 - (100 - light);
-              ctx.fillStyle = "hsl(0, 50%, " + light + "%)";
-              ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
+            // step 3: adjust hue, preserve luma and chroma
+            context.globalCompositeOperation = 'hue';
+            context.fillStyle = 'hsl(' + hue + ',1%, 50%)'; // sat must be > 0, otherwise won't matter
+            context.fillRect(0, 0, width, height);
 
-              // adjust saturation
-              ctx.globalCompositeOperation = "saturation";
-              ctx.fillStyle = "hsl(0," + sat + "%, 50%)";
-              ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
-
-              // adjust hue
-              ctx.globalCompositeOperation = "hue";
-              ctx.fillStyle = "hsl(" + hue + ",1%, 50%)";
-              ctx.fillRect(0, 0, this.layerImg.current.width, this.layerImg.current.height);
-            }
-
-            // clip
-            ctx.globalCompositeOperation = "destination-in";
-            ctx.drawImage(img, 0, 0, this.layerImg.current.width, this.layerImg.current.height);
-
-            // reset comp. mode to default
-            ctx.globalCompositeOperation = "source-over";
-          }
-          layer.hsl[0].oninput = layer.hsl[1].oninput = layer.hsl[2].oninput = cColor.onchange = render;
-          }
+            // step 4: in our case, we need to clip as we filled the entire area
+            context.globalCompositeOperation = 'destination-in';
+            context.drawImage(img, 0, 0, width, height);
+            // step 5: reset comp mode to default
+            context.globalCompositeOperation = 'source-over';
+          };
+          img.src = 'https://upload.wikimedia.org/wikipedia/en/d/d4/Mickey_Mouse.png';
+        }
       try {
         return (
-          <div>
-          <canvas
-            key={layer.id}
-            id = "imgLayer"
-            ref = {this.layerImg}
-            className={'mask-img'}
-            alt={`mask_image_${layer.id}`}
-            draggable={false}
-            style={{
-              // if image is selected, this highlights it
-              filter:
-                isLayerSelected && layer.imgUrl !== null
-                  ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
-                  : 'none',
-              zIndex: isLayerSelected ? '100' : 'auto',
-            }}
-            onClick={isLayerSelected && layer.visibility ? onPointAndClick : null}
-            onContextMenu={isLayerSelected && layer.visibility ? onPointAndClick : null}
-          ></canvas>
-          </div>
+          <Canvas draw={draw}></Canvas>
         );
       } catch {
         console.log(`Image for layer ${layer.id} not found`);
