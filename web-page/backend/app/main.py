@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 import os
 import tempfile
 import shutil
-from typing import Literal
+from typing import Literal, List, Tuple, Annotated
 from pydantic import BaseModel, Field
 from masking.predictor import create_sam, update_stored_mask
 from utils import load_image, clean_mask_files, save_output
@@ -45,6 +45,13 @@ class PointAndClickData(BaseModel):
     )
     type: Literal[0, 1] = Field(
         description="Point type, 0 for negative and 1 for positive"
+    )
+
+
+class LayerPointer(BaseModel):
+    layer_id: int = Field(description="Specifies layer id of point and click")
+    pointer: int = Field(
+        description="Pointer to last point to use for mask gen. It's one-indexed"
     )
 
 
@@ -181,19 +188,35 @@ def image_downloader():
 
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickData):
-    # coordinates must be transformed to real image coordinates
+    layer_id = data.layer_id
+    # coordinates transformed to real image coordinates
     new_point = [data.x_coord * img.shape[1], data.y_coord * img.shape[0], data.type]
-    if data.layer_id in layer_coords:
-        layer_coords[data.layer_id].append(new_point)
+    if layer_id in layer_coords:
+        layer_data = layer_coords[layer_id]
+        # continue adding points from where pointer is at
+        layer_coords[layer_id]["points"] = layer_coords[layer_id]["points"][
+            : layer_data["pointer"]
+        ]
+        layer_coords[layer_id]["points"].append(new_point)
+        # increase pointer
+        layer_coords[layer_id]["pointer"] += 1
     else:
-        layer_coords[data.layer_id] = [new_point]
-    print("el layer seleccionado es: ", data.layer_id)
-    print("los puntos son: ", layer_coords[data.layer_id])
+        # new layer
+        layer_coords[layer_id] = {"points": [new_point], "pointer": 1}
     update_stored_mask(
-        data.layer_id,
+        layer_id,
         img,
         predictor,
         layer_coords,
         temp_dir,
     )
     return {"message": f"Coordenadas pasadas correctamente: {new_point}"}
+
+
+@app.post("/api/move-pointer")
+def move_layer_pointer(layer_pointer: LayerPointer):
+    print(f"new pointer: {layer_pointer.pointer}")
+    layer_id = layer_pointer.layer_id
+    layer_coords[layer_id]["pointer"] = layer_pointer.pointer
+    update_stored_mask(layer_id, img, predictor, layer_coords, temp_dir)
+    return {"message": "layer pointer moved successfully"}

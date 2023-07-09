@@ -93,6 +93,12 @@ def gen_new_mask(
     Returns:
         Image: new mask
     """
+    mask_img = np.zeros(img.shape, dtype=np.uint8)
+    # if no points, mask is a completely transparent image
+    if len(points) == 0:
+        mask_img = Image.fromarray(mask_img)
+        mask_img.putalpha(0)
+        return mask_img
     points_arr = np.array(points)
     points = points_arr[:, :2]
     labels = points_arr[:, -1]
@@ -122,8 +128,13 @@ def update_stored_mask(
         layer_coords (Dict[str, List]): points for all layers
         mask_dir (str): _description_
     """
-    points = layer_coords.get(layer_id, [])
+    points = layer_coords.get(layer_id, {})
+    if len(points) == 0:
+        return
+    effective_points = layer_coords[layer_id]["points"][
+        : layer_coords[layer_id]["pointer"]
+    ]
     # create new mask
-    mask_img = gen_new_mask(img, points, predictor)
+    mask_img = gen_new_mask(img, effective_points, predictor)
     # update mask by overwriting stored image
     mask_img.save(os.path.join(mask_dir, f"{layer_id}.png"))

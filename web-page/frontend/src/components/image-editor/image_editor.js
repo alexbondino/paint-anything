@@ -1,17 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import './image-editor.scss';
 import axios from 'axios';
-
-function useStateHistory(initialValue) {
-  const stateHistoryRef = useRef(initialValue);
-  const [state, setState] = useState(initialValue);
-  useEffect(() => {
-    stateHistoryRef.current = [...stateHistoryRef.current, state];
-  }, [state]);
-
-  return [state, setState, stateHistoryRef.current];
-}
+import { useHistoryState } from '../../Utils';
 
 /**
  * Extracts base image size
@@ -28,10 +19,33 @@ function getBaseImageSize(type) {
   return null;
 }
 
+async function moveApiLayerPointer(layerId, pointer, onMaskUpdate) {
+  const layer_pointer = { layer_id: layerId, pointer: pointer };
+  axios
+    .post('http://localhost:8000/api/move-pointer', layer_pointer)
+    .then((response) => {
+      onMaskUpdate(layerId);
+    })
+    .catch((error) => console.error('Error moving layer pointer:', error));
+}
+
 function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
   console.log('rendering mask');
-  const [points, setPoints, pointsHistory] = useStateHistory([]);
-  const [hasKeyListener, setHasKeyListener] = useState(false);
+  const [points, setPoints, undoPoints, redoPoints, pointsHistory, pointer] = useHistoryState([]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  });
+
+  async function handleKeyPress(event) {
+    if (isSelected && event.keyCode === 90 && event.ctrlKey && pointer > 0) {
+      undoPoints();
+      await moveApiLayerPointer(layerId, pointer - 1, onMaskUpdate);
+    }
+  }
 
   const handlePointAndClick = async (event) => {
     event.preventDefault();
