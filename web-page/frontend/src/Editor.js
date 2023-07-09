@@ -15,6 +15,9 @@ export function Editor() {
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
 
+  // layer points
+  const [layerPoints, setLayerPoints] = useState([]);
+
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
     const layerPos = newLayerDef.findIndex((l) => l.id === layerId);
@@ -95,13 +98,67 @@ export function Editor() {
         });
         const newHSL = hslResponse.data.hsl;
         newLayersDef[layerPos].hsl = newHSL;
-        console.log(newHSL);
       } catch (error) {
         console.error('failed trying to set initial hsl');
       }
     }
     setLayersDef(newLayersDef);
   }
+
+  async function handlePointerChange(layerId, pointerChange) {
+    const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
+    const layerDef = layerPoints[layerIndex];
+    const newPointer = layerDef.pointer + pointerChange;
+    const points = layerDef.history[layerDef.history.length - 1];
+    if (newPointer < 0 || newPointer > points.length) {
+      return;
+    }
+    const newLayerPoints = [...layerPoints];
+    newLayerPoints[layerIndex].pointer = newPointer;
+    newLayerPoints[layerIndex].points = points.slice(0, newPointer);
+    setLayerPoints(newLayerPoints);
+    const layer_pointer = { layer_id: layerId, pointer: newPointer };
+    axios
+      .post('http://localhost:8000/api/move-pointer', layer_pointer)
+      .then((response) => {
+        handleMaskUpdate(layerId);
+      })
+      .catch((error) => console.error('Error moving layer pointer:', error));
+  }
+
+  async function handleNewPoint(layerId, point) {
+    const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
+    let newLayerPoints = [];
+    if (layerIndex === -1) {
+      newLayerPoints = [
+        ...layerPoints,
+        { id: layerId, points: [point], pointer: 1, history: [[point]] },
+      ];
+    } else {
+      newLayerPoints = [...layerPoints];
+      const layerPointer = layerPoints[layerIndex].pointer;
+      let newPoints = [];
+      if (layerPoints[layerIndex].pointer !== layerPoints[layerIndex].points.length) {
+        newPoints = [...newLayerPoints[layerIndex].points.slice(0, layerPointer), point];
+      } else {
+        newPoints = [...newLayerPoints[layerIndex].points, point];
+      }
+      const newHistory = [...newLayerPoints[layerIndex].history, newPoints];
+      newLayerPoints[layerIndex].points = newPoints;
+      newLayerPoints[layerIndex].pointer += 1;
+      newLayerPoints[layerIndex].history = newHistory;
+    }
+    setLayerPoints(newLayerPoints);
+    const data = { layer_id: layerId, x_coord: point[0], y_coord: point[1], type: point[2] };
+    // send new point to backend
+    axios
+      .post('http://localhost:8000/api/point_&_click', data)
+      .then((response) => {
+        handleMaskUpdate(layerId);
+      })
+      .catch((error) => console.error('Error al enviar coordenadas:', error));
+  }
+
   // render upload if no image has been loaded
   const imgUploader = sidebarVisibility ? null : (
     <ImageUploader
@@ -116,7 +173,9 @@ export function Editor() {
       baseImg={baseImg}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
-      onMaskUpdate={handleMaskUpdate}
+      layerPoints={layerPoints}
+      onPointerChange={handlePointerChange}
+      onNewPoint={handleNewPoint}
     />
   ) : null;
 

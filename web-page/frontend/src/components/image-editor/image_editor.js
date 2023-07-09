@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import './image-editor.scss';
 import axios from 'axios';
-import { useHistoryState } from '../../Utils';
 
 /**
  * Extracts base image size
@@ -19,19 +18,7 @@ function getBaseImageSize(type) {
   return null;
 }
 
-async function moveApiLayerPointer(layerId, pointer, onMaskUpdate) {
-  const layer_pointer = { layer_id: layerId, pointer: pointer };
-  axios
-    .post('http://localhost:8000/api/move-pointer', layer_pointer)
-    .then((response) => {
-      onMaskUpdate(layerId);
-    })
-    .catch((error) => console.error('Error moving layer pointer:', error));
-}
-
-function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
-  const [points, setPoints, undoPoints, redoPoints, pointsHistory, pointer] = useHistoryState([]);
-
+function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint }) {
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
     return () => {
@@ -40,17 +27,10 @@ function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
   });
 
   async function handleKeyPress(event) {
-    if (isSelected && event.keyCode === 90 && event.ctrlKey && pointer > 0) {
-      undoPoints();
-      await moveApiLayerPointer(layerId, pointer - 1, onMaskUpdate);
-    } else if (
-      isSelected &&
-      event.keyCode === 89 &&
-      event.ctrlKey &&
-      pointer < pointsHistory[pointsHistory.length - 1].length
-    ) {
-      redoPoints();
-      await moveApiLayerPointer(layerId, pointer + 1, onMaskUpdate);
+    if (isSelected && event.keyCode === 90 && event.ctrlKey) {
+      onPointerChange(layerId, -1);
+    } else if (isSelected && event.keyCode === 89 && event.ctrlKey) {
+      onPointerChange(layerId, 1);
     }
   }
 
@@ -78,17 +58,9 @@ function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
     if (pointType === -1) {
       return;
     }
-    const data = { layer_id: layerId, x_coord: xPercent, y_coord: yPercent, type: pointType };
     // update coordintes
-    const newPoints = [...points, [xPercent * 100, yPercent * 100, pointType]];
-    setPoints(newPoints);
-    // send new point to backend
-    axios
-      .post('http://localhost:8000/api/point_&_click', data)
-      .then((response) => {
-        onMaskUpdate(layerId);
-      })
-      .catch((error) => console.error('Error al enviar coordenadas:', error));
+    const newPoint = [xPercent, yPercent, pointType];
+    onNewPoint(layerId, newPoint);
   };
   const pointBoxes = isSelected
     ? points.map((point, index) => {
@@ -97,8 +69,8 @@ function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
             className="mask-point"
             key={index}
             sx={{
-              left: `${point[0]}%`,
-              top: `${point[1]}%`,
+              left: `${point[0] * 100}%`,
+              top: `${point[1] * 100}%`,
               backgroundColor: point[2] === 1 ? 'green' : 'red',
             }}
           />
@@ -137,22 +109,29 @@ function Mask({ layerId, imgUrl, isSelected, onMaskUpdate }) {
  * Renders mask images
     
  */
-const MaskImages = ({ layersDef, selectedLayer, onMaskUpdate }) => {
+const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, onNewPoint }) => {
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
       try {
+        let points = [];
+        if (layerPoints.length > 0) {
+          const pointsDef = layerPoints.find((l) => l.id === layer.id);
+          points = pointsDef ? pointsDef.points.slice(0, pointsDef.pointer) : [];
+        }
         return (
           <Mask
             key={`mask_${layer.id}`}
             layerId={layer.id}
             imgUrl={layer.imgUrl}
             isSelected={layer.id === selectedLayer}
-            onMaskUpdate={onMaskUpdate}
+            points={points}
+            onPointerChange={onPointerChange}
+            onNewPoint={onNewPoint}
           />
         );
-      } catch {
-        console.log(`Image for layer ${layer.id} not found`);
+      } catch (error) {
+        console.log(`Error rendering mask ${layer.id}`, error);
         return;
       }
     });
@@ -162,7 +141,14 @@ const MaskImages = ({ layersDef, selectedLayer, onMaskUpdate }) => {
  * Image editor
  */
 // TODO: move useEffect from here to mask component, to avoid triggering it every time this larger component is updated
-export default function ImageEditor({ baseImg, layersDef, selectedLayer, onMaskUpdate }) {
+export default function ImageEditor({
+  baseImg,
+  layersDef,
+  selectedLayer,
+  layerPoints,
+  onPointerChange,
+  onNewPoint,
+}) {
   // construct mask images dynamically from layer definitions
   const [naturalImgSize, setNaturalImgSize] = useState([]);
 
@@ -185,7 +171,9 @@ export default function ImageEditor({ baseImg, layersDef, selectedLayer, onMaskU
         <MaskImages
           layersDef={layersDef}
           selectedLayer={selectedLayer}
-          onMaskUpdate={onMaskUpdate}
+          layerPoints={layerPoints}
+          onPointerChange={onPointerChange}
+          onNewPoint={onNewPoint}
         />
       ) : null}
     </Box>
