@@ -180,7 +180,7 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
             defaultValue={layerName}
             variant={'standard'}
             sx={{
-              input: { cursor: !openEditionMode ? 'pointer' : 'auto' },
+              pointerEvents: openEditionMode ? 'auto' : 'none',
             }}
             multiline={true}
             InputProps={{
