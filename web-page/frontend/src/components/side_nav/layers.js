@@ -1,15 +1,7 @@
 import { useState, useEffect } from 'react';
 import './layers.scss';
 
-import IconButton from '@mui/material/IconButton';
-import Button from '@mui/material/Button';
-
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import TextField from '@mui/material/TextField';
-
+// icons
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -17,14 +9,10 @@ import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-
-import Slider from '@mui/material/Slider';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+// other components
+import { List, ListItem, ListItemButton, ListItemIcon } from '@mui/material';
+import { Box, Button, IconButton, Slider, Typography, TextField } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
 
 function valueLabelFormat(value) {
   return `${value} ${'%'}`;

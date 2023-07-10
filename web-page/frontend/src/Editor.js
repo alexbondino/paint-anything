@@ -15,7 +15,7 @@ export function Editor() {
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
 
-  // layer points
+  // list of layer points as objects {coords:[[x1,y1,v1],[x2,y2,v2]], history:[coords_t1, coords_t2], pointer:pointer_value}
   const [layerPoints, setLayerPoints] = useState([]);
 
   function handleLayerVisibilityClick(layerId) {
@@ -103,18 +103,28 @@ export function Editor() {
     setLayersDef(newLayersDef);
   }
 
+  /**
+   * Updates layer coords based on pointer change
+   * @param {int} layerId layer affected
+   * @param {int} pointerChange direction of pointer change. -1 for undo and +1 for redo
+   */
   async function handlePointerChange(layerId, pointerChange) {
     const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
     const layerDef = layerPoints[layerIndex];
+    // computes new pointer
     const newPointer = layerDef.pointer + pointerChange;
-    const points = layerDef.history[layerDef.history.length - 1];
-    if (newPointer < 0 || newPointer > points.length) {
+    // retrieves most recent coordinates in history
+    const lastPoints = layerDef.history[layerDef.history.length - 1];
+    // handle pointer overflow
+    if (newPointer < 0 || newPointer > lastPoints.length) {
       return;
     }
+    // update coordinates with new slice
     const newLayerPoints = [...layerPoints];
     newLayerPoints[layerIndex].pointer = newPointer;
-    newLayerPoints[layerIndex].points = points.slice(0, newPointer);
+    newLayerPoints[layerIndex].coords = lastPoints.slice(0, newPointer);
     setLayerPoints(newLayerPoints);
+    // triggers same operation in backend
     const layer_pointer = { layer_id: layerId, pointer: newPointer };
     axios
       .post('http://localhost:8000/api/move-pointer', layer_pointer)
@@ -124,31 +134,33 @@ export function Editor() {
       .catch((error) => console.error('Error moving layer pointer:', error));
   }
 
+  /**
+   * Adds new point to layer
+   * @param {int} layerId
+   * @param {number[]} point new point to add [x1,y1,v1]
+   */
   async function handleNewPoint(layerId, point) {
     const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
     let newLayerPoints = [];
     if (layerIndex === -1) {
+      // first layer point
       newLayerPoints = [
         ...layerPoints,
-        { id: layerId, points: [point], pointer: 1, history: [[point]] },
+        { id: layerId, coords: [point], pointer: 1, history: [[point]] },
       ];
     } else {
       newLayerPoints = [...layerPoints];
       const layerPointer = layerPoints[layerIndex].pointer;
-      let newPoints = [];
-      if (layerPoints[layerIndex].pointer !== layerPoints[layerIndex].points.length) {
-        newPoints = [...newLayerPoints[layerIndex].points.slice(0, layerPointer), point];
-      } else {
-        newPoints = [...newLayerPoints[layerIndex].points, point];
-      }
+      // add new point to current points after pointer and discard the rest
+      const newPoints = [...newLayerPoints[layerIndex].coords.slice(0, layerPointer), point];
       const newHistory = [...newLayerPoints[layerIndex].history, newPoints];
-      newLayerPoints[layerIndex].points = newPoints;
+      newLayerPoints[layerIndex].coords = newPoints;
       newLayerPoints[layerIndex].pointer += 1;
       newLayerPoints[layerIndex].history = newHistory;
     }
     setLayerPoints(newLayerPoints);
-    const data = { layer_id: layerId, x_coord: point[0], y_coord: point[1], type: point[2] };
     // send new point to backend
+    const data = { layer_id: layerId, x_coord: point[0], y_coord: point[1], type: point[2] };
     axios
       .post('http://localhost:8000/api/point_&_click', data)
       .then((response) => {
@@ -157,6 +169,10 @@ export function Editor() {
       .catch((error) => console.error('Error al enviar coordenadas:', error));
   }
 
+  /**
+   * Erase layer with specified id from here to backend
+   * @param {int} layerId layer to delete
+   */
   async function handleLayerDelete(layerId) {
     // erase mask from disk
     fetch(
@@ -169,7 +185,7 @@ export function Editor() {
         if (response.status === 200) {
           console.log('layer file successfully deleted');
         } else {
-          console.log('failed deleting mask file with error: ', response.message);
+          console.error('failed deleting mask file with error: ', response.message);
         }
       })
       .catch((error) => {

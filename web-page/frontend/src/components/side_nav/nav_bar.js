@@ -2,6 +2,7 @@ import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import './nav-bar.scss';
+import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -12,14 +13,10 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
-import axios from 'axios';
 
 // list components
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+
 // icons
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';

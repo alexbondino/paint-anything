@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Box from '@mui/material/Box';
 import './image-editor.scss';
 
-import Stack from '@mui/material/Stack';
+import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material';
+
+// icons
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
-import IconButton from '@mui/material/IconButton';
-import Button from '@mui/material/Button';
-import ButtonGroup from '@mui/material/ButtonGroup';
-import { Tooltip } from '@mui/material';
 
 /**
  * Extracts base image size
@@ -25,7 +22,12 @@ function getBaseImageSize(type) {
   return null;
 }
 
+/**
+ * Renders the mask for `layerId` along with its points
+ * @returns mask component
+ */
 function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint }) {
+  // listen to key press
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
     return () => {
@@ -35,8 +37,10 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint
 
   async function handleKeyPress(event) {
     if (isSelected && event.keyCode === 90 && event.ctrlKey) {
+      // Ctrl + z command, goes back to last state in history
       onPointerChange(layerId, -1);
     } else if (isSelected && event.keyCode === 89 && event.ctrlKey) {
+      // Ctrl + y command, goes forward to next state in history
       onPointerChange(layerId, 1);
     }
   }
@@ -50,13 +54,15 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint
     // computes click point as 0.0-1.0 image coordinates
     const xPercent = (clientX - boxRect.left - 5) / (boxRect.right - boxRect.left);
     const yPercent = (clientY - boxRect.top - 5) / (boxRect.bottom - boxRect.top);
-    // payload for api is point coordinates in [0-1] range
+    // defines which type of point was clicked
     let pointType = -1;
     switch (event.type) {
       case 'click':
+        // positive point
         pointType = 1;
         break;
       case 'contextmenu':
+        // negative point
         pointType = 0;
         break;
       default:
@@ -65,10 +71,11 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint
     if (pointType === -1) {
       return;
     }
-    // update coordintes
+    // push new point
     const newPoint = [xPercent, yPercent, pointType];
     onNewPoint(layerId, newPoint);
   };
+  // points to render as boxes
   const pointBoxes = isSelected
     ? points.map((point, index) => {
         return (
@@ -113,18 +120,19 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint
 }
 
 /**
- * Renders mask images
-    
+ * Renders all visible masks and corresponding points
+ * @returns list of mask components
  */
 const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, onNewPoint }) => {
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
       try {
-        let points = [];
+        // extract cooords up until pointer
+        let coords = [];
         if (layerPoints.length > 0) {
           const pointsDef = layerPoints.find((l) => l.id === layer.id);
-          points = pointsDef ? pointsDef.points.slice(0, pointsDef.pointer) : [];
+          coords = pointsDef ? pointsDef.coords.slice(0, pointsDef.pointer) : [];
         }
         return (
           <Mask
@@ -132,7 +140,7 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, on
             layerId={layer.id}
             imgUrl={layer.imgUrl}
             isSelected={layer.id === selectedLayer}
-            points={points}
+            points={coords}
             onPointerChange={onPointerChange}
             onNewPoint={onNewPoint}
           />
@@ -144,10 +152,6 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, on
     });
 };
 
-/*
- * Image editor
- */
-// TODO: move useEffect from here to mask component, to avoid triggering it every time this larger component is updated
 export default function ImageEditor({
   baseImg,
   layersDef,
@@ -165,7 +169,7 @@ export default function ImageEditor({
     setNaturalImgSize(newImageSize);
   };
 
-  const selectedLayerDef = layersDef.find((l) => l.id === selectedLayer) ?? {
+  const selectedLayerVisibility = layersDef.find((l) => l.id === selectedLayer) ?? {
     visibility: false,
   };
 
@@ -186,8 +190,8 @@ export default function ImageEditor({
         <Tooltip title="Undo (Ctrl + z)" placement="top">
           <Button
             className="history-button"
-            disabled={selectedLayer === -1 || !selectedLayerDef.visibility}
-            onClick={() => onPointerChange(selectedLayerDef.id, -1)}
+            disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
+            onClick={() => onPointerChange(selectedLayerVisibility.id, -1)}
           >
             <UndoIcon />
           </Button>
@@ -195,8 +199,8 @@ export default function ImageEditor({
         <Tooltip title="Redo (Ctrl + y)" placement="top">
           <Button
             className="history-button"
-            disabled={selectedLayer === -1 || !selectedLayerDef.visibility}
-            onClick={() => onPointerChange(selectedLayerDef.id, 1)}
+            disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
+            onClick={() => onPointerChange(selectedLayerVisibility.id, 1)}
           >
             <RedoIcon />
           </Button>
