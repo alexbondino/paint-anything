@@ -155,7 +155,7 @@ export function ImageEditorDrawer({
       <CssBaseline />
       <TitleBar position="fixed" open={open}>
         <Toolbar>
-          <BrushIcon />
+          <BrushIcon sx={{ marginRight: 2 }} />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
             Imagine Houses
           </Typography>

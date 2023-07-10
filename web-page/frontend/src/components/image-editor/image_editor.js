@@ -8,6 +8,7 @@ import RedoIcon from '@mui/icons-material/Redo';
 import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
+import { Tooltip } from '@mui/material';
 
 /**
  * Extracts base image size
@@ -182,18 +183,24 @@ export default function ImageEditor({
         variant="contained"
         aria-label="outlined primary button group"
       >
-        <Button
-          className="history-button"
-          disabled={selectedLayer === -1 || !selectedLayerDef.visibility}
-        >
-          <UndoIcon />
-        </Button>
-        <Button
-          className="history-button"
-          disabled={selectedLayer === -1 || !selectedLayerDef.visibility}
-        >
-          <RedoIcon />
-        </Button>
+        <Tooltip title="Undo (Ctrl + z)" placement="top">
+          <Button
+            className="history-button"
+            disabled={selectedLayer === -1 || !selectedLayerDef.visibility}
+            onClick={() => onPointerChange(selectedLayerDef.id, -1)}
+          >
+            <UndoIcon />
+          </Button>
+        </Tooltip>
+        <Tooltip title="Redo (Ctrl + y)" placement="top">
+          <Button
+            className="history-button"
+            disabled={selectedLayer === -1 || !selectedLayerDef.visibility}
+            onClick={() => onPointerChange(selectedLayerDef.id, 1)}
+          >
+            <RedoIcon />
+          </Button>
+        </Tooltip>
       </ButtonGroup>
       <Box className="image-box">
         <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
