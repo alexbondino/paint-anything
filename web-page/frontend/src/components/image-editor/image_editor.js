@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import './image-editor.scss';
-import axios from 'axios';
+
+import Stack from '@mui/material/Stack';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 
 /**
  * Extracts base image size
@@ -158,24 +164,49 @@ export default function ImageEditor({
     setNaturalImgSize(newImageSize);
   };
 
+  const selectedLayerDef = layersDef.find((l) => l.id === selectedLayer) ?? {
+    visibility: false,
+  };
+
   return (
-    <Box
-      className="image-box"
+    <Stack
+      className="editor-stack"
       sx={{
         aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
         visibility: naturalImgSize ? 'visible' : 'hidden',
       }}
+      spacing={1}
     >
-      <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
-      {naturalImgSize.length === 2 ? (
-        <MaskImages
-          layersDef={layersDef}
-          selectedLayer={selectedLayer}
-          layerPoints={layerPoints}
-          onPointerChange={onPointerChange}
-          onNewPoint={onNewPoint}
-        />
-      ) : null}
-    </Box>
+      <ButtonGroup
+        className="history-box"
+        variant="contained"
+        aria-label="outlined primary button group"
+      >
+        <Button
+          className="history-button"
+          disabled={selectedLayer === -1 || !selectedLayerDef.visibility}
+        >
+          <UndoIcon />
+        </Button>
+        <Button
+          className="history-button"
+          disabled={selectedLayer === -1 || !selectedLayerDef.visibility}
+        >
+          <RedoIcon />
+        </Button>
+      </ButtonGroup>
+      <Box className="image-box">
+        <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
+        {naturalImgSize.length === 2 ? (
+          <MaskImages
+            layersDef={layersDef}
+            selectedLayer={selectedLayer}
+            layerPoints={layerPoints}
+            onPointerChange={onPointerChange}
+            onNewPoint={onNewPoint}
+          />
+        ) : null}
+      </Box>
+    </Stack>
   );
 }

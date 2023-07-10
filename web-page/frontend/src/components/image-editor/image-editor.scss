@@ -1,13 +1,35 @@
+// editor stack
+.editor-stack {
+    display: flex;
+    flex-direction: column;
+    max-width:80%;
+    height:auto;
+    max-height:100%;
+    margin:auto;
+}
+
+// undo-box
+.history-box{
+    display: flex;
+    height:auto;
+    width:15%;
+    min-width:90px;
+    max-width:150px;
+    margin-right:0%;
+    margin-left:auto;
+}
+
+.history-button{
+    display:flex;
+    flex:1;
+}
+
 // image container
 .image-box {
     display: flex;
     flex-direction: column;
-    max-width: 65%;
-    height:auto;
-    max-height:95%;
-    margin:auto;
     position: relative;
-    border: 1px solid gray;
+    border: 2px solid gray;
 }
 // base image
 .image-box img {

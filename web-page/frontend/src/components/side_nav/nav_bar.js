@@ -165,7 +165,6 @@ export function ImageEditorDrawer({
             edge="end"
             onClick={handleDrawerOpen}
             sx={{
-              ...(open && { display: 'none' }),
               display: sidebarVisibility ? 'flex' : 'none',
             }}
           >
@@ -175,7 +174,6 @@ export function ImageEditorDrawer({
       </TitleBar>
       <Main open={open}>
         <DrawerHeader />
-        <Typography paragraph>Change the colour of any object, in the way you see fit</Typography>
       </Main>
       <Drawer
         sx={{

@@ -206,7 +206,7 @@ export function Editor() {
   ) : null;
 
   return (
-    <div style={{ height: '80vh' }}>
+    <div style={{ height: '78vh' }}>
       <ImageEditorDrawer
         key="side_nav"
         baseImg={baseImg}
