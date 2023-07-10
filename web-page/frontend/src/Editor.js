@@ -33,14 +33,13 @@ export function Editor() {
       imgUrl: null,
       hsl: [],
     };
-    console.log('Se ingresó a handle Image uploade');
     setSidebarVisibility(true);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
+    setLayerPoints([]);
     setSelectedLayer(0);
     const imgObjectURL = URL.createObjectURL(imgFile);
     setBaseImg(imgObjectURL);
-
     // send new image to backend
     const formData = new FormData();
     formData.append('image', imgFile);
