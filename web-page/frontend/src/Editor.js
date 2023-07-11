@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
+import ModelSelector from './components/model-selector/model-selector.js';
 import axios from 'axios';
 
 // TODO: show loading status while image embeddings are being computed
@@ -18,12 +19,23 @@ export function Editor() {
   // list of layer points as objects {coords:[[x1,y1,v1],[x2,y2,v2]], history:[coords_t1, coords_t2], pointer:pointer_value}
   const [layerPoints, setLayerPoints] = useState([]);
 
+  const [modelSelected, setModelSelected] = useState('');
+
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
     const layerPos = newLayerDef.findIndex((l) => l.id === layerId);
     newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
     setLayersDef(newLayerDef);
   }
+  
+  useEffect(() => {
+    console.log("Modelo accesado correctamente", modelSelected);
+  }, [modelSelected]);
+  
+  const handleSelectmodel = (event) => {
+    setModelSelected(event.target.value);
+  }
+  
 
   async function handleImageUpload(imgFile) {
     // initial layer shown after image is uploaded
@@ -234,6 +246,9 @@ export function Editor() {
         onSelectLayer={(layerId) => handleSelectLayer(layerId)}
         onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
         onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
+      />
+      <ModelSelector
+        onHandleSelectModel={handleSelectmodel}
       />
       {imgEditor}
       {imgUploader}
