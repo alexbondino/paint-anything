@@ -20,6 +20,9 @@ export function Editor() {
   const [loaderVisibility, setLoaderVisibility] = React.useState(false);
   // image visibility
   const [imageVisibility, setImageVisibility] = React.useState(false);
+  // HSL input
+  const [hslInput, setHslInput] = React.useState(false);
+  
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -70,6 +73,7 @@ export function Editor() {
     // update hsl in layer definition
     newLayersDef[layerPos].hsl = newHSL;
     setLayersDef(newLayersDef);
+    setHslInput(true);
   }
 
   async function handleSelectLayer(layerId) {
@@ -110,7 +114,7 @@ export function Editor() {
       return;
     }
     // set initial hsl with base img values if not set
-    if (newLayersDef[layerPos].hsl.length === 0) {
+    if (hslInput===false) {
       try {
         const hslResponse = await axios.get('http://localhost:8000/api/mask-base-hsl', {
           params: { layer_id: layerId },
