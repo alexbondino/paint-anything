@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 import os
 import tempfile
 import shutil
+from typing import Literal, List, Tuple, Annotated
 from pydantic import BaseModel, Field
 from masking.predictor import create_sam, update_stored_mask
 from utils import load_image, clean_mask_files, save_output
@@ -18,9 +19,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 temp_dir = tempfile.mkdtemp()  # Global variable to store the temporary directory path
 
 # layer vars
-layer_selected = 0
-positive_layer_coords = {}
-negative_layer_coords = {}
+layer_coords = {}
 
 # image to edit
 img = None
@@ -37,11 +36,22 @@ class Layer(BaseModel):
 
 
 class PointAndClickData(BaseModel):
+    layer_id: int = Field(description="Specifies layer id of point and click")
     x_coord: float = Field(
         description="Point x-coordinate, as ratio of total image width", ge=0.0, le=1.0
     )
     y_coord: float = Field(
         description="Point y-coordinate, as ratio of total image height", ge=0.0, le=1.0
+    )
+    type: Literal[0, 1] = Field(
+        description="Point type, 0 for negative and 1 for positive"
+    )
+
+
+class LayerPointer(BaseModel):
+    layer_id: int = Field(description="Specifies layer id of point and click")
+    pointer: int = Field(
+        description="Pointer to last point to use for mask gen. It's one-indexed"
     )
 
 
@@ -63,12 +73,8 @@ app.add_middleware(
 
 
 def reset_points():
-    global negative_layer_coords
-    global positive_layer_coords
-    global layer_selected
-    positive_layer_coords = {}
-    negative_layer_coords = {}
-    layer_selected = 0
+    global layer_coords
+    layer_coords = {}
 
 
 def set_new_img(img_path: str) -> SamPredictor:
@@ -80,11 +86,7 @@ def set_new_img(img_path: str) -> SamPredictor:
 
 
 def delete_points(layer_id: int):
-    print("deleting poinnntss")
-    global negative_layer_coords
-    global positive_layer_coords
-    positive_layer_coords.pop(layer_id, None)
-    negative_layer_coords.pop(layer_id, None)
+    layer_coords.pop(layer_id, None)
 
 
 # Get image
@@ -183,52 +185,37 @@ def image_downloader():
     return FileResponse(output_path, media_type="image/png")
 
 
-@app.post("/api/selected_layer")
-def set_selected_layer(data: Layer):
-    global layer_selected
-    layerId = data.layerId
-    layer_selected = layerId
-    return {"message": f"{layerId}"}
-
-
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickData):
-    # coordinates must be transformed to real image coordinates
-    new_point = [data.x_coord * img.shape[1], data.y_coord * img.shape[0]]
-    if layer_selected in positive_layer_coords:
-        positive_layer_coords[layer_selected].append(new_point)
+    layer_id = data.layer_id
+    # coordinates transformed to real image coordinates
+    new_point = [data.x_coord * img.shape[1], data.y_coord * img.shape[0], data.type]
+    if layer_id in layer_coords:
+        layer_data = layer_coords[layer_id]
+        # continue adding points from where pointer is at
+        layer_coords[layer_id]["points"] = layer_coords[layer_id]["points"][
+            : layer_data["pointer"]
+        ]
+        layer_coords[layer_id]["points"].append(new_point)
+        # increase pointer
+        layer_coords[layer_id]["pointer"] += 1
     else:
-        positive_layer_coords[layer_selected] = [new_point]
-    print("el layer seleccionado es: ", layer_selected)
-    print("los puntos positivos son: ", positive_layer_coords[layer_selected])
+        # new layer
+        layer_coords[layer_id] = {"points": [new_point], "pointer": 1}
     update_stored_mask(
-        layer_selected,
+        layer_id,
         img,
         predictor,
-        positive_layer_coords,
-        negative_layer_coords,
+        layer_coords,
         temp_dir,
     )
     return {"message": f"Coordenadas pasadas correctamente: {new_point}"}
 
 
-@app.post("/api/neg_point_&_click")
-def neg_point_and_click(data: PointAndClickData):
-    # coordinates must be transformed to real image coordinates
-    new_point = [data.x_coord * img.shape[1], data.y_coord * img.shape[0]]
-    if layer_selected in negative_layer_coords:
-        negative_layer_coords[layer_selected].append(new_point)
-    else:
-        negative_layer_coords[layer_selected] = [new_point]
-
-    print("el layer seleccionado es: ", layer_selected)
-    print("los puntos negativos son: ", negative_layer_coords[layer_selected])
-    update_stored_mask(
-        layer_selected,
-        img,
-        predictor,
-        positive_layer_coords,
-        negative_layer_coords,
-        temp_dir,
-    )
-    return {"message": f"Coordenadas pasadas correctamente: {new_point}"}
+@app.post("/api/move-pointer")
+def move_layer_pointer(layer_pointer: LayerPointer):
+    print(f"new pointer: {layer_pointer.pointer}")
+    layer_id = layer_pointer.layer_id
+    layer_coords[layer_id]["pointer"] = layer_pointer.pointer
+    update_stored_mask(layer_id, img, predictor, layer_coords, temp_dir)
+    return {"message": "layer pointer moved successfully"}

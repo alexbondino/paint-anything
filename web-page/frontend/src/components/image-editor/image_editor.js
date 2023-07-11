@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Box from '@mui/material/Box';
 import './image-editor.scss';
-import axios from 'axios';
+
+import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material';
+
+// icons
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 
 /**
  * Extracts base image size
@@ -19,92 +23,30 @@ function getBaseImageSize(type) {
 }
 
 /**
- * Renders mask images
- * @param {Array} layersDef array with layer definitions
- * @param {int} selectedLayer id of selected layer
- * @param {function} onPointAndClick trigger for when image is selected and click is performed
- * @returns array of html images for masks
+ * Renders the mask for `layerId` along with its points
+ * @returns mask component
  */
-const MaskImages = ({ layersDef, selectedLayer, onPointAndClick }) => {
-  return layersDef
-    .filter((l) => l.visibility)
-    .map((layer) => {
-      const isLayerSelected = layer.id === selectedLayer;
-      try {
-        return (
-          <img
-            key={layer.id}
-            // If image file has not been defined, loads full transparent image
-            src={
-              layer.imgUrl !== null
-                ? layer.imgUrl
-                : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-            }
-            className={'mask-img'}
-            alt={`mask_image_${layer.id}`}
-            draggable={false}
-            style={{
-              // if image is selected, this highlights it
-              filter:
-                isLayerSelected && layer.imgUrl !== null
-                  ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
-                  : 'none',
-              zIndex: isLayerSelected ? '100' : 'auto',
-            }}
-            onClick={isLayerSelected && layer.visibility ? onPointAndClick : null}
-            onContextMenu={isLayerSelected && layer.visibility ? onPointAndClick : null}
-          />
-        );
-      } catch {
-        console.log(`Image for layer ${layer.id} not found`);
-        return;
-      }
-    });
-};
-
-/*
- * Image editor
- */
-// TODO: move useEffect from here to mask component, to avoid triggering it every time this larger component is updated
-export default function ImageEditor({
-  baseImg,
-  layersDef,
-  selectedLayer,
-  onNewLayerDef,
-  onMaskUpdate,
-  layerVisibility,
-}) {
-  // construct mask images dynamically from layer definitions
-  const [naturalImgSize, setNaturalImgSize] = useState([]);
-  const [truePoints, setTruePoints] = useState([]);
-  const [falsePoints, setFalsePoints] = useState([]);
-  const [showPoints, setShowPoints] = useState(true);
-
+function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint }) {
+  // listen to key press
   useEffect(() => {
-    // dont trigger effect if no layer is selected or layers are empty
-    if ((selectedLayer === -1) | (layersDef.length === 0)) {
-      setShowPoints(false);
-      return;
-    }
-    // points are shown only when visible
-    const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
-    if (layersDef[layerPos].visibility === true) {
-      // set points to show
-      setTruePoints(layersDef[layerPos].layerTrueCoords);
-      setFalsePoints(layersDef[layerPos].layerFalseCoords);
-      setShowPoints(true);
-    } else {
-      setShowPoints(false);
-    }
-  }, [selectedLayer, layerVisibility, layersDef]);
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  });
 
-  // sets image size when is loaded
-  const handleOnBaseImageLoad = () => {
-    const newImageSize = getBaseImageSize('natural');
-    setNaturalImgSize(newImageSize);
-  };
+  async function handleKeyPress(event) {
+    if (isSelected && event.keyCode === 90 && event.ctrlKey) {
+      // Ctrl + z command, goes back to last state in history
+      onPointerChange(layerId, -1);
+    } else if (isSelected && event.keyCode === 89 && event.ctrlKey) {
+      // Ctrl + y command, goes forward to next state in history
+      onPointerChange(layerId, 1);
+    }
+  }
 
   const handlePointAndClick = async (event) => {
+    event.preventDefault();
     const { clientX, clientY } = event;
     //  current component bounds
     const boxElement = document.querySelector('.image-box img');
@@ -112,81 +54,170 @@ export default function ImageEditor({
     // computes click point as 0.0-1.0 image coordinates
     const xPercent = (clientX - boxRect.left - 5) / (boxRect.right - boxRect.left);
     const yPercent = (clientY - boxRect.top - 5) / (boxRect.bottom - boxRect.top);
-
-    const layerPos = layersDef.findIndex((l) => l.id === selectedLayer);
-    const newLayerDef = [...layersDef];
-    // payload for api is point coordinates in [0-1] range
-    const data = { x_coord: xPercent, y_coord: yPercent };
-    event.preventDefault();
-    if (event.type === 'click' && layerPos !== -1) {
-      // update positive coords
-      newLayerDef[layerPos].layerTrueCoords.push([xPercent * 100, yPercent * 100]);
-      onNewLayerDef(newLayerDef);
-      console.log('layerTrueCoords:', newLayerDef[layerPos].layerTrueCoords);
-      // send new point to backend
-      axios
-        .post('http://localhost:8000/api/point_&_click', data)
-        .then((response) => {
-          onMaskUpdate(newLayerDef[layerPos].id);
-        })
-        .catch((error) => console.error('Error al enviar coordenadas positivas:', error));
-    } else if (event.type === 'contextmenu' && layerPos !== -1) {
-      // update negative coords
-      newLayerDef[layerPos].layerFalseCoords.push([xPercent * 100, yPercent * 100]);
-      onNewLayerDef(newLayerDef);
-      console.log('layerFalseCoords:', newLayerDef[layerPos].layerFalseCoords);
-      // send new point to backend
-      axios
-        .post('http://localhost:8000/api/neg_point_&_click', data)
-        .then((response) => {
-          onMaskUpdate(newLayerDef[layerPos].id);
-        })
-        .catch((error) => console.error('Error al enviare coordenadas negativas:', error));
+    // defines which type of point was clicked
+    let pointType = -1;
+    switch (event.type) {
+      case 'click':
+        // positive point
+        pointType = 1;
+        break;
+      case 'contextmenu':
+        // negative point
+        pointType = 0;
+        break;
+      default:
+        break;
     }
-    setShowPoints(true);
+    if (pointType === -1) {
+      return;
+    }
+    // push new point
+    const newPoint = [xPercent, yPercent, pointType];
+    onNewPoint(layerId, newPoint);
   };
+  // points to render as boxes
+  const pointBoxes = isSelected
+    ? points.map((point, index) => {
+        return (
+          <Box
+            className="mask-point"
+            key={index}
+            sx={{
+              left: `${point[0] * 100}%`,
+              top: `${point[1] * 100}%`,
+              backgroundColor: point[2] === 1 ? 'green' : 'red',
+            }}
+          />
+        );
+      })
+    : null;
+
+  return [
+    <img
+      key={layerId}
+      // If image file has not been defined, loads full transparent image
+      src={
+        imgUrl !== null
+          ? imgUrl
+          : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+      }
+      className={'mask-img'}
+      alt={`mask_image_${layerId}`}
+      draggable={false}
+      style={{
+        // if image is selected, this highlights it
+        filter:
+          isSelected && imgUrl !== null
+            ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
+            : 'none',
+        zIndex: isSelected ? '100' : 'auto',
+      }}
+      onClick={isSelected ? handlePointAndClick : null}
+      onContextMenu={isSelected ? handlePointAndClick : null}
+    />,
+    pointBoxes,
+  ];
+}
+
+/**
+ * Renders all visible masks and corresponding points
+ * @returns list of mask components
+ */
+const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, onNewPoint }) => {
+  return layersDef
+    .filter((l) => l.visibility)
+    .map((layer) => {
+      try {
+        // extract cooords up until pointer
+        let coords = [];
+        if (layerPoints.length > 0) {
+          const pointsDef = layerPoints.find((l) => l.id === layer.id);
+          coords = pointsDef ? pointsDef.coords.slice(0, pointsDef.pointer) : [];
+        }
+        return (
+          <Mask
+            key={`mask_${layer.id}`}
+            layerId={layer.id}
+            imgUrl={layer.imgUrl}
+            isSelected={layer.id === selectedLayer}
+            points={coords}
+            onPointerChange={onPointerChange}
+            onNewPoint={onNewPoint}
+          />
+        );
+      } catch (error) {
+        console.log(`Error rendering mask ${layer.id}`, error);
+        return;
+      }
+    });
+};
+
+export default function ImageEditor({
+  baseImg,
+  layersDef,
+  selectedLayer,
+  layerPoints,
+  onPointerChange,
+  onNewPoint,
+}) {
+  // construct mask images dynamically from layer definitions
+  const [naturalImgSize, setNaturalImgSize] = useState([]);
+
+  // sets image size when is loaded
+  const handleOnBaseImageLoad = () => {
+    const newImageSize = getBaseImageSize('natural');
+    setNaturalImgSize(newImageSize);
+  };
+
+  const selectedLayerVisibility = layersDef.find((l) => l.id === selectedLayer) ?? {
+    visibility: false,
+  };
+
   return (
-    <Box
-      className="image-box"
+    <Stack
+      className="editor-stack"
       sx={{
         aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
         visibility: naturalImgSize ? 'visible' : 'hidden',
       }}
+      spacing={1}
     >
-      <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
-      {naturalImgSize.length === 2 ? (
-        <MaskImages
-          layersDef={layersDef}
-          selectedLayer={selectedLayer}
-          onPointAndClick={handlePointAndClick}
-        />
-      ) : null}
-      {truePoints.map((truePoint, index) => {
-        return (
-          <Box
-            className="true-point"
-            key={index}
-            sx={{
-              left: `${truePoint[0]}%`,
-              top: `${truePoint[1]}%`,
-              visibility: showPoints ? 'visible' : 'hidden',
-            }}
+      <ButtonGroup
+        className="history-box"
+        variant="contained"
+        aria-label="outlined primary button group"
+      >
+        <Tooltip title="Undo (Ctrl + z)" placement="top">
+          <Button
+            className="history-button"
+            disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
+            onClick={() => onPointerChange(selectedLayerVisibility.id, -1)}
+          >
+            <UndoIcon />
+          </Button>
+        </Tooltip>
+        <Tooltip title="Redo (Ctrl + y)" placement="top">
+          <Button
+            className="history-button"
+            disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
+            onClick={() => onPointerChange(selectedLayerVisibility.id, 1)}
+          >
+            <RedoIcon />
+          </Button>
+        </Tooltip>
+      </ButtonGroup>
+      <Box className="image-box">
+        <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
+        {naturalImgSize.length === 2 ? (
+          <MaskImages
+            layersDef={layersDef}
+            selectedLayer={selectedLayer}
+            layerPoints={layerPoints}
+            onPointerChange={onPointerChange}
+            onNewPoint={onNewPoint}
           />
-        );
-      })}
-      {falsePoints.map((falsePoint, index) => {
-        return (
-          <Box
-            className="false-point"
-            key={index}
-            sx={{
-              left: `${falsePoint[0]}%`,
-              top: `${falsePoint[1]}%`,
-              visibility: showPoints ? 'visible' : 'hidden',
-            }}
-          />
-        );
-      })}
-    </Box>
+        ) : null}
+      </Box>
+    </Stack>
   );
 }

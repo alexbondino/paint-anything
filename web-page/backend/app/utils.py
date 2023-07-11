@@ -4,7 +4,8 @@ import numpy as np
 from PIL import Image
 
 
-def list_mask_files(mask_dir: str):
+def list_mask_files(mask_dir: str) -> list[str]:
+    """returns a list with all mask files stored in disk"""
     return [file for file in os.listdir(mask_dir) if re.search(r"\d+\.png", file)]
 
 

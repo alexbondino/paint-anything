@@ -80,24 +80,29 @@ def predict_mask(
 
 def gen_new_mask(
     img: np.ndarray,
-    positive_points: List[List[int]],
-    negative_points: List[List[int]],
+    points: List[List[int]],
     predictor: SamPredictor,
 ) -> Image:
     """Creates a new mask Image from input points and predictor model
 
     Args:
         img (np.ndarray): input image
-        positive_points (List[List[int]]): positive points for model
-        negative_points (List[List[int]]): negative points for model
+        points (List[List[int]]): points for model
         predictor (SamPredictor): predictor with image embeddings already loaded
 
     Returns:
         Image: new mask
     """
-    points = np.array(positive_points + negative_points)
-    input_label = np.array([1] * len(positive_points) + [0] * len(negative_points))
-    mask = predict_mask(points, input_label, predictor)
+    mask_img = np.zeros(img.shape, dtype=np.uint8)
+    # if no points, mask is a completely transparent image
+    if len(points) == 0:
+        mask_img = Image.fromarray(mask_img)
+        mask_img.putalpha(0)
+        return mask_img
+    points_arr = np.array(points)
+    points = points_arr[:, :2]
+    labels = points_arr[:, -1]
+    mask = predict_mask(points, labels, predictor)
     mask_img = np.zeros(img.shape, dtype=np.uint8)
     mask_img[mask] = img[mask]
     alpha_channel = np.zeros(img.shape[:2], dtype=np.uint8)
@@ -111,8 +116,7 @@ def update_stored_mask(
     layer_id: int,
     img: np.ndarray,
     predictor: SamPredictor,
-    positive_layer_coords: Dict[str, List],
-    negative_layer_coords: Dict[str, List],
+    layer_coords: Dict[str, List],
     mask_dir: str,
 ):
     """Update stored mask for specific layer based on input points
@@ -121,13 +125,16 @@ def update_stored_mask(
         layer_id (int): id of layer
         img (np.ndarray): image input for model
         predictor (SamPredictor): predictor with image embeddings already loaded
-        positive_layer_coords (Dict[str, List]): positive points of all layers
-        negative_layer_coords (Dict[str, List]): negative points of all layers
+        layer_coords (Dict[str, List]): points for all layers
         mask_dir (str): _description_
     """
-    positive_points = positive_layer_coords.get(layer_id, [])
-    negative_points = negative_layer_coords.get(layer_id, [])
+    points = layer_coords.get(layer_id, {})
+    if len(points) == 0:
+        return
+    effective_points = layer_coords[layer_id]["points"][
+        : layer_coords[layer_id]["pointer"]
+    ]
     # create new mask
-    mask_img = gen_new_mask(img, positive_points, negative_points, predictor)
+    mask_img = gen_new_mask(img, effective_points, predictor)
     # update mask by overwriting stored image
     mask_img.save(os.path.join(mask_dir, f"{layer_id}.png"))
