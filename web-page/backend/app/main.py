@@ -55,6 +55,10 @@ class LayerPointer(BaseModel):
     )
 
 
+class ModelSelection(BaseModel):
+    model: str
+
+
 app = FastAPI()
 
 ## CORS dependencies
@@ -218,4 +222,11 @@ def move_layer_pointer(layer_pointer: LayerPointer):
     layer_id = layer_pointer.layer_id
     layer_coords[layer_id]["pointer"] = layer_pointer.pointer
     update_stored_mask(layer_id, img, predictor, layer_coords, temp_dir)
+    return {"message": "layer pointer moved successfully"}
+
+
+@app.post("/api/model-selected")
+def model_selected(data: ModelSelection):
+    selected_model = data
+    print(selected_model)
     return {"message": "layer pointer moved successfully"}

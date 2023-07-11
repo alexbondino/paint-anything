@@ -19,7 +19,7 @@ export function Editor() {
   // list of layer points as objects {coords:[[x1,y1,v1],[x2,y2,v2]], history:[coords_t1, coords_t2], pointer:pointer_value}
   const [layerPoints, setLayerPoints] = useState([]);
 
-  const [modelSelected, setModelSelected] = useState('');
+  const [modelSelected, setModelSelected] = useState('option2');
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -61,6 +61,12 @@ export function Editor() {
       console.log('Imagen enviada correctamente.');
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
+    }
+    try {
+      await axios.post('http://localhost:8000/api/model-selected', { model: modelSelected } );
+      console.log('Modelo enviado correctamente.');
+    } catch (error) {
+      console.error('Error al enviar el modelo:', error);
     }
   }
 
