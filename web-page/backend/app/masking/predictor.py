@@ -75,6 +75,7 @@ def predict_mask(
         multimask_output=False,
     )
     mask = mask.squeeze()
+    print(predictor)
     return mask
 
 

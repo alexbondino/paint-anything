@@ -56,17 +56,16 @@ export function Editor() {
     const formData = new FormData();
     formData.append('image', imgFile);
     try {
-      await axios.post('http://localhost:8000/api/image', formData);
-
-      console.log('Imagen enviada correctamente.');
-    } catch (error) {
-      console.error('Error al enviar la imagen:', error);
-    }
-    try {
       await axios.post('http://localhost:8000/api/model-selected', { model: modelSelected } );
       console.log('Modelo enviado correctamente.');
     } catch (error) {
       console.error('Error al enviar el modelo:', error);
+    }
+    try {
+      await axios.post('http://localhost:8000/api/image', formData);
+      console.log('Imagen enviada correctamente.');
+    } catch (error) {
+      console.error('Error al enviar la imagen:', error);
     }
   }
 

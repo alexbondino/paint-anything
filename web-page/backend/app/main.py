@@ -27,7 +27,7 @@ img = None
 # TODO: choose which SAM variant can be used
 # segment anything model
 print("-> loading sam predictor")
-predictor = SamPredictor(create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth"))
+predictor = SamPredictor(create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth"))
 print("-> sam predictor successfully loaded")
 
 
@@ -227,6 +227,11 @@ def move_layer_pointer(layer_pointer: LayerPointer):
 
 @app.post("/api/model-selected")
 def model_selected(data: ModelSelection):
-    selected_model = data
-    print(selected_model)
-    return {"message": "layer pointer moved successfully"}
+    global predictor
+    if data.model == "option1":
+        predictor = SamPredictor(create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth"))
+    elif data.model == "option2":
+        predictor = SamPredictor(create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth"))
+    elif data.model == "option3":
+        predictor = SamPredictor(create_sam("vit_h", "./assets/sam_vit_h_4b8939.pth"))
+    return {"message": "model selected successfuly"}
