@@ -194,6 +194,20 @@ export function ImageEditorDrawer({
         </DrawerHeader>
         <Divider />
         <List>
+          <ListItem key="model_select" disablePadding>
+            <FormControl>
+              <InputLabel id="model-select-label">Model Quality</InputLabel>
+              <Select
+                labelId="model-select-label"
+                defaultValue="option2"
+                style={{ width: '300px', height: '50px', border: 0}}
+              >
+                <MenuItem value="option1">Low Quality (Fast)</MenuItem>
+                <MenuItem value="option2">Medium Quality (Normal)</MenuItem>
+                <MenuItem value="option3">High Quality (Slow)</MenuItem>
+              </Select>
+            </FormControl>
+          </ListItem>
           <ListItem key="layers">
             <ListItemIcon>
               <LayersIcon />
@@ -257,20 +271,6 @@ export function ImageEditorDrawer({
             </ListItemButton>
           </ListItem>
         </List>
-        <ListItem key="model_select" disablePadding>
-          <FormControl>
-            <InputLabel id="model-select-label">Model Quality</InputLabel>
-            <Select
-              labelId="model-select-label"
-              defaultValue="option2"
-              sx={{ width: '300px', height: '50px' }}
-            >
-              <MenuItem value="option1">Low Quality (Fast)</MenuItem>
-              <MenuItem value="option2">Medium Quality (Normal)</MenuItem>
-              <MenuItem value="option3">High Quality (Slow)</MenuItem>
-            </Select>
-          </FormControl>
-        </ListItem>
       </Drawer>
     </Box>
   );
