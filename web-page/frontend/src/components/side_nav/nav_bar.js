@@ -96,6 +96,8 @@ export function ImageEditorDrawer({
   onSelectLayer,
   onHandleLayerVisibilityClick,
   onDeleteLayer,
+  onHandleSelectModel,
+  modelSelected,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -198,8 +200,9 @@ export function ImageEditorDrawer({
             <FormControl>
               <InputLabel id="model-select-label">Model Quality</InputLabel>
               <Select
+                onChange={onHandleSelectModel}
                 labelId="model-select-label"
-                defaultValue="option2"
+                value={modelSelected}
                 style={{ width: '300px', height: '50px', border: 0}}
               >
                 <MenuItem value="option1">Low Quality (Fast)</MenuItem>

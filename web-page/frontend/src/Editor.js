@@ -251,6 +251,8 @@ export function Editor() {
         onSelectLayer={(layerId) => handleSelectLayer(layerId)}
         onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
         onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
+        onHandleSelectModel={handleSelectmodel}
+        modelSelected={modelSelected}
       />
       <ModelSelector
         onHandleSelectModel={handleSelectmodel}
