@@ -21,7 +21,7 @@ export function ImageUploader({ onImageUpload }) {
   }
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="center" height="60vh">
+    <Box display="flex" alignItems="center" justifyContent="center" height="50vh">
       <form onSubmit={handleSubmit} className="initial_form">
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <label htmlFor="file_upload" className="custom-file-upload"></label>

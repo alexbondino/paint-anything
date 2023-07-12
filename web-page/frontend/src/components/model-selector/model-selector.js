@@ -5,11 +5,15 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 export function Modelselector({
-    onHandleSelectModel
+    onHandleSelectModel,
+    sidebarVisibility,
 }){
     return (
-    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Box marginRight={"20px"}>
+    <div style={{ display: !sidebarVisibility ? 'flex' : 'none', justifyContent: 'flex-end' }}>
+        <Box 
+        marginRight={"20px"}
+        marginBottom={"40px"}
+        >
             <Typography 
             sx={{ flexGrow: 1, fontSize: 13 }} 
             component="div"

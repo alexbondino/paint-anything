@@ -254,6 +254,7 @@ export function Editor() {
       />
       <ModelSelector
         onHandleSelectModel={handleSelectmodel}
+        sidebarVisibility={sidebarVisibility}
       />
       {imgEditor}
       {imgUploader}
