@@ -16,6 +16,8 @@ import Collapse from '@mui/material/Collapse';
 
 // list components
 import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+
 
 // icons
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -236,18 +238,6 @@ export function ImageEditorDrawer({
             </ListItemButton>
           </ListItem>
         </List>
-        <Divider />
-        <List>
-          {[['Developers', <GroupsIcon />]].map((text, index) => (
-            <ListItem key={text[0]} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>{text[1]}</ListItemIcon>
-                <ListItemText primary={text[0]} />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-        <Divider />
         <List>
           <ListItem disablePadding>
             <ListItemButton variant="contained" component="label">
@@ -267,6 +257,20 @@ export function ImageEditorDrawer({
             </ListItemButton>
           </ListItem>
         </List>
+        <ListItem key="model_select" disablePadding>
+          <FormControl>
+            <InputLabel id="model-select-label">Model Quality</InputLabel>
+            <Select
+              labelId="model-select-label"
+              defaultValue="option2"
+              sx={{ width: '300px', height: '50px' }}
+            >
+              <MenuItem value="option1">Low Quality (Fast)</MenuItem>
+              <MenuItem value="option2">Medium Quality (Normal)</MenuItem>
+              <MenuItem value="option3">High Quality (Slow)</MenuItem>
+            </Select>
+          </FormControl>
+        </ListItem>
       </Drawer>
     </Box>
   );

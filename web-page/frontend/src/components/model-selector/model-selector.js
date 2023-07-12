@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
 export function Modelselector({
     onHandleSelectModel,
@@ -14,12 +13,7 @@ export function Modelselector({
         marginRight={"20px"}
         marginBottom={"40px"}
         >
-            <Typography 
-            sx={{ flexGrow: 1, fontSize: 13 }} 
-            component="div"
-            >
-            Select the quality of the mask selector.  
-            </Typography>
+            <InputLabel id="model-select-label">Model Quality</InputLabel>
             <Select 
             onChange={onHandleSelectModel} 
             defaultValue="option2"
