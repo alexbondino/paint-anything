@@ -93,6 +93,8 @@ lerna-debug.log
 .DS_Store
 Thumbs.db
 
+# JS
+package-lock.json
 
 # Python comments
 **/__pycache__/

@@ -1,28 +1,18 @@
-import * as React from 'react';
+import { useState, useEffect } from 'react';
 import './layers.scss';
 
-import IconButton from '@mui/material/IconButton';
-import Button from '@mui/material/Button';
-
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-
+// icons
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
 
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-
-import Slider from '@mui/material/Slider';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+// other components
+import { List, ListItem, ListItemButton, ListItemIcon } from '@mui/material';
+import { Box, Button, IconButton, Slider, Typography, TextField } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
 
 function valueLabelFormat(value) {
   return `${value} ${'%'}`;
@@ -123,13 +113,36 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
  * @returns the navigation layer item
  */
 const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, onHSLChange }) => {
-  const [openAlert, setOpenAlert] = React.useState(false);
+  const [openAlert, setOpenAlert] = useState(false);
+  const [openEditionMode, setEditionMode] = useState(false);
   const layerName = 'Layer ' + layerDef.id;
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  });
+
+  const handleKeyPress = (event) => {
+    if (openEditionMode && event.keyCode === 13) {
+      setEditionMode(false);
+    }
+  };
 
   const handleDeleteConfirmation = () => {
     setOpenAlert(false);
     onDelete(layerDef.id);
   };
+
+  const handleLayerEditOpen = () => {
+    setEditionMode(true);
+  };
+
+  const handleLayerEditClose = () => {
+    setEditionMode(false);
+  };
+
   return (
     <div>
       <ListItem>
@@ -137,9 +150,10 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
           id={layerDef.id}
           disableRipple
           selected={selectedLayer === layerDef.id}
-          onClick={() => onSelected(layerDef.id)}
+          onClick={() => (openEditionMode ? null : onSelected(layerDef.id))}
+          sx={{ borderRadius: '5%' }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: '30%' }}>
             {layerDef.hsl.length === 3 ? (
               <SquareRoundedIcon
                 sx={{
@@ -159,17 +173,41 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
               />
             )}
           </ListItemIcon>
-          <ListItemText primary={layerName} />
+          <TextField
+            defaultValue={layerName}
+            variant={'standard'}
+            sx={{
+              pointerEvents: openEditionMode ? 'auto' : 'none',
+            }}
+            multiline={true}
+            InputProps={{
+              disableUnderline: !openEditionMode,
+              readOnly: !openEditionMode,
+            }}
+          />
         </ListItemButton>
         <IconButton
           disableTouchRipple
           aria-label="layer visibility"
           onClick={() => onVisClick(layerDef.id)}
         >
-          {layerDef.visibility ? <VisibilityIcon /> : <VisibilityOffIcon />}
+          {layerDef.visibility ? (
+            <VisibilityIcon fontSize="small" />
+          ) : (
+            <VisibilityOffIcon fontSize="small" />
+          )}
         </IconButton>
+        {openEditionMode ? (
+          <IconButton onClick={handleLayerEditClose}>
+            <CheckIcon fontSize="small" sx={{ color: 'green' }} />
+          </IconButton>
+        ) : (
+          <IconButton onClick={handleLayerEditOpen}>
+            <EditIcon fontSize="small" />
+          </IconButton>
+        )}
         <IconButton disableTouchRipple aria-label="delete layer" onClick={() => setOpenAlert(true)}>
-          <DeleteIcon />
+          <DeleteIcon fontSize="small" />
         </IconButton>
         <Dialog
           open={openAlert}

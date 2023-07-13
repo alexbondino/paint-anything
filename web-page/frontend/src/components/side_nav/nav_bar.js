@@ -2,6 +2,7 @@ import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import './nav-bar.scss';
+import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -12,14 +13,10 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
-import axios from 'axios';
 
 // list components
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
+import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+
 // icons
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -38,7 +35,7 @@ import Layers from './layers';
 import PreviewDialog from './preview';
 
 // controls the width of the drawer
-const drawerWidth = 280;
+const drawerWidth = 300;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -96,6 +93,7 @@ export function ImageEditorDrawer({
   onHSLChange,
   onSelectLayer,
   onHandleLayerVisibilityClick,
+  onDeleteLayer,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -123,8 +121,6 @@ export function ImageEditorDrawer({
         visibility: true,
         imgUrl: null,
         hsl: [],
-        layerTrueCoords: [],
-        layerFalseCoords: [],
       },
     ];
     onNewLayerDef(newLayersDef);
@@ -133,31 +129,6 @@ export function ImageEditorDrawer({
       setExpandLayers(!expandLayers);
     }
   };
-
-  async function handleLayerDelete(layerId) {
-    const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
-    if (selectedLayer === layerId) {
-      onSelectLayer(layerId);
-    }
-    // erase mask from disk
-    fetch(
-      'http://localhost:8000/api/delete-mask?' +
-        new URLSearchParams({
-          layer_id: layerId,
-        })
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log('layer file successfully deleted');
-        } else {
-          console.log('failed deleting mask file with error: ', response.message);
-        }
-      })
-      .catch((error) => {
-        console.error('Error deleting mask', error);
-      });
-    onNewLayerDef(newLayerDef);
-  }
 
   async function handleDownloadButtonClick() {
     try {
@@ -181,7 +152,7 @@ export function ImageEditorDrawer({
       <CssBaseline />
       <TitleBar position="fixed" open={open}>
         <Toolbar>
-          <BrushIcon />
+          <BrushIcon sx={{ marginRight: 2 }} />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
             Imagine Houses
           </Typography>
@@ -191,7 +162,6 @@ export function ImageEditorDrawer({
             edge="end"
             onClick={handleDrawerOpen}
             sx={{
-              ...(open && { display: 'none' }),
               display: sidebarVisibility ? 'flex' : 'none',
             }}
           >
@@ -201,7 +171,6 @@ export function ImageEditorDrawer({
       </TitleBar>
       <Main open={open}>
         <DrawerHeader />
-        <Typography paragraph>Change the colour of any object, in the way you see fit</Typography>
       </Main>
       <Drawer
         sx={{
@@ -250,7 +219,7 @@ export function ImageEditorDrawer({
               layersDef={layersDef}
               selectedLayer={selectedLayer}
               onSelectLayer={onSelectLayer}
-              onDeleteLayer={handleLayerDelete}
+              onDeleteLayer={onDeleteLayer}
               onVisibilityClicked={onHandleLayerVisibilityClick}
               onHSLChange={onHSLChange}
             />
