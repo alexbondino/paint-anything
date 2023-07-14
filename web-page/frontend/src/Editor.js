@@ -7,7 +7,6 @@ import axios from 'axios';
 
 // TODO: show loading status while image embeddings are being computed
 export function Editor() {
-  const [sidebarVisibility, setSidebarVisibility] = useState(false);
   // base image to be edited
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
@@ -16,10 +15,8 @@ export function Editor() {
   const [selectedLayer, setSelectedLayer] = React.useState(0);
   // layerVisibility
   const [layerVisibility, setLayerVisibility] = React.useState();
-  // loader visibility
-  const [loaderVisibility, setLoaderVisibility] = React.useState(false);
-  // image visibility
-  const [imageVisibility, setImageVisibility] = React.useState(false);
+  // loader, image and sidebar visibility
+  const [ilsVisibility, setIlsVisibility] = React.useState([false, false, false]);
   // HSL input
   const [hslInput, setHslInput] = React.useState(false);
   
@@ -33,7 +30,6 @@ export function Editor() {
   }
 
   async function handleImageUpload(imgFile) {
-    console.log('el cacas');
     // initial layer shown after image is uploaded
     const initialLayer = {
       id: 0,
@@ -44,9 +40,7 @@ export function Editor() {
       layerFalseCoords: [],
     };
     console.log('Se ingresó a handle Image uploade');
-    setSidebarVisibility(true);
-    setLoaderVisibility(true);
-    setImageVisibility(false);
+    setIlsVisibility([false, true, false]);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setSelectedLayer(0);
@@ -63,8 +57,7 @@ export function Editor() {
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
-    setLoaderVisibility(false);
-    setImageVisibility(true);
+    setIlsVisibility([true, false, true]);
   }
 
   function handleHSLChange(newHSL, layerId) {
@@ -114,7 +107,7 @@ export function Editor() {
       return;
     }
     // set initial hsl with base img values if not set
-    if (hslInput===false) {
+    if (!hslInput) {
       try {
         const hslResponse = await axios.get('http://localhost:8000/api/mask-base-hsl', {
           params: { layer_id: layerId },
@@ -129,21 +122,21 @@ export function Editor() {
     setLayersDef(newLayersDef);
   }
   // render upload if no image has been loaded
-  const imgUploader = sidebarVisibility ? null : (
+  const imgUploader = ilsVisibility[1] ? null : (
     <ImageUploader
       key="upload_img"
       onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
     />
   );
   // render image editor only when sidebar is visible
-  const imgEditor = sidebarVisibility
+  const imgEditor = ilsVisibility[2]
     ? [
         <ImageEditor
           key="img_editor"
           baseImg={baseImg}
           layersDef={layersDef}
           layerVisibility={layerVisibility}
-          imageVisibility={imageVisibility}
+          imageVisibility={ilsVisibility[0]}
           selectedLayer={selectedLayer}
           onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
           onMaskUpdate={handleMaskUpdate}
@@ -156,7 +149,7 @@ export function Editor() {
       <ImageEditorDrawer
         key="side_nav"
         baseImg={baseImg}
-        sidebarVisibility={sidebarVisibility}
+        sidebarVisibility={ilsVisibility[2]}
         layersDef={layersDef}
         selectedLayer={selectedLayer}
         layerVisibility={layerVisibility}
@@ -169,7 +162,7 @@ export function Editor() {
       {imgEditor}
       {imgUploader}
       <LoadingComponent
-        loaderVisibility={loaderVisibility}
+        loaderVisibility={ilsVisibility[1]}
       />
     </div>
     
