@@ -11,22 +11,21 @@ export function Editor() {
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
   const [layersDef, setLayersDef] = React.useState([]);
+
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
-  // layerVisibility
-  const [layerVisibility, setLayerVisibility] = React.useState();
+  // list of layer points as objects {coords:[[x1,y1,v1],[x2,y2,v2]], history:[coords_t1, coords_t2], pointer:pointer_value}
+  const [layerPoints, setLayerPoints] = useState([]);
   // loader, image and sidebar visibility
   const [ilsVisibility, setIlsVisibility] = React.useState([false, false, false]);
   // HSL input
   const [hslInput, setHslInput] = React.useState(false);
-  
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
     const layerPos = newLayerDef.findIndex((l) => l.id === layerId);
     newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
     setLayersDef(newLayerDef);
-    setLayerVisibility(newLayerDef[layerPos].visibility);
   }
 
   async function handleImageUpload(imgFile) {
@@ -36,17 +35,15 @@ export function Editor() {
       visibility: true,
       imgUrl: null,
       hsl: [],
-      layerTrueCoords: [],
-      layerFalseCoords: [],
     };
     console.log('Se ingresó a handle Image uploade');
     setIlsVisibility([false, true, false]);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
+    setLayerPoints([]);
     setSelectedLayer(0);
     const imgObjectURL = URL.createObjectURL(imgFile);
     setBaseImg(imgObjectURL);
-
     // send new image to backend
     const formData = new FormData();
     formData.append('image', imgFile);
@@ -76,14 +73,6 @@ export function Editor() {
       return;
     }
     setSelectedLayer(layerId);
-
-    const data = { layerId };
-    try {
-      await axios.post('http://localhost:8000/api/selected_layer', data);
-      console.log('Layer enviada correctamente');
-    } catch (error) {
-      console.error('Error al enviar la layer seleccionada:', error);
-    }
   }
 
   async function handleMaskUpdate(layerId) {
@@ -114,13 +103,110 @@ export function Editor() {
         });
         const newHSL = hslResponse.data.hsl;
         newLayersDef[layerPos].hsl = newHSL;
-        console.log(newHSL);
       } catch (error) {
         console.error('failed trying to set initial hsl');
       }
     }
     setLayersDef(newLayersDef);
   }
+
+  /**
+   * Updates layer coords based on pointer change
+   * @param {int} layerId layer affected
+   * @param {int} pointerChange direction of pointer change. -1 for undo and +1 for redo
+   */
+  async function handlePointerChange(layerId, pointerChange) {
+    const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
+    const layerDef = layerPoints[layerIndex];
+    // computes new pointer
+    const newPointer = layerDef.pointer + pointerChange;
+    // retrieves most recent coordinates in history
+    const lastPoints = layerDef.history[layerDef.history.length - 1];
+    // handle pointer overflow
+    if (newPointer < 0 || newPointer > lastPoints.length) {
+      return;
+    }
+    // update coordinates with new slice
+    const newLayerPoints = [...layerPoints];
+    newLayerPoints[layerIndex].pointer = newPointer;
+    newLayerPoints[layerIndex].coords = lastPoints.slice(0, newPointer);
+    setLayerPoints(newLayerPoints);
+    // triggers same operation in backend
+    const layer_pointer = { layer_id: layerId, pointer: newPointer };
+    axios
+      .post('http://localhost:8000/api/move-pointer', layer_pointer)
+      .then((response) => {
+        handleMaskUpdate(layerId);
+      })
+      .catch((error) => console.error('Error moving layer pointer:', error));
+  }
+
+  /**
+   * Adds new point to layer
+   * @param {int} layerId
+   * @param {number[]} point new point to add [x1,y1,v1]
+   */
+  async function handleNewPoint(layerId, point) {
+    const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
+    let newLayerPoints = [];
+    if (layerIndex === -1) {
+      // first layer point
+      newLayerPoints = [
+        ...layerPoints,
+        { id: layerId, coords: [point], pointer: 1, history: [[point]] },
+      ];
+    } else {
+      newLayerPoints = [...layerPoints];
+      const layerPointer = layerPoints[layerIndex].pointer;
+      // add new point to current points after pointer and discard the rest
+      const newPoints = [...newLayerPoints[layerIndex].coords.slice(0, layerPointer), point];
+      const newHistory = [...newLayerPoints[layerIndex].history, newPoints];
+      newLayerPoints[layerIndex].coords = newPoints;
+      newLayerPoints[layerIndex].pointer += 1;
+      newLayerPoints[layerIndex].history = newHistory;
+    }
+    setLayerPoints(newLayerPoints);
+    // send new point to backend
+    const data = { layer_id: layerId, x_coord: point[0], y_coord: point[1], type: point[2] };
+    axios
+      .post('http://localhost:8000/api/point_&_click', data)
+      .then((response) => {
+        handleMaskUpdate(layerId);
+      })
+      .catch((error) => console.error('Error al enviar coordenadas:', error));
+  }
+
+  /**
+   * Erase layer with specified id from here to backend
+   * @param {int} layerId layer to delete
+   */
+  async function handleLayerDelete(layerId) {
+    // erase mask from disk
+    fetch(
+      'http://localhost:8000/api/delete-mask?' +
+        new URLSearchParams({
+          layer_id: layerId,
+        })
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          console.log('layer file successfully deleted');
+        } else {
+          console.error('failed deleting mask file with error: ', response.message);
+        }
+      })
+      .catch((error) => {
+        console.error('Error deleting mask', error);
+      });
+    const newLayerDef = [...layersDef.filter((l) => l.id !== layerId)];
+    const newLayerPoints = [...layerPoints.filter((l) => l.id !== layerId)];
+    if (selectedLayer === layerId) {
+      setSelectedLayer(-1);
+    }
+    setLayersDef(newLayerDef);
+    setLayerPoints(newLayerPoints);
+  }
+
   // render upload if no image has been loaded
   const imgUploader = ilsVisibility[1] ? null : (
     <ImageUploader
@@ -129,35 +215,33 @@ export function Editor() {
     />
   );
   // render image editor only when sidebar is visible
-  const imgEditor = ilsVisibility[2]
-    ? [
-        <ImageEditor
-          key="img_editor"
-          baseImg={baseImg}
-          layersDef={layersDef}
-          layerVisibility={layerVisibility}
-          imageVisibility={ilsVisibility[0]}
-          selectedLayer={selectedLayer}
-          onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
-          onMaskUpdate={handleMaskUpdate}
-        />,
-      ]
-    : null;
+  const imgEditor = ilsVisibility[2] ? (
+    <ImageEditor
+      key="img_editor"
+      baseImg={baseImg}
+      layersDef={layersDef}
+      selectedLayer={selectedLayer}
+      imageVisibility={ilsVisibility[0]}
+      layerPoints={layerPoints}
+      onPointerChange={handlePointerChange}
+      onNewPoint={handleNewPoint}
+    />
+  ) : null;
 
   return (
-    <div style={{ height: '80vh' }}>
+    <div style={{ height: '78vh' }}>
       <ImageEditorDrawer
         key="side_nav"
         baseImg={baseImg}
         sidebarVisibility={ilsVisibility[2]}
         layersDef={layersDef}
         selectedLayer={selectedLayer}
-        layerVisibility={layerVisibility}
         onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
         onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
         onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
         onSelectLayer={(layerId) => handleSelectLayer(layerId)}
         onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
+        onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
       />
       {imgEditor}
       {imgUploader}
