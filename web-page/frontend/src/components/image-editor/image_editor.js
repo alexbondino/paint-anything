@@ -29,7 +29,7 @@ function getBaseImageSize(type) {
  * Renders the mask for `layerId` along with its points
  * @returns mask component
  */
-function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint }) {
+function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint, currentHSL, naturalImgSize }) {
   // listen to key press
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
@@ -48,36 +48,7 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint
     }
   }
 
-  const handlePointAndClick = async (event) => {
-    event.preventDefault();
-    const { clientX, clientY } = event;
-    //  current component bounds
-    const boxElement = document.querySelector('.image-box img');
-    const boxRect = boxElement.getBoundingClientRect();
-    // computes click point as 0.0-1.0 image coordinates
-    const xPercent = (clientX - boxRect.left - 5) / (boxRect.right - boxRect.left);
-    const yPercent = (clientY - boxRect.top - 5) / (boxRect.bottom - boxRect.top);
-    // defines which type of point was clicked
-    let pointType = -1;
-    switch (event.type) {
-      case 'click':
-        // positive point
-        pointType = 1;
-        break;
-      case 'contextmenu':
-        // negative point
-        pointType = 0;
-        break;
-      default:
-        break;
-    }
-    if (pointType === -1) {
-      return;
-    }
-    // push new point
-    const newPoint = [xPercent, yPercent, pointType];
-    onNewPoint(layerId, newPoint);
-  };
+
   // points to render as boxes
   const pointBoxes = isSelected
     ? points.map((point, index) => {
@@ -95,29 +66,63 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint
       })
     : null;
 
-  return [
-    <img
-      key={layerId}
-      // If image file has not been defined, loads full transparent image
-      src={
-        imgUrl !== null
-          ? imgUrl
-          : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+    const draw = (context, canvas) => {
+      const c = canvas.current;
+      const ctx = context;
+      var img = new Image();
+      img.src = imgUrl ? imgUrl : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+      const l = getBaseImageSize()
+      c.width = l[0];
+      c.height = l[1];
+      img.onload = function(){
+        console.log("img.onLoad")
+        console.log(`image width: ${img.width} height: ${img.height}`)
+        var hue = currentHSL[0];
+        var sat = currentHSL[1];
+        var l = currentHSL[2];
+        //draw outline with offset
+/*         var dArr = [-1,-1, 0,-1, 1,-1, -1,0, 1,0, -1,1, 0,1, 1,1], // offset array
+            s = 2,  // thickness scale
+            i = 0,  // iterator
+            x = 5,  // final position
+            y = 5;
+
+        // draw images at offsets from the array scaled by s
+        for(; i < dArr.length; i += 2)
+          ctx.drawImage(img, x + dArr[i]*s, y + dArr[i+1]*s);
+
+        // fill with color
+        ctx.globalCompositeOperation = "source-in";
+        ctx.fillStyle = "red";
+        ctx.fillRect(0,0,c.width, c.height); */
+
+        //draw original image in normal mode
+        ctx.globalCompositeOperation = "source-over";
+        ctx.drawImage(img, 0,0,c.width, c.height);
+
+        ctx.globalCompositeOperation = l < 100 ? "color-burn" : "color-dodge";
+        // for common slider, to produce a valid value for both directions
+        l = l >= 100 ? l - 100 : 100 - (100 - l);
+        ctx.fillStyle = "hsl(0, 50%, " + currentHSL[2] + "%)";
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        // adjust saturation
+        ctx.globalCompositeOperation = "saturation";
+        ctx.fillStyle = "hsl(0," + sat + "%, 50%)";
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        // step 3: adjust hue, preserve luma and chroma
+        ctx.globalCompositeOperation = "hue";
+        ctx.fillStyle = "hsl(" + hue + ",1%, 50%)";  // sat must be > 0, otherwise won't matter
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        // step 4: in our case, we need to clip as we filled the entire area
+        ctx.globalCompositeOperation = "destination-in";
+        ctx.drawImage(img, 0,0,c.width, c.height);
       }
-      className={'mask-img'}
-      alt={`mask_image_${layerId}`}
-      draggable={false}
-      style={{
-        // if image is selected, this highlights it
-        filter:
-          isSelected && imgUrl !== null
-            ? 'drop-shadow(1px 1px 0 yellow) drop-shadow(-1px -1px 0 yellow) drop-shadow(1px -1px 0 yellow) drop-shadow(-1px 1px 0 yellow)'
-            : 'none',
-        zIndex: isSelected ? '100' : 'auto',
-      }}
-      onClick={isSelected ? handlePointAndClick : null}
-      onContextMenu={isSelected ? handlePointAndClick : null}
-    />,
+    }
+  return [
+    <Canvas draw={draw} width={getBaseImageSize()[0]} height={getBaseImageSize()[1]}></Canvas>,
     pointBoxes,
   ];
 }
@@ -126,7 +131,7 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint
  * Renders all visible masks and corresponding points
  * @returns list of mask components
  */
-const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, onNewPoint }) => {
+const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, onNewPoint, naturalImgSize }) => {
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
@@ -146,6 +151,8 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, on
             points={coords}
             onPointerChange={onPointerChange}
             onNewPoint={onNewPoint}
+            currentHSL={layer.hsl}
+            naturalImgSize={naturalImgSize}
           />
         );
       } catch (error) {
@@ -169,7 +176,41 @@ export default function ImageEditor({
   // sets image size when is loaded
   const handleOnBaseImageLoad = () => {
     const newImageSize = getBaseImageSize('natural');
+    console.log("image size", getBaseImageSize())
     setNaturalImgSize(newImageSize);
+  };
+
+  async function handlePointAndClick(event) {
+    event.preventDefault();
+    const { clientX, clientY } = event;
+    //  current component bounds
+    const boxElement = document.querySelector('.image-box');
+    console.log(boxElement);
+    const boxRect = boxElement.getBoundingClientRect();;
+    console.log(clientX, clientY);
+    // computes click point as 0.0-1.0 image coordinates
+    const xPercent = (clientX - boxRect.left - 5) / (boxRect.right - boxRect.left);
+    const yPercent = (clientY - boxRect.top - 5) / (boxRect.bottom - boxRect.top);
+    // defines which type of point was clicked
+    let pointType = -1;
+    switch (event.type) {
+      case 'click':
+        // positive point
+        pointType = 1;
+        break;
+      case 'contextmenu':
+        // negative point
+        pointType = 0;
+        break;
+      default:
+        break;
+    }
+    if (pointType === -1) {
+      return;
+    }
+    // push new point
+    const newPoint = [xPercent, yPercent, pointType];
+    onNewPoint(selectedLayer, newPoint);
   };
 
   const selectedLayerVisibility = layersDef.find((l) => l.id === selectedLayer) ?? {
@@ -209,8 +250,8 @@ export default function ImageEditor({
           </Button>
         </Tooltip>
       </ButtonGroup>
-      <Box className="image-box">
-        <img src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
+      <Box className="image-box" sx={{border:'2px solid red'}} onClick={handlePointAndClick} onContextMenu={handlePointAndClick}>
+        <img id='baseImg' src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad}/>
         {naturalImgSize.length === 2 ? (
           <MaskImages
             layersDef={layersDef}
@@ -218,6 +259,7 @@ export default function ImageEditor({
             layerPoints={layerPoints}
             onPointerChange={onPointerChange}
             onNewPoint={onNewPoint}
+            naturalImgSize={naturalImgSize}
           />
         ) : null}
       </Box>
