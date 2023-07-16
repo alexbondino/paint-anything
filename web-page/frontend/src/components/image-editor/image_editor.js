@@ -159,6 +159,7 @@ export default function ImageEditor({
   layerPoints,
   onPointerChange,
   onNewPoint,
+  imageVisibility,
 }) {
   // construct mask images dynamically from layer definitions
   const [naturalImgSize, setNaturalImgSize] = useState([]);
@@ -178,7 +179,7 @@ export default function ImageEditor({
       className="editor-stack"
       sx={{
         aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
-        visibility: naturalImgSize ? 'visible' : 'hidden',
+        visibility: naturalImgSize && imageVisibility === true ? 'visible' : 'hidden',
       }}
       spacing={1}
     >

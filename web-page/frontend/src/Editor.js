@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
+import LoadingComponent from './components/loading/loading.js';
 import axios from 'axios';
 
 // TODO: show loading status while image embeddings are being computed
 export function Editor() {
-  const [sidebarVisibility, setSidebarVisibility] = useState(false);
   // base image to be edited
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
@@ -14,9 +14,12 @@ export function Editor() {
 
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
-
   // list of layer points as objects {coords:[[x1,y1,v1],[x2,y2,v2]], history:[coords_t1, coords_t2], pointer:pointer_value}
   const [layerPoints, setLayerPoints] = useState([]);
+  // image and sidebar visibility
+  const [sidebarVisibility, setSidebarVisibility] = React.useState(false);
+  // loader visibility
+  const [loaderVisibility, setLoaderVisibility] = React.useState(false);
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -32,8 +35,10 @@ export function Editor() {
       visibility: true,
       imgUrl: null,
       hsl: [],
+      hslInput: false,
     };
-    setSidebarVisibility(true);
+    console.log('Se ingresó a handle Image uploade');
+    setLoaderVisibility(true);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setLayerPoints([]);
@@ -50,6 +55,8 @@ export function Editor() {
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
+    setLoaderVisibility(false);
+    setSidebarVisibility(true);
   }
 
   function handleHSLChange(newHSL, layerId) {
@@ -58,6 +65,7 @@ export function Editor() {
     // update hsl in layer definition
     newLayersDef[layerPos].hsl = newHSL;
     setLayersDef(newLayersDef);
+    newLayersDef[layerPos].hslInput = true;
   }
 
   async function handleSelectLayer(layerId) {
@@ -89,7 +97,7 @@ export function Editor() {
       return;
     }
     // set initial hsl with base img values if not set
-    if (newLayersDef[layerPos].hsl.length === 0) {
+    if (!newLayersDef[layerPos].hslInput) {
       try {
         const hslResponse = await axios.get('http://localhost:8000/api/mask-base-hsl', {
           params: { layer_id: layerId },
@@ -201,12 +209,13 @@ export function Editor() {
   }
 
   // render upload if no image has been loaded
-  const imgUploader = sidebarVisibility ? null : (
-    <ImageUploader
-      key="upload_img"
-      onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
-    />
-  );
+  const imgUploader =
+    sidebarVisibility || loaderVisibility ? null : (
+      <ImageUploader
+        key="upload_img"
+        onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
+      />
+    );
   // render image editor only when sidebar is visible
   const imgEditor = sidebarVisibility ? (
     <ImageEditor
@@ -214,6 +223,7 @@ export function Editor() {
       baseImg={baseImg}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
+      imageVisibility={sidebarVisibility}
       layerPoints={layerPoints}
       onPointerChange={handlePointerChange}
       onNewPoint={handleNewPoint}
@@ -237,6 +247,7 @@ export function Editor() {
       />
       {imgEditor}
       {imgUploader}
+      <LoadingComponent loaderVisibility={loaderVisibility} />
     </div>
   );
 }
