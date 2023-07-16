@@ -92,7 +92,6 @@ export function Editor() {
       const url = URL.createObjectURL(await imgResponse.blob());
       // update url in layer definition
       newLayersDef[layerPos].imgUrl = url;
-
     } catch (error) {
       console.error('failed trying to update mask data');
       return;
@@ -210,12 +209,13 @@ export function Editor() {
   }
 
   // render upload if no image has been loaded
-  const imgUploader = loaderVisibility ? null : (
-    <ImageUploader
-      key="upload_img"
-      onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
-    />
-  );
+  const imgUploader =
+    sidebarVisibility || loaderVisibility ? null : (
+      <ImageUploader
+        key="upload_img"
+        onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
+      />
+    );
   // render image editor only when sidebar is visible
   const imgEditor = sidebarVisibility ? (
     <ImageEditor
@@ -247,10 +247,7 @@ export function Editor() {
       />
       {imgEditor}
       {imgUploader}
-      <LoadingComponent
-        loaderVisibility={loaderVisibility}
-      />
+      <LoadingComponent loaderVisibility={loaderVisibility} />
     </div>
-    
   );
 }
