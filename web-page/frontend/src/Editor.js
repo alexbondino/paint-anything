@@ -16,8 +16,10 @@ export function Editor() {
   const [selectedLayer, setSelectedLayer] = React.useState(0);
   // list of layer points as objects {coords:[[x1,y1,v1],[x2,y2,v2]], history:[coords_t1, coords_t2], pointer:pointer_value}
   const [layerPoints, setLayerPoints] = useState([]);
-  // loader, image and sidebar visibility
-  const [ilsVisibility, setIlsVisibility] = React.useState([false, false, false]);
+  // image and sidebar visibility
+  const [sidebarVisibility, setSidebarVisibility] = React.useState(false);
+  // loader visibility
+  const [loaderVisibility, setLoaderVisibility] = React.useState(false);
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -35,7 +37,7 @@ export function Editor() {
       hsl: [],
     };
     console.log('Se ingresó a handle Image uploade');
-    setIlsVisibility([false, true, false]);
+    setLoaderVisibility(true);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setLayerPoints([]);
@@ -52,7 +54,8 @@ export function Editor() {
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
-    setIlsVisibility([true, false, true]);
+    setLoaderVisibility(false);
+    setSidebarVisibility(true);
   }
 
   function handleHSLChange(newHSL, layerId) {
@@ -205,20 +208,20 @@ export function Editor() {
   }
 
   // render upload if no image has been loaded
-  const imgUploader = ilsVisibility[1] ? null : (
+  const imgUploader = loaderVisibility ? null : (
     <ImageUploader
       key="upload_img"
       onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
     />
   );
   // render image editor only when sidebar is visible
-  const imgEditor = ilsVisibility[2] ? (
+  const imgEditor = sidebarVisibility ? (
     <ImageEditor
       key="img_editor"
       baseImg={baseImg}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
-      imageVisibility={ilsVisibility[0]}
+      imageVisibility={sidebarVisibility}
       layerPoints={layerPoints}
       onPointerChange={handlePointerChange}
       onNewPoint={handleNewPoint}
@@ -230,7 +233,7 @@ export function Editor() {
       <ImageEditorDrawer
         key="side_nav"
         baseImg={baseImg}
-        sidebarVisibility={ilsVisibility[2]}
+        sidebarVisibility={sidebarVisibility}
         layersDef={layersDef}
         selectedLayer={selectedLayer}
         onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
@@ -243,7 +246,7 @@ export function Editor() {
       {imgEditor}
       {imgUploader}
       <LoadingComponent
-        loaderVisibility={ilsVisibility[1]}
+        loaderVisibility={loaderVisibility}
       />
     </div>
     
