@@ -35,6 +35,7 @@ export function Editor() {
       visibility: true,
       imgUrl: null,
       hsl: [],
+      hslInput: false,
     };
     console.log('Se ingresó a handle Image uploade');
     setLoaderVisibility(true);
@@ -64,6 +65,7 @@ export function Editor() {
     // update hsl in layer definition
     newLayersDef[layerPos].hsl = newHSL;
     setLayersDef(newLayersDef);
+    newLayersDef[layerPos].hslInput = true;
   }
 
   async function handleSelectLayer(layerId) {
@@ -96,7 +98,7 @@ export function Editor() {
       return;
     }
     // set initial hsl with base img values if not set
-    if (newLayersDef[layerPos].hsl) {
+    if (!newLayersDef[layerPos].hslInput) {
       try {
         const hslResponse = await axios.get('http://localhost:8000/api/mask-base-hsl', {
           params: { layer_id: layerId },
