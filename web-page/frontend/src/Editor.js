@@ -28,6 +28,8 @@ export function Editor() {
   const [modelConfirmation, setModelConfirmation] = useState(false);
   // image
   const [currentImage, setCurrentImage] = useState(null);
+  // previous selected model
+  const [previousModel, setPreviousModel] = useState("option2");
 
 
 
@@ -46,8 +48,8 @@ export function Editor() {
   const handleSelectmodel = (event) => {
     if (sidebarVisibility === true){
       console.log("sidebar model accesed");
-      setModelConfirmation(true);
       setModelSelected(event.target.value);
+      setModelConfirmation(true);
     } else {
       setModelSelected(event.target.value);
     }
@@ -55,6 +57,7 @@ export function Editor() {
 
   const handleCancelModelConfirmation = () => {
     setModelConfirmation(false);
+    setModelSelected(previousModel);
   };
 
   const handleConfirmModelConfirmation = () =>{
@@ -87,6 +90,7 @@ export function Editor() {
     try {
       await axios.post('http://localhost:8000/api/model-selected', { model: modelSelected } );
       console.log('Modelo enviado correctamente.');
+      setPreviousModel(modelSelected)
     } catch (error) {
       console.error('Error al enviar el modelo:', error);
     }
