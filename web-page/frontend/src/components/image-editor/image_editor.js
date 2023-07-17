@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './image-editor.scss';
-
 import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material';
 
 // icons

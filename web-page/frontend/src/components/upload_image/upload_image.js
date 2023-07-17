@@ -3,7 +3,8 @@ import { Button, Input } from '@mui/material';
 import Box from '@mui/material/Box';
 
 // TODO: replicate upload logic from here in nav bar component
-export function ImageUploader({ onImageUpload }) {
+export function ImageUploader({onImageUpload}) {
+
   const [selectedImage, setSelectedImage] = useState(null);
 
   function handleImageChange(event) {

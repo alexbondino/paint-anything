@@ -4,6 +4,7 @@ import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 import LoadingComponent from './components/loading/loading.js';
 import ModelSelector from './components/model-selector/model-selector.js';
+import ModelChangeConfirmation from './components/model-change-confirmation/model-change-confirmation.js';
 import axios from 'axios';
 
 // TODO: show loading status while image embeddings are being computed
@@ -21,8 +22,13 @@ export function Editor() {
   const [sidebarVisibility, setSidebarVisibility] = React.useState(false);
   // loader visibility
   const [loaderVisibility, setLoaderVisibility] = React.useState(false);
-
+  // model selection
   const [modelSelected, setModelSelected] = useState('option2');
+  // model selection confirmation modal
+  const [modelConfirmation, setModelConfirmation] = useState(false);
+  // image
+  const [currentImage, setCurrentImage] = useState(null);
+
 
 
   function handleLayerVisibilityClick(layerId) {
@@ -36,9 +42,25 @@ export function Editor() {
     console.log("Modelo accesado correctamente", modelSelected);
   }, [modelSelected]);
   
+
   const handleSelectmodel = (event) => {
-    setModelSelected(event.target.value);
+    if (sidebarVisibility === true){
+      console.log("sidebar model accesed");
+      setModelConfirmation(true);
+      setModelSelected(event.target.value);
+    } else {
+      setModelSelected(event.target.value);
+    }
   }
+
+  const handleCancelModelConfirmation = () => {
+    setModelConfirmation(false);
+  };
+
+  const handleConfirmModelConfirmation = () =>{
+    setModelConfirmation(false);
+  }
+
   
 
   async function handleImageUpload(imgFile) {
@@ -71,6 +93,7 @@ export function Editor() {
     try {
       await axios.post('http://localhost:8000/api/image', formData);
       console.log('Imagen enviada correctamente.');
+      setCurrentImage(imgFile);
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
@@ -270,10 +293,18 @@ export function Editor() {
         onHandleSelectModel={handleSelectmodel}
         sidebarVisibility={sidebarVisibility}
         loaderVisibility={loaderVisibility}
+        baseImg={baseImg}
       />
       {imgEditor}
       {imgUploader}
       <LoadingComponent loaderVisibility={loaderVisibility} />
+      <ModelChangeConfirmation 
+        open={modelConfirmation}
+        onCancel={handleCancelModelConfirmation}
+        onConfirm={handleConfirmModelConfirmation}
+        onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
+        currentImage={currentImage}
+        />
     </div>
   );
 }
