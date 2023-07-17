@@ -52,6 +52,7 @@ export function Editor() {
     };
     console.log('Se ingresó a handle Image uploade');
     setLoaderVisibility(true);
+    setSidebarVisibility(false);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setLayerPoints([]);
@@ -268,6 +269,7 @@ export function Editor() {
       <ModelSelector
         onHandleSelectModel={handleSelectmodel}
         sidebarVisibility={sidebarVisibility}
+        loaderVisibility={loaderVisibility}
       />
       {imgEditor}
       {imgUploader}

@@ -6,9 +6,10 @@ import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 export function Modelselector({
     onHandleSelectModel,
     sidebarVisibility,
+    loaderVisibility,
 }){
     return (
-    <div style={{ display: !sidebarVisibility ? 'flex' : 'none', justifyContent: 'flex-end' }}>
+    <div style={{ display: !sidebarVisibility && !loaderVisibility ? 'flex' : 'none', justifyContent: 'flex-end' }}>
         <Box 
         marginRight={"60px"}
         >
