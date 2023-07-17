@@ -1,9 +1,11 @@
 import numpy as np
 import os
-from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+from segment_anything import sam_model_registry, SamPredictor
 import torch
 from typing import List, Dict
 from PIL import Image
+
+import onnxruntime
 
 # TODO: restrict device choice based on available virtual RAM on gpu
 # use gpu if available
@@ -57,54 +59,64 @@ def create_sam(type: str, checkpoint_path: str):
 
 ## Generating the final mask
 def predict_mask(
-    input_point: np.ndarray, input_label: np.ndarray, predictor: SamPredictor
+    input_point: np.ndarray,
+    input_label: np.ndarray,
+    predictor: SamPredictor,
+    image_embedding: np.ndarray,
+    ort_session: onnxruntime,
+    img: np.ndarray,
 ) -> np.ndarray:
     """Uses the model over some given points to generate a chosen mask given the input data."""
-    # first pass
-    _, pre_scores, pre_logits = predictor.predict(
-        point_coords=input_point,
-        point_labels=input_label,
-        multimask_output=True,
+
+    onnx_coord = np.concatenate([input_point, np.array([[0.0, 0.0]])], axis=0)[
+        None, :, :
+    ]
+    onnx_label = np.concatenate([input_label, np.array([-1])], axis=0)[None, :].astype(
+        np.float32
     )
-    mask_input = pre_logits[np.argmax(pre_scores), :, :]
-    # second and final pass
-    mask, _, _ = predictor.predict(
-        point_coords=input_point,
-        point_labels=input_label,
-        mask_input=mask_input[None, :, :],
-        multimask_output=False,
-    )
-    mask = mask.squeeze()
-    print(predictor)
-    return mask
+
+    onnx_coord = predictor.transform.apply_coords(onnx_coord, img.shape[:2]).astype(
+        np.float32
+    )  ## ok
+
+    onnx_mask_input = np.zeros((1, 1, 256, 256), dtype=np.float32)
+    onnx_has_mask_input = np.ones(1, dtype=np.float32)
+
+    ort_inputs = {
+        "image_embeddings": image_embedding,
+        "point_coords": onnx_coord,
+        "point_labels": onnx_label,
+        "mask_input": onnx_mask_input,
+        "has_mask_input": onnx_has_mask_input,
+        "orig_im_size": np.array(img.shape[:2], dtype=np.float32),
+    }
+
+    masks, _, _ = ort_session.run(None, ort_inputs)
+    masks = masks > predictor.model.mask_threshold
+    return masks
 
 
 def gen_new_mask(
     img: np.ndarray,
-    points: List[List[int]],
+    points,
     predictor: SamPredictor,
-) -> Image:
-    """Creates a new mask Image from input points and predictor model
+    image_embedding: np.ndarray,
+    ort_session: onnxruntime,
+):
+    # coord transforming
+    points_arr = np.array(points)
+    points = points_arr[:, :2]
+    labels = points_arr[:, -1]
 
-    Args:
-        img (np.ndarray): input image
-        points (List[List[int]]): points for model
-        predictor (SamPredictor): predictor with image embeddings already loaded
-
-    Returns:
-        Image: new mask
-    """
-    mask_img = np.zeros(img.shape, dtype=np.uint8)
-    # if no points, mask is a completely transparent image
+    mask_img = np.zeros_like(img, dtype=np.uint8)
+    # si no hay puntos, la máscara es una imagen completamente transparente
     if len(points) == 0:
         mask_img = Image.fromarray(mask_img)
         mask_img.putalpha(0)
         return mask_img
-    points_arr = np.array(points)
-    points = points_arr[:, :2]
-    labels = points_arr[:, -1]
-    mask = predict_mask(points, labels, predictor)
-    mask_img = np.zeros(img.shape, dtype=np.uint8)
+
+    mask = predict_mask(points, labels, predictor, image_embedding, ort_session, img)
+    mask = mask[0, 0, :, :]
     mask_img[mask] = img[mask]
     alpha_channel = np.zeros(img.shape[:2], dtype=np.uint8)
     alpha_channel[mask] = 255
@@ -119,6 +131,8 @@ def update_stored_mask(
     predictor: SamPredictor,
     layer_coords: Dict[str, List],
     mask_dir: str,
+    image_embedding: np.ndarray,
+    ort_session: onnxruntime,
 ):
     """Update stored mask for specific layer based on input points
 
@@ -136,6 +150,8 @@ def update_stored_mask(
         : layer_coords[layer_id]["pointer"]
     ]
     # create new mask
-    mask_img = gen_new_mask(img, effective_points, predictor)
+    mask_img = gen_new_mask(
+        img, effective_points, predictor, image_embedding, ort_session
+    )
     # update mask by overwriting stored image
     mask_img.save(os.path.join(mask_dir, f"{layer_id}.png"))

@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 import os
 import tempfile
 import shutil
-from typing import Literal, List, Tuple, Annotated
+from typing import Literal
 from pydantic import BaseModel, Field
 from masking.predictor import create_sam, update_stored_mask
 from utils import load_image, clean_mask_files, save_output
@@ -13,6 +13,7 @@ from color_transform.transform import extract_median_h_sat, hsl_cv2_2_js
 from segment_anything import SamPredictor
 from PIL import Image
 import numpy as np
+import onnxruntime
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,6 +28,8 @@ img = None
 # TODO: choose which SAM variant can be used
 # segment anything model
 print("-> loading sam predictor")
+onnx_model_path = "./assets/vit_l_quantized.onnx"
+ort_session = onnxruntime.InferenceSession(onnx_model_path)
 predictor = SamPredictor(create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth"))
 print("-> sam predictor successfully loaded")
 
@@ -82,10 +85,11 @@ def reset_points():
 
 
 def set_new_img(img_path: str) -> SamPredictor:
-    global img
+    global img, image_embedding
     print("-> generating embeddings for base image ...")
     img = load_image(img_path)
     predictor.set_image(img)
+    image_embedding = predictor.get_image_embedding().detach().cpu().numpy()
     print("-> embeddings generated")
 
 
@@ -212,6 +216,8 @@ def point_and_click(data: PointAndClickData):
         predictor,
         layer_coords,
         temp_dir,
+        image_embedding,
+        ort_session,
     )
     return {"message": f"Coordenadas pasadas correctamente: {new_point}"}
 
@@ -227,11 +233,17 @@ def move_layer_pointer(layer_pointer: LayerPointer):
 
 @app.post("/api/model-selected")
 def model_selected(data: ModelSelection):
-    global predictor
+    global predictor, ort_session
     if data.model == "option1":
+        onnx_model_path = "./assets/vit_b_quantized.onnx"
+        ort_session = onnxruntime.InferenceSession(onnx_model_path)
         predictor = SamPredictor(create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth"))
     elif data.model == "option2":
+        onnx_model_path = "./assets/vit_l_quantized.onnx"
+        ort_session = onnxruntime.InferenceSession(onnx_model_path)
         predictor = SamPredictor(create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth"))
     elif data.model == "option3":
+        onnx_model_path = "./assets/vit_h_quantized.onnx"
+        ort_session = onnxruntime.InferenceSession(onnx_model_path)
         predictor = SamPredictor(create_sam("vit_h", "./assets/sam_vit_h_4b8939.pth"))
     return {"message": "model selected successfuly"}
