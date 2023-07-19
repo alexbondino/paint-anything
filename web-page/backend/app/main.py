@@ -22,8 +22,9 @@ temp_dir = tempfile.mkdtemp()  # Global variable to store the temporary director
 # layer vars
 layer_coords = {}
 
-# image to edit
+# image to edit and corresponding embedding
 img = None
+image_embedding = None
 
 # TODO: choose which SAM variant can be used
 # segment anything model
