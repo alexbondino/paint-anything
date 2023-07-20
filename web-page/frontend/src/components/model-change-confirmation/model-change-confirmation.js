@@ -29,10 +29,10 @@ function ModelChangeConfirmation({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} color="primary">
-          Cancelar
+          Cancel
         </Button>
         <Button onClick={handleConfirm} color="primary" autoFocus>
-          Confirmar
+          Confirm
         </Button>
       </DialogActions>
     </Dialog>

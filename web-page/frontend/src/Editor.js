@@ -23,13 +23,13 @@ export function Editor() {
   // loader visibility
   const [loaderVisibility, setLoaderVisibility] = React.useState(false);
   // model selection
-  const [modelSelected, setModelSelected] = useState('option2');
+  const [modelSelected, setModelSelected] = useState('large_model');
   // model selection confirmation modal
   const [modelConfirmation, setModelConfirmation] = useState(false);
   // image
   const [currentImage, setCurrentImage] = useState(null);
   // previous selected model
-  const [previousModel, setPreviousModel] = useState("option2");
+  const [previousModel, setPreviousModel] = useState("large_model");
 
 
 
@@ -41,7 +41,7 @@ export function Editor() {
   }
   
   useEffect(() => {
-    console.log("Modelo accesado correctamente", modelSelected);
+    console.log("Model succesfully adressed", modelSelected);
   }, [modelSelected]);
   
 
@@ -254,7 +254,7 @@ export function Editor() {
     setLayerPoints(newLayerPoints);
   }
 
-  // render upload if no image has been loaded
+  // render upload if no image has been loaded and the loader is not visible
   const imgUploader =
     sidebarVisibility || loaderVisibility ? null : (
       <ImageUploader
@@ -276,6 +276,16 @@ export function Editor() {
     />
   ) : null;
 
+  // render model selector if no image has been loaded and the loader is not visible
+
+  const modelSelector = 
+    sidebarVisibility || loaderVisibility ? null : (
+      <ModelSelector
+        onHandleSelectModel={handleSelectmodel}
+        baseImg={baseImg}
+      />
+  );
+
   return (
     <div style={{ height: '78vh' }}>
       <ImageEditorDrawer
@@ -293,12 +303,7 @@ export function Editor() {
         onHandleSelectModel={handleSelectmodel}
         modelSelected={modelSelected}
       />
-      <ModelSelector
-        onHandleSelectModel={handleSelectmodel}
-        sidebarVisibility={sidebarVisibility}
-        loaderVisibility={loaderVisibility}
-        baseImg={baseImg}
-      />
+      {modelSelector}
       {imgEditor}
       {imgUploader}
       <LoadingComponent loaderVisibility={loaderVisibility} />

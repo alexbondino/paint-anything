@@ -205,9 +205,9 @@ export function ImageEditorDrawer({
                 value={modelSelected}
                 style={{ width: '300px', height: '50px', border: 0}}
               >
-                <MenuItem value="option1">Low Quality (Fast)</MenuItem>
-                <MenuItem value="option2">Medium Quality (Normal)</MenuItem>
-                <MenuItem value="option3">High Quality (Slow)</MenuItem>
+                <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
+                <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
+                <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
               </Select>
             </FormControl>
           </ListItem>

@@ -3,24 +3,22 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import { InputLabel, Select, MenuItem } from '@mui/material';
 
-export function Modelselector({
+export function ModelSelector({
     onHandleSelectModel,
-    sidebarVisibility,
-    loaderVisibility,
 }){
     return (
-    <div style={{ display: !sidebarVisibility && !loaderVisibility ? 'flex' : 'none', justifyContent: 'flex-end' }}>
+    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Box 
         marginRight={"60px"}
         >
             <InputLabel id="model-select-label">Model Quality</InputLabel>
             <Select 
             onChange={onHandleSelectModel} 
-            defaultValue="option2"
+            defaultValue="large_model"
             sx={{ width: '250px', height: '20px' }}>
-            <MenuItem value="option1">Low Quality (Fast)</MenuItem>
-            <MenuItem value="option2">Medium Quality (Normal)</MenuItem>
-            <MenuItem value="option3">High Quality (Slow)</MenuItem>
+            <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
+            <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
+            <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
             </Select>
             <Typography 
             sx={{ flexGrow: 1, fontSize: 13 }} 
@@ -33,5 +31,5 @@ export function Modelselector({
     );
   };
   
-  export default Modelselector;
+  export default ModelSelector;
   

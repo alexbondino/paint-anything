@@ -98,11 +98,19 @@ def predict_mask(
 
 def gen_new_mask(
     img: np.ndarray,
-    points,
+    points: List[List[int]],
     predictor: SamPredictor,
     image_embedding: np.ndarray,
     ort_session: onnxruntime,
-):
+) -> Image:
+    """Creates a new mask Image from input points and predictor model
+    Args:
+        img (np.ndarray): input image
+        points (List[List[int]]): points for model
+        predictor (SamPredictor): predictor with image embeddings already loaded
+        image_embedding (np.ndarray): representation of the image processed by the model
+        ort_session (ort_session): onnx inference session, so the model is submited only once.
+    """
     # coord transforming
     points_arr = np.array(points)
     points = points_arr[:, :2]
@@ -142,6 +150,8 @@ def update_stored_mask(
         predictor (SamPredictor): predictor with image embeddings already loaded
         layer_coords (Dict[str, List]): points for all layers
         mask_dir (str): _description_
+        image_embedding (np_ndarray):
+        ort_session (onnxruntime):
     """
     points = layer_coords.get(layer_id, {})
     if len(points) == 0:
