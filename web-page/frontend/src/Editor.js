@@ -4,7 +4,6 @@ import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 import LoadingComponent from './components/loading/loading.js';
 import ModelSelector from './components/model-selector/model-selector.js';
-import ModelChangeConfirmation from './components/model-change-confirmation/model-change-confirmation.js';
 import axios from 'axios';
 
 // TODO: show loading status while image embeddings are being computed
@@ -302,18 +301,15 @@ export function Editor() {
         onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
         onHandleSelectModel={handleSelectmodel}
         modelSelected={modelSelected}
+        openModelConfirmation={modelConfirmation}
+        onCancelModelConfirmation={handleCancelModelConfirmation}
+        onConfirmModelConfirmation={handleConfirmModelConfirmation}
+        currentImage={currentImage}
       />
       {modelSelector}
       {imgEditor}
       {imgUploader}
       <LoadingComponent loaderVisibility={loaderVisibility} />
-      <ModelChangeConfirmation 
-        open={modelConfirmation}
-        onCancel={handleCancelModelConfirmation}
-        onConfirm={handleConfirmModelConfirmation}
-        onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
-        currentImage={currentImage}
-        />
     </div>
   );
 }

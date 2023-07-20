@@ -17,6 +17,12 @@ import Collapse from '@mui/material/Collapse';
 // list components
 import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 
 // icons
@@ -26,7 +32,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import BrushIcon from '@mui/icons-material/Brush';
 import LayersIcon from '@mui/icons-material/Layers';
 import DownloadIcon from '@mui/icons-material/Download';
-import GroupsIcon from '@mui/icons-material/Groups';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -98,6 +103,10 @@ export function ImageEditorDrawer({
   onDeleteLayer,
   onHandleSelectModel,
   modelSelected,
+  openModelConfirmation,
+  onCancelModelConfirmation,
+  onConfirmModelConfirmation,
+  currentImage,
 }) {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -133,6 +142,16 @@ export function ImageEditorDrawer({
       setExpandLayers(!expandLayers);
     }
   };
+
+  const handleModelConfirmationClose = () => {
+    onCancelModelConfirmation();
+  };
+
+  const handleModelConfirmationConfirm = (event) => {
+    onConfirmModelConfirmation();
+    onImageUpload(currentImage);
+  }
+
 
   async function handleDownloadButtonClick() {
     try {
@@ -275,6 +294,20 @@ export function ImageEditorDrawer({
           </ListItem>
         </List>
       </Drawer>
+      <Dialog open={openModelConfirmation} onClose={handleModelConfirmationClose} >
+        <DialogTitle>Model Change Confirmation Dialog</DialogTitle>
+        <DialogContent>
+          <DialogContentText>¿Are you sure you want to change the Model Quality? All changes will be errased.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleModelConfirmationClose} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleModelConfirmationConfirm} color="primary" autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
