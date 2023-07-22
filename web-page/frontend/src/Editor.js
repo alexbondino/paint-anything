@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
+import LoadingComponent from './components/loading/loading.js';
+import ModelSelector from './components/model-selector/model-selector.js';
 import axios from 'axios';
 
 // TODO: show loading status while image embeddings are being computed
 export function Editor() {
-  const [sidebarVisibility, setSidebarVisibility] = useState(false);
   // base image to be edited
   const [baseImg, setBaseImg] = useState(null);
   // layerIds holds the list of existing layer ids
@@ -14,9 +15,22 @@ export function Editor() {
 
   // selectedLayerIdx is the index of the layer selected. -1 indicates no layer is selected
   const [selectedLayer, setSelectedLayer] = React.useState(0);
-
   // list of layer points as objects {coords:[[x1,y1,v1],[x2,y2,v2]], history:[coords_t1, coords_t2], pointer:pointer_value}
   const [layerPoints, setLayerPoints] = useState([]);
+  // image and sidebar visibility
+  const [sidebarVisibility, setSidebarVisibility] = React.useState(false);
+  // loader visibility
+  const [loaderVisibility, setLoaderVisibility] = React.useState(false);
+  // model selection
+  const [modelSelected, setModelSelected] = useState('large_model');
+  // model selection confirmation modal
+  const [modelConfirmation, setModelConfirmation] = useState(false);
+  // image
+  const [currentImage, setCurrentImage] = useState(null);
+  // previous selected model
+  const [previousModel, setPreviousModel] = useState("large_model");
+
+
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -24,6 +38,32 @@ export function Editor() {
     newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
     setLayersDef(newLayerDef);
   }
+  
+  useEffect(() => {
+    console.log("Model succesfully adressed", modelSelected);
+  }, [modelSelected]);
+  
+
+  const handleSelectmodel = (event) => {
+    if (sidebarVisibility === true){
+      console.log("sidebar model accesed");
+      setModelSelected(event.target.value);
+      setModelConfirmation(true);
+    } else {
+      setModelSelected(event.target.value);
+    }
+  }
+
+  const handleCancelModelConfirmation = () => {
+    setModelConfirmation(false);
+    setModelSelected(previousModel);
+  };
+
+  const handleConfirmModelConfirmation = () =>{
+    setModelConfirmation(false);
+  }
+
+  
 
   async function handleImageUpload(imgFile) {
     // initial layer shown after image is uploaded
@@ -32,8 +72,11 @@ export function Editor() {
       visibility: true,
       imgUrl: null,
       hsl: [],
+      hslInput: false,
     };
-    setSidebarVisibility(true);
+    console.log('Se ingresó a handle Image uploade');
+    setLoaderVisibility(true);
+    setSidebarVisibility(false);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setLayerPoints([]);
@@ -44,12 +87,21 @@ export function Editor() {
     const formData = new FormData();
     formData.append('image', imgFile);
     try {
+      await axios.post('http://localhost:8000/api/model-selected', { model: modelSelected } );
+      console.log('Modelo enviado correctamente.');
+      setPreviousModel(modelSelected)
+    } catch (error) {
+      console.error('Error al enviar el modelo:', error);
+    }
+    try {
       await axios.post('http://localhost:8000/api/image', formData);
-
       console.log('Imagen enviada correctamente.');
+      setCurrentImage(imgFile);
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
+    setLoaderVisibility(false);
+    setSidebarVisibility(true);
   }
 
   function handleHSLChange(newHSL, layerId) {
@@ -58,6 +110,7 @@ export function Editor() {
     // update hsl in layer definition
     newLayersDef[layerPos].hsl = newHSL;
     setLayersDef(newLayersDef);
+    newLayersDef[layerPos].hslInput = true;
   }
 
   async function handleSelectLayer(layerId) {
@@ -89,7 +142,7 @@ export function Editor() {
       return;
     }
     // set initial hsl with base img values if not set
-    if (newLayersDef[layerPos].hsl.length === 0) {
+    if (!newLayersDef[layerPos].hslInput) {
       try {
         const hslResponse = await axios.get('http://localhost:8000/api/mask-base-hsl', {
           params: { layer_id: layerId },
@@ -200,13 +253,14 @@ export function Editor() {
     setLayerPoints(newLayerPoints);
   }
 
-  // render upload if no image has been loaded
-  const imgUploader = sidebarVisibility ? null : (
-    <ImageUploader
-      key="upload_img"
-      onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
-    />
-  );
+  // render upload if no image has been loaded and the loader is not visible
+  const imgUploader =
+    sidebarVisibility || loaderVisibility ? null : (
+      <ImageUploader
+        key="upload_img"
+        onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
+      />
+    );
   // render image editor only when sidebar is visible
   const imgEditor = sidebarVisibility ? (
     <ImageEditor
@@ -214,11 +268,22 @@ export function Editor() {
       baseImg={baseImg}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
+      imageVisibility={sidebarVisibility}
       layerPoints={layerPoints}
       onPointerChange={handlePointerChange}
       onNewPoint={handleNewPoint}
     />
   ) : null;
+
+  // render model selector if no image has been loaded and the loader is not visible
+
+  const modelSelector = 
+    sidebarVisibility || loaderVisibility ? null : (
+      <ModelSelector
+        onHandleSelectModel={handleSelectmodel}
+        baseImg={baseImg}
+      />
+  );
 
   return (
     <div style={{ height: '78vh' }}>
@@ -234,9 +299,17 @@ export function Editor() {
         onSelectLayer={(layerId) => handleSelectLayer(layerId)}
         onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
         onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
+        onHandleSelectModel={handleSelectmodel}
+        modelSelected={modelSelected}
+        openModelConfirmation={modelConfirmation}
+        onCancelModelConfirmation={handleCancelModelConfirmation}
+        onConfirmModelConfirmation={handleConfirmModelConfirmation}
+        currentImage={currentImage}
       />
+      {modelSelector}
       {imgEditor}
       {imgUploader}
+      <LoadingComponent loaderVisibility={loaderVisibility} />
     </div>
   );
 }

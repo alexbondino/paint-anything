@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import './image-editor.scss'
-
 import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material'
 
 // icons
@@ -147,7 +146,15 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, on
 		})
 }
 
-export default function ImageEditor({ baseImg, layersDef, selectedLayer, layerPoints, onPointerChange, onNewPoint }) {
+export default function ImageEditor({
+	baseImg,
+	layersDef,
+	selectedLayer,
+	layerPoints,
+	onPointerChange,
+	onNewPoint,
+	imageVisibility,
+}) {
 	// construct mask images dynamically from layer definitions
 	const [naturalImgSize, setNaturalImgSize] = useState([])
 
@@ -197,7 +204,7 @@ export default function ImageEditor({ baseImg, layersDef, selectedLayer, layerPo
 			className="editor-stack"
 			sx={{
 				aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
-				visibility: naturalImgSize ? 'visible' : 'hidden',
+				visibility: naturalImgSize && imageVisibility === true ? 'visible' : 'hidden',
 			}}
 			spacing={1}
 		>
