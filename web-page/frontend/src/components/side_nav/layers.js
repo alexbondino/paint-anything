@@ -91,12 +91,6 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         valueLabelFormat={valueLabelFormat}
         onChange={(e) => onHSLChange([hue, saturation, e.target.value], layerId)}
       ></Slider>
-      <div>
-      <Typography  variant="button" id="input-slider">
-        Use "color" instead:
-      </Typography>
-      <input type="checkbox" id="cColor"/>
-      </div>
     </Box>
   );
 };

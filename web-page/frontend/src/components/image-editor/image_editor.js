@@ -70,52 +70,54 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, onNewPoint
       const c = canvas.current;
       //const ctx = context;
       var img = new Image();
-      function start() {
-        img.src = imgUrl ? imgUrl : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-        window.requestAnimationFrame(drawMask);
-      }
+      var imgNull = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
       const l = getBaseImageSize()
       c.width = l[0];
       c.height = l[1];
 
       function drawMask() {
-        console.log("img.onLoad")
+        console.log("img.drawMask")
         console.log(`image width: ${img.width} height: ${img.height}`)
+
         var hue = currentHSL[0];
         var sat = currentHSL[1];
         var l = currentHSL[2];
 
+        function changeHSLCanvas() {
+          //draw original image in normal mode
+          context.globalCompositeOperation = "source-over";
+          context.drawImage(img, 0,0,c.width, c.height);
 
-        //draw original image in normal mode
-        context.globalCompositeOperation = "source-over";
-        context.drawImage(img, 0,0,c.width, c.height);
+          context.globalCompositeOperation = l < 100 ? "color-burn" : "color-dodge";
+          // for common slider, to produce a valid value for both directions
+          l = l >= 100 ? l - 100 : 100 - (100 - l);
+          context.fillStyle = "hsl(0, 50%, " + currentHSL[2] + "%)";
+          context.fillRect(0, 0, c.width, c.height);
+          // adjust saturation
+          context.globalCompositeOperation = "saturation";
+          context.fillStyle = "hsl(0," + sat + "%, 50%)";
+          context.fillRect(0, 0, c.width, c.height);
 
-        context.globalCompositeOperation = l < 100 ? "color-burn" : "color-dodge";
-        // for common slider, to produce a valid value for both directions
-        l = l >= 100 ? l - 100 : 100 - (100 - l);
-        context.fillStyle = "hsl(0, 50%, " + currentHSL[2] + "%)";
-        context.fillRect(0, 0, c.width, c.height);
+          // step 3: adjust hue, preserve luma and chroma
+          context.globalCompositeOperation = "hue";
+          context.fillStyle = "hsl(" + hue + ",1%, 50%)";  // sat must be > 0, otherwise won't matter
+          context.fillRect(0, 0, c.width, c.height);
 
-        // adjust saturation
-        context.globalCompositeOperation = "saturation";
-        context.fillStyle = "hsl(0," + sat + "%, 50%)";
-        context.fillRect(0, 0, c.width, c.height);
+          // step 4: in our case, we need to clip as we filled the entire area
+          context.globalCompositeOperation = "destination-in";
+          context.drawImage(img, 0,0,c.width, c.height);
 
-        // step 3: adjust hue, preserve luma and chroma
-        context.globalCompositeOperation = "hue";
-        context.fillStyle = "hsl(" + hue + ",1%, 50%)";  // sat must be > 0, otherwise won't matter
-        context.fillRect(0, 0, c.width, c.height);
+          requestAnimationFrame(changeHSLCanvas);
 
-        // step 4: in our case, we need to clip as we filled the entire area
-        context.globalCompositeOperation = "destination-in";
-        context.drawImage(img, 0,0,c.width, c.height);
-        window.requestAnimationFrame(drawMask);
+        }
+        changeHSLCanvas();
 
       }
 
-      img.onload = drawMask(); 
+      img.src = imgUrl ? imgUrl : imgNull;
+      console.log('imgUrl: '+ img.src);
 
-      start();
+      img.onload = drawMask;
 
     }
   return [
@@ -246,7 +248,7 @@ export default function ImageEditor({
           </Button>
         </Tooltip>
       </ButtonGroup>
-      <Box className="image-box" sx={{border:'2px solid red'}} onClick={handlePointAndClick} onContextMenu={handlePointAndClick}>
+      <Box className="image-box" onClick={handlePointAndClick} onContextMenu={handlePointAndClick}>
         <img id='baseImg' src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad}/>
         {naturalImgSize.length === 2 ? (
           <MaskImages
