@@ -117,7 +117,7 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
     });
   };
   return [
-    <Canvas draw={draw} width={getBaseImageSize()[0]} height={getBaseImageSize()[1]}></Canvas>,
+    <Canvas draw={draw} ></Canvas>,
     pointBoxes,
   ];
 }
