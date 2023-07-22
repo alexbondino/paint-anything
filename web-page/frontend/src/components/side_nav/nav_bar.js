@@ -173,23 +173,27 @@ export function ImageEditorDrawer({
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <TitleBar position="fixed" open={open}>
+      <IconButton
+        color="inherit" 
+        aria-label="open drawer"
+        edge="end"
+        onClick={handleDrawerOpen}
+        sx={{
+          display: sidebarVisibility ? 'flex' : 'none',
+          position: 'absolute',
+          top: '15px', 
+          right: '25px',
+          zIndex: 1,
+        }}
+      >
+        <MenuIcon sx={{ color: 'white' }}/>
+      </IconButton>
+      <TitleBar position="relative" open={open} sx={{ height: '65px' }}>
         <Toolbar>
           <BrushIcon sx={{ marginRight: 2 }} />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
             Imagine Houses
           </Typography>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="end"
-            onClick={handleDrawerOpen}
-            sx={{
-              display: sidebarVisibility ? 'flex' : 'none',
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
         </Toolbar>
       </TitleBar>
       <Main open={open}>
