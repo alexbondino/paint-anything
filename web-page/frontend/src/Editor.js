@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 import LoadingComponent from './components/loading/loading.js';
+import ModelSelector from './components/model-selector/model-selector.js';
 import axios from 'axios';
 
 // TODO: show loading status while image embeddings are being computed
@@ -20,6 +21,16 @@ export function Editor() {
   const [sidebarVisibility, setSidebarVisibility] = React.useState(false);
   // loader visibility
   const [loaderVisibility, setLoaderVisibility] = React.useState(false);
+  // model selection
+  const [modelSelected, setModelSelected] = useState('large_model');
+  // model selection confirmation modal
+  const [modelConfirmation, setModelConfirmation] = useState(false);
+  // image
+  const [currentImage, setCurrentImage] = useState(null);
+  // previous selected model
+  const [previousModel, setPreviousModel] = useState("large_model");
+
+
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -27,6 +38,32 @@ export function Editor() {
     newLayerDef[layerPos].visibility = !newLayerDef[layerPos].visibility;
     setLayersDef(newLayerDef);
   }
+  
+  useEffect(() => {
+    console.log("Model succesfully adressed", modelSelected);
+  }, [modelSelected]);
+  
+
+  const handleSelectmodel = (event) => {
+    if (sidebarVisibility === true){
+      console.log("sidebar model accesed");
+      setModelSelected(event.target.value);
+      setModelConfirmation(true);
+    } else {
+      setModelSelected(event.target.value);
+    }
+  }
+
+  const handleCancelModelConfirmation = () => {
+    setModelConfirmation(false);
+    setModelSelected(previousModel);
+  };
+
+  const handleConfirmModelConfirmation = () =>{
+    setModelConfirmation(false);
+  }
+
+  
 
   async function handleImageUpload(imgFile) {
     // initial layer shown after image is uploaded
@@ -39,6 +76,7 @@ export function Editor() {
     };
     console.log('Se ingresó a handle Image uploade');
     setLoaderVisibility(true);
+    setSidebarVisibility(false);
     const newLayersDef = [initialLayer];
     setLayersDef(newLayersDef);
     setLayerPoints([]);
@@ -49,9 +87,16 @@ export function Editor() {
     const formData = new FormData();
     formData.append('image', imgFile);
     try {
+      await axios.post('http://localhost:8000/api/model-selected', { model: modelSelected } );
+      console.log('Modelo enviado correctamente.');
+      setPreviousModel(modelSelected)
+    } catch (error) {
+      console.error('Error al enviar el modelo:', error);
+    }
+    try {
       await axios.post('http://localhost:8000/api/image', formData);
-
       console.log('Imagen enviada correctamente.');
+      setCurrentImage(imgFile);
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
@@ -208,7 +253,7 @@ export function Editor() {
     setLayerPoints(newLayerPoints);
   }
 
-  // render upload if no image has been loaded
+  // render upload if no image has been loaded and the loader is not visible
   const imgUploader =
     sidebarVisibility || loaderVisibility ? null : (
       <ImageUploader
@@ -230,6 +275,16 @@ export function Editor() {
     />
   ) : null;
 
+  // render model selector if no image has been loaded and the loader is not visible
+
+  const modelSelector = 
+    sidebarVisibility || loaderVisibility ? null : (
+      <ModelSelector
+        onHandleSelectModel={handleSelectmodel}
+        baseImg={baseImg}
+      />
+  );
+
   return (
     <div style={{ height: '78vh' }}>
       <ImageEditorDrawer
@@ -244,7 +299,14 @@ export function Editor() {
         onSelectLayer={(layerId) => handleSelectLayer(layerId)}
         onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
         onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
+        onHandleSelectModel={handleSelectmodel}
+        modelSelected={modelSelected}
+        openModelConfirmation={modelConfirmation}
+        onCancelModelConfirmation={handleCancelModelConfirmation}
+        onConfirmModelConfirmation={handleConfirmModelConfirmation}
+        currentImage={currentImage}
       />
+      {modelSelector}
       {imgEditor}
       {imgUploader}
       <LoadingComponent loaderVisibility={loaderVisibility} />

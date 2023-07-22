@@ -4,6 +4,7 @@ matplotlib>=3.6,<3.9
 fastapi>=0.95,<0.96
 python-multipart>=0.0.6
 uvicorn>=0.22,<0.23
+onnxruntime>=1.15
 torch==1.12.1; platform_system=="Darwin"
 torchvision==0.13.1; platform_system=="Darwin"
 git+https://github.com/facebookresearch/segment-anything.git
