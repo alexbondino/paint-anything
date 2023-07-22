@@ -35,7 +35,7 @@
     margin:auto;
     position: relative;
     border: 2px solid gray;
-    z-index: 200;
+    z-index: 1001;
 }
 // base image
 .image-box img {
@@ -50,7 +50,6 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    z-index: 101;
 }
 
 .mask-point{
@@ -59,5 +58,5 @@
     height: 10px;
     border-radius: 50%;
     border: 1px solid white;
-    z-index: 101;
+    z-index: 1001;
 }

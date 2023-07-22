@@ -116,10 +116,7 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
       context.drawImage(img, 0, 0, c.width, c.height);
     });
   };
-  return [
-    <Canvas draw={draw} ></Canvas>,
-    pointBoxes,
-  ];
+  return [<Canvas draw={draw} zIndex={1000 - layerId} />, pointBoxes];
 }
 
 /**
