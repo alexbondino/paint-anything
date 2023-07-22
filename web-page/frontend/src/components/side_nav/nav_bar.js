@@ -109,7 +109,7 @@ export function ImageEditorDrawer({
   currentImage,
 }) {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
   const [expandLayers, setExpandLayers] = React.useState(true);
   const lastLayerId = layersDef.length > 0 ? Math.max(...layersDef.map((l) => l.id)) : -1;
 
@@ -188,7 +188,7 @@ export function ImageEditorDrawer({
       >
         <MenuIcon sx={{ color: 'white' }}/>
       </IconButton>
-      <TitleBar position="relative" open={open} sx={{ height: '65px' }}>
+      <TitleBar position="relative" open={open} sx={{ height: '65px', width: "100%" }}>
         <Toolbar>
           <BrushIcon sx={{ marginRight: 2 }} />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
@@ -196,122 +196,128 @@ export function ImageEditorDrawer({
           </Typography>
         </Toolbar>
       </TitleBar>
-      <Main open={open}>
-        <DrawerHeader />
-      </Main>
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
+
+      {sidebarVisibility ? (
+
+      <Box>
+        <Main>
+          <DrawerHeader />
+        </Main>
+        <Drawer
+          sx={{
             width: drawerWidth,
-            display: sidebarVisibility,
-          },
-        }}
-        variant="persistent"
-        anchor="right"
-        open={open}
-      >
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-          <ListItem key="model_select" disablePadding>
-            <FormControl>
-              <InputLabel id="model-select-label">Model Quality</InputLabel>
-              <Select
-                onChange={onHandleSelectModel}
-                labelId="model-select-label"
-                value={modelSelected}
-                style={{ width: '300px', height: '50px', border: 0}}
-              >
-                <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
-                <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
-                <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
-              </Select>
-            </FormControl>
-          </ListItem>
-          <ListItem key="layers">
-            <ListItemIcon>
-              <LayersIcon />
-            </ListItemIcon>
-            <ListItemText primary="Layers" />
-            <IconButton
-              color="inherit"
-              aria-label="add layer"
-              onClick={async () => await handleAddLayer()}
-            >
-              <AddIcon />
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              width: drawerWidth,
+              display: sidebarVisibility,
+            },
+          }}
+          variant="persistent"
+          anchor="right"
+          open={open}
+        >
+          <DrawerHeader>
+            <IconButton onClick={handleDrawerClose}>
+              {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
             </IconButton>
-            {expandLayers ? (
-              <IconButton color="inherit" aria-label="retract layers" onClick={handleLayersClick}>
-                <ExpandLess />{' '}
-              </IconButton>
-            ) : (
-              <IconButton color="inherit" aria-label="retract layers" onClick={handleLayersClick}>
-                <ExpandMore />{' '}
-              </IconButton>
-            )}
-          </ListItem>
-          <Collapse key="layer_drawer" in={expandLayers} timeout="auto" unmountOnExit>
-            <Layers
-              layersDef={layersDef}
-              selectedLayer={selectedLayer}
-              onSelectLayer={onSelectLayer}
-              onDeleteLayer={onDeleteLayer}
-              onVisibilityClicked={onHandleLayerVisibilityClick}
-              onHSLChange={onHSLChange}
-            />
-          </Collapse>
-          <ListItem key="open_preview" disablePadding>
-            <PreviewDialog layersDef={layersDef} baseImg={baseImg} />
-          </ListItem>
-          <ListItem key="download_result" disablePadding>
-            <ListItemButton onClick={handleDownloadButtonClick}>
+          </DrawerHeader>
+          <Divider />
+          <List>
+            <ListItem key="model_select" disablePadding>
+              <FormControl>
+                <InputLabel id="model-select-label">Model Quality</InputLabel>
+                <Select
+                  onChange={onHandleSelectModel}
+                  labelId="model-select-label"
+                  value={modelSelected}
+                  style={{ width: '300px', height: '50px', border: 0}}
+                >
+                  <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
+                  <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
+                  <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
+                </Select>
+              </FormControl>
+            </ListItem>
+            <ListItem key="layers">
               <ListItemIcon>
-                <DownloadIcon />
+                <LayersIcon />
               </ListItemIcon>
-              <ListItemText primary="Download Result" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton variant="contained" component="label">
-              <ListItemIcon>
-                <DownloadForOfflineIcon />
-              </ListItemIcon>
-              <ListItemText primary="Upload Image" />
-              <input
-                hidden
-                type="file"
-                onChange={(event) => onImageUpload(event.target.files[0])}
-                onClick={(event) => {
-                  event.target.value = null;
-                  event.stopPropagation();
-                }} // Stop Propagation to parent components (Avoids "cancel button" to call "On Change")
+              <ListItemText primary="Layers" />
+              <IconButton
+                color="inherit"
+                aria-label="add layer"
+                onClick={async () => await handleAddLayer()}
+              >
+                <AddIcon />
+              </IconButton>
+              {expandLayers ? (
+                <IconButton color="inherit" aria-label="retract layers" onClick={handleLayersClick}>
+                  <ExpandLess />{' '}
+                </IconButton>
+              ) : (
+                <IconButton color="inherit" aria-label="retract layers" onClick={handleLayersClick}>
+                  <ExpandMore />{' '}
+                </IconButton>
+              )}
+            </ListItem>
+            <Collapse key="layer_drawer" in={expandLayers} timeout="auto" unmountOnExit>
+              <Layers
+                layersDef={layersDef}
+                selectedLayer={selectedLayer}
+                onSelectLayer={onSelectLayer}
+                onDeleteLayer={onDeleteLayer}
+                onVisibilityClicked={onHandleLayerVisibilityClick}
+                onHSLChange={onHSLChange}
               />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Drawer>
-      <Dialog open={openModelConfirmation} onClose={handleModelConfirmationClose} >
-        <DialogTitle>Model Change Confirmation Dialog</DialogTitle>
-        <DialogContent>
-          <DialogContentText>¿Are you sure you want to change the Model Quality? All changes will be errased.</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleModelConfirmationClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleModelConfirmationConfirm} color="primary" autoFocus>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+            </Collapse>
+            <ListItem key="open_preview" disablePadding>
+              <PreviewDialog layersDef={layersDef} baseImg={baseImg} />
+            </ListItem>
+            <ListItem key="download_result" disablePadding>
+              <ListItemButton onClick={handleDownloadButtonClick}>
+                <ListItemIcon>
+                  <DownloadIcon />
+                </ListItemIcon>
+                <ListItemText primary="Download Result" />
+              </ListItemButton>
+            </ListItem>
+          </List>
+          <List>
+            <ListItem disablePadding>
+              <ListItemButton variant="contained" component="label">
+                <ListItemIcon>
+                  <DownloadForOfflineIcon />
+                </ListItemIcon>
+                <ListItemText primary="Upload Image" />
+                <input
+                  hidden
+                  type="file"
+                  onChange={(event) => onImageUpload(event.target.files[0])}
+                  onClick={(event) => {
+                    event.target.value = null;
+                    event.stopPropagation();
+                  }} // Stop Propagation to parent components (Avoids "cancel button" to call "On Change")
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+        </Drawer>
+        <Dialog open={openModelConfirmation} onClose={handleModelConfirmationClose} >
+          <DialogTitle>Model Change Confirmation Dialog</DialogTitle>
+          <DialogContent>
+            <DialogContentText>¿Are you sure you want to change the Model Quality? All changes will be errased.</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleModelConfirmationClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleModelConfirmationConfirm} color="primary" autoFocus>
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box> 
+      ) : null}
     </Box>
   );
 }

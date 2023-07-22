@@ -10,6 +10,7 @@ export function ModelSelector({
     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <Box 
         marginRight={"60px"}
+        marginTop={"30px"}
         >
             <InputLabel id="model-select-label">Model Quality</InputLabel>
             <Select 
