@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './image-editor.scss';
 import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material';
+import axios from 'axios';
 
 // icons
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
+import DownloadIcon from '@mui/icons-material/Download';
 
 /**
  * Extracts base image size
@@ -151,6 +153,23 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, on
     });
 };
 
+async function handleDownloadButtonClick() {
+  try {
+    const response = await axios.get('http://localhost:8000/api/image_downloader', {
+      responseType: 'blob',
+    });
+    const url = window.URL.createObjectURL(new Blob([response.data], { type: 'image/png' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'imagen.png');
+    document.body.appendChild(link);
+    link.click();
+    console.log('imagen descargada correctamente');
+  } catch (error) {
+    console.error('Error al enviar la imagen:', error);
+  }
+}
+
 export default function ImageEditor({
   baseImg,
   layersDef,
@@ -187,6 +206,15 @@ export default function ImageEditor({
         variant="contained"
         aria-label="outlined primary button group"
       >
+        <Tooltip title="Download" placement="top">
+          <Button
+          className="download-button"
+          disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
+          onClick={handleDownloadButtonClick}
+          >
+            <DownloadIcon />
+          </Button>
+        </Tooltip>
         <Tooltip title="Undo (Ctrl + z)" placement="top">
           <Button
             className="history-button"

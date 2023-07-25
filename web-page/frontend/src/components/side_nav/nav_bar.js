@@ -152,24 +152,6 @@ export function ImageEditorDrawer({
     onImageUpload(currentImage);
   }
 
-
-  async function handleDownloadButtonClick() {
-    try {
-      const response = await axios.get('http://localhost:8000/api/image_downloader', {
-        responseType: 'blob',
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'image/png' }));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'imagen.png');
-      document.body.appendChild(link);
-      link.click();
-      console.log('imagen descargada correctamente');
-    } catch (error) {
-      console.error('Error al enviar la imagen:', error);
-    }
-  }
-
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -196,9 +178,8 @@ export function ImageEditorDrawer({
           </Typography>
         </Toolbar>
       </TitleBar>
-
+      
       {sidebarVisibility ? (
-
       <Box>
         <Main>
           <DrawerHeader />
@@ -272,14 +253,6 @@ export function ImageEditorDrawer({
             </Collapse>
             <ListItem key="open_preview" disablePadding>
               <PreviewDialog layersDef={layersDef} baseImg={baseImg} />
-            </ListItem>
-            <ListItem key="download_result" disablePadding>
-              <ListItemButton onClick={handleDownloadButtonClick}>
-                <ListItemIcon>
-                  <DownloadIcon />
-                </ListItemIcon>
-                <ListItemText primary="Download Result" />
-              </ListItemButton>
             </ListItem>
           </List>
           <List>
