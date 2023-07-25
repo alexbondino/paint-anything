@@ -205,16 +205,34 @@ export default function ImageEditor({
         className="history-box"
         variant="contained"
         aria-label="outlined primary button group"
-      >
+        sx={{
+          marginBottom: -5.5
+        }}>
         <Tooltip title="Download" placement="top">
           <Button
           className="download-button"
           disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
           onClick={handleDownloadButtonClick}
           >
-            <DownloadIcon />
+            <DownloadIcon style={{ width: '40px' }}/>
           </Button>
         </Tooltip>
+        <Tooltip title="Download" placement="top">
+          <Button
+          className="download-button"
+          disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
+          onClick={handleDownloadButtonClick}
+          >
+            <DownloadIcon style={{ width: '40px' }}/>
+          </Button>
+        </Tooltip>
+
+      </ButtonGroup>
+      <ButtonGroup
+        className="history-box"
+        variant="contained"
+        aria-label="outlined primary button group"
+      >
         <Tooltip title="Undo (Ctrl + z)" placement="top">
           <Button
             className="history-button"
