@@ -202,21 +202,6 @@ export function ImageEditorDrawer({
           </DrawerHeader>
           <Divider />
           <List>
-            <ListItem key="model_select" disablePadding>
-              <FormControl>
-                <InputLabel id="model-select-label">Model Quality</InputLabel>
-                <Select
-                  onChange={onHandleSelectModel}
-                  labelId="model-select-label"
-                  value={modelSelected}
-                  style={{ width: '300px', height: '50px', border: 0}}
-                >
-                  <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
-                  <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
-                  <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
-                </Select>
-              </FormControl>
-            </ListItem>
             <ListItem key="layers">
               <ListItemIcon>
                 <LayersIcon />
@@ -250,7 +235,22 @@ export function ImageEditorDrawer({
               />
             </Collapse>
           </List>
-          <List>
+          <List sx={{position:"fixed", bottom: 0, backgroundColor: "white", width: "300px"}}>
+            <ListItem key="model_select" disablePadding>
+              <FormControl>
+                <InputLabel id="model-select-label">Model Quality</InputLabel>
+                <Select
+                  onChange={onHandleSelectModel}
+                  labelId="model-select-label"
+                  value={modelSelected}
+                  style={{ width: '300px', height: '50px', border: 0}}
+                >
+                  <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
+                  <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
+                  <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
+                </Select>
+              </FormControl>
+            </ListItem>
             <ListItem disablePadding>
               <ListItemButton variant="contained" component="label">
                 <ListItemIcon>
