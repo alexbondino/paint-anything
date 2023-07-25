@@ -31,7 +31,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuIcon from '@mui/icons-material/Menu';
 import BrushIcon from '@mui/icons-material/Brush';
 import LayersIcon from '@mui/icons-material/Layers';
-import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -39,7 +38,6 @@ import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 // project module
 import Layers from './layers';
-import PreviewDialog from './preview';
 
 // controls the width of the drawer
 const drawerWidth = 300;
@@ -251,9 +249,6 @@ export function ImageEditorDrawer({
                 onHSLChange={onHSLChange}
               />
             </Collapse>
-            <ListItem key="open_preview" disablePadding>
-              <PreviewDialog layersDef={layersDef} baseImg={baseImg} />
-            </ListItem>
           </List>
           <List>
             <ListItem disablePadding>

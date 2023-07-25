@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import './image-editor.scss';
 import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material';
 import axios from 'axios';
+import PreviewDialog from './preview';
 
 // icons
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import DownloadIcon from '@mui/icons-material/Download';
+import PreviewIcon from '@mui/icons-material/Preview';
 
 /**
  * Extracts base image size
@@ -208,15 +210,7 @@ export default function ImageEditor({
         sx={{
           marginBottom: -5.5
         }}>
-        <Tooltip title="Download" placement="top">
-          <Button
-          className="download-button"
-          disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
-          onClick={handleDownloadButtonClick}
-          >
-            <DownloadIcon style={{ width: '40px' }}/>
-          </Button>
-        </Tooltip>
+        <PreviewDialog layersDef={layersDef} baseImg={baseImg} selectedLayer={selectedLayer} selectedLayerVisibility={selectedLayerVisibility}/>
         <Tooltip title="Download" placement="top">
           <Button
           className="download-button"
