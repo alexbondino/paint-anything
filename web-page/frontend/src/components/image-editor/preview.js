@@ -58,7 +58,7 @@ export default function PreviewDialog({ layersDef, baseImg, selectedLayer, selec
           disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
           onClick={handleOpen}
           >
-            <PreviewIcon style={{ width: '40px' }}/>
+            <PreviewIcon style={{ width: '43px' }}/>
           </Button>
     </Tooltip>,
     <Dialog

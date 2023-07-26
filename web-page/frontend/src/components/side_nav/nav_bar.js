@@ -189,6 +189,7 @@ export function ImageEditorDrawer({
             '& .MuiDrawer-paper': {
               width: drawerWidth,
               display: sidebarVisibility,
+              height: "715px",
             },
           }}
           variant="persistent"
@@ -201,6 +202,7 @@ export function ImageEditorDrawer({
             </IconButton>
           </DrawerHeader>
           <Divider />
+          <Box>
           <List>
             <ListItem key="layers">
               <ListItemIcon>
@@ -235,55 +237,60 @@ export function ImageEditorDrawer({
               />
             </Collapse>
           </List>
-          <List sx={{position:"fixed", bottom: 0, backgroundColor: "white", width: "300px"}}>
-            <ListItem key="model_select" disablePadding>
-              <FormControl>
-                <InputLabel id="model-select-label">Model Quality</InputLabel>
-                <Select
-                  onChange={onHandleSelectModel}
-                  labelId="model-select-label"
-                  value={modelSelected}
-                  style={{ width: '300px', height: '50px', border: 0}}
-                >
-                  <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
-                  <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
-                  <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
-                </Select>
-              </FormControl>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton variant="contained" component="label">
-                <ListItemIcon>
-                  <DownloadForOfflineIcon />
-                </ListItemIcon>
-                <ListItemText primary="Upload Image" />
-                <input
-                  hidden
-                  type="file"
-                  onChange={(event) => onImageUpload(event.target.files[0])}
-                  onClick={(event) => {
-                    event.target.value = null;
-                    event.stopPropagation();
-                  }} // Stop Propagation to parent components (Avoids "cancel button" to call "On Change")
-                />
-              </ListItemButton>
-            </ListItem>
-          </List>
+          </Box>
+          <Box>
+            <List sx={{position:"fixed", bottom: 0, backgroundColor: "white", width: drawerWidth, borderLeft: '1px solid #e0e0e0', m:-0.15 }}>
+              <Divider />
+              <ListItem key="model_select" disablePadding > 
+                <FormControl sx={{width: drawerWidth, height: '50px'}}>
+                  <InputLabel id="model-select-label">Model Quality</InputLabel>
+                  <Select
+                    onChange={onHandleSelectModel}
+                    labelId="model-select-label"
+                    value={modelSelected}
+                    style={{ width: drawerWidth, height: '50px', border: 0}}
+                  >
+                    <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
+                    <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
+                    <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
+                  </Select>
+                </FormControl>
+              </ListItem>
+              <Divider />
+              <ListItem disablePadding>
+                <ListItemButton variant="contained" component="label">
+                  <ListItemIcon>
+                    <DownloadForOfflineIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Upload Image"  />
+                  <input
+                    hidden
+                    type="file"
+                    onChange={(event) => onImageUpload(event.target.files[0])}
+                    onClick={(event) => {
+                      event.target.value = null;
+                      event.stopPropagation();
+                    }} // Stop Propagation to parent components (Avoids "cancel button" to call "On Change")
+                  />
+                </ListItemButton>
+              </ListItem>
+            </List>
+            <Dialog open={openModelConfirmation} onClose={handleModelConfirmationClose} >
+              <DialogTitle>Model Change Confirmation Dialog</DialogTitle>
+              <DialogContent>
+                <DialogContentText>¿Are you sure you want to change the Model Quality? All changes will be errased.</DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleModelConfirmationClose} color="primary">
+                  Cancel
+                </Button>
+                <Button onClick={handleModelConfirmationConfirm} color="primary" autoFocus>
+                  Confirm
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </Box>
         </Drawer>
-        <Dialog open={openModelConfirmation} onClose={handleModelConfirmationClose} >
-          <DialogTitle>Model Change Confirmation Dialog</DialogTitle>
-          <DialogContent>
-            <DialogContentText>¿Are you sure you want to change the Model Quality? All changes will be errased.</DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleModelConfirmationClose} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleModelConfirmationConfirm} color="primary" autoFocus>
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Box> 
       ) : null}
     </Box>

@@ -217,7 +217,7 @@ export default function ImageEditor({
           disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
           onClick={handleDownloadButtonClick}
           >
-            <DownloadIcon style={{ width: '40px' }}/>
+            <DownloadIcon style={{ width: '43px' }}/>
           </Button>
         </Tooltip>
 
