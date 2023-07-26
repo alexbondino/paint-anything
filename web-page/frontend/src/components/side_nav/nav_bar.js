@@ -40,7 +40,7 @@ import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import Layers from './layers';
 
 // controls the width of the drawer
-const drawerWidth = 300;
+const drawerWidth = "20%";
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -239,10 +239,10 @@ export function ImageEditorDrawer({
           </List>
           </Box>
           <Box>
-            <List sx={{position:"fixed", bottom: 0, backgroundColor: "white", width: drawerWidth, borderLeft: '1px solid #e0e0e0', m:-0.15 }}>
+            <List sx={{position:"fixed", bottom: 0, backgroundColor: "white", width: "100%", borderLeft: '1px solid #e0e0e0', m:-0.15 }}>
               <Divider />
               <ListItem key="model_select" disablePadding > 
-                <FormControl sx={{width: drawerWidth, height: '50px'}}>
+                <FormControl sx={{width: "100%", height: '50px'}}>
                   <InputLabel id="model-select-label">Model Quality</InputLabel>
                   <Select
                     onChange={onHandleSelectModel}
