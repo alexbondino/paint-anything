@@ -70,14 +70,14 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   const handleOnHSLChange = (newValue => {
     setSliderPoint(newValue);
     if (newValue>50){
-      setNewLightness(newLightness + newValue-50);
+      setNewLightness(newLightness + (newValue-50)/100);
     } else if (newValue<50) {
-      setNewLightness(newLightness - newValue-50);
+      setNewLightness(newLightness - (newValue-50)/100);
     } else if (newValue===50){
       setNewLightness(newLightness);
     } 
 
-    let adjustedLightness = newLightness + newValue - 50;
+    let adjustedLightness = newLightness + (newValue - 50)/10;
     adjustedLightness = Math.min(100, Math.max(0, adjustedLightness));
     setNewLightness(adjustedLightness);
 
