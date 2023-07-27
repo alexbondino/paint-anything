@@ -52,7 +52,8 @@ function hslToHex(h, s, l) {
 const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [sliderPoint, setSliderPoint] = useState(50);
-  const [lightnessDif, setLightnessDif] = useState(lightness);
+  const [newLightness, setNewLightness] = useState(lightness);
+  const [lightnessDif, setLightnessDif] = useState(0);
 
   const handleSliderDragStart = () => {
     setIsDragging(true);
@@ -68,10 +69,23 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
 
   const handleOnHSLChange = (newValue => {
     setSliderPoint(newValue);
-    setLightnessDif(newValue - lightness); //todo define lightness limits
+    if (newValue>50){
+      setNewLightness(newLightness + newValue-50);
+    } else if (newValue<50) {
+      setNewLightness(newLightness - newValue-50);
+    } else if (newValue===50){
+      setNewLightness(newLightness);
+    } 
+
+    let adjustedLightness = newLightness + newValue - 50;
+    adjustedLightness = Math.min(100, Math.max(0, adjustedLightness));
+    setNewLightness(adjustedLightness);
+
+    console.log("adjusted value: ", adjustedLightness)
     console.log("new value:",newValue)
     console.log("lightness:", lightness)
-    onHSLChange([hue, saturation, lightnessDif], layerId)
+    console.log("new lightness: ", newLightness)
+    onHSLChange([hue, saturation, newLightness], layerId)
   })
 
 
