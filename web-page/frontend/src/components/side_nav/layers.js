@@ -50,6 +50,7 @@ function hslToHex(h, s, l) {
  */
 const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [sliderPoint, setSliderPoint] = useState(50)
 
   const handleSliderDragStart = () => {
     setIsDragging(true);
@@ -60,8 +61,13 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
 
   const handleSliderChange = (newValue) => {
     const newLightness = Math.min(100, Math.max(0, newValue));
-    onHSLChange([hue, saturation, newLightness], layerId);
+    setSliderPoint(newLightness)
   };
+
+  const handleOnHSLChange = (newValue => {
+    setSliderPoint(newValue);
+    onHSLChange([hue, saturation, newValue], layerId)
+  })
 
 
   return (
@@ -96,13 +102,13 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
       </Typography>
       <Slider
         aria-label="Lightness"
-        value={lightness}
+        value={sliderPoint}
         size="small"
         min={0}
         max={100}
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
-        onChange={(e) => onHSLChange([hue, saturation, e.target.value], layerId)}
+        onChange={(e) => handleOnHSLChange(e.target.value)}
         onMouseUp={() => {
           if (!isDragging) {
             handleSliderChange(50);
