@@ -9,6 +9,7 @@ import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 
+
 // other components
 import { List, ListItem, ListItemButton, ListItemIcon } from '@mui/material';
 import { Box, Button, IconButton, Slider, Typography, TextField } from '@mui/material';
@@ -48,6 +49,21 @@ function hslToHex(h, s, l) {
  * @returns HSL slider for modifying hsl color of layer
  */
 const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleSliderDragStart = () => {
+    setIsDragging(true);
+  };
+  const handleSliderDragEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleSliderChange = (newValue) => {
+    const newLightness = Math.min(100, Math.max(0, newValue));
+    onHSLChange([hue, saturation, newLightness], layerId);
+  };
+
+
   return (
     <Box className="sliders-box">
       <Typography variant="button" id="input-slider" gutterBottom>
@@ -87,6 +103,12 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
         onChange={(e) => onHSLChange([hue, saturation, e.target.value], layerId)}
+        onMouseUp={() => {
+          if (!isDragging) {
+            handleSliderChange(50);
+        }}}
+        onDragStart={handleSliderDragStart}
+        onDragEnd={handleSliderDragEnd}
       ></Slider>
     </Box>
   );
