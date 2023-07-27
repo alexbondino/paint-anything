@@ -14,6 +14,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import { List, ListItem, ListItemButton, ListItemIcon } from '@mui/material';
 import { Box, Button, IconButton, Slider, Typography, TextField } from '@mui/material';
 import { Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
+import { light } from '@mui/material/styles/createPalette';
 
 function valueLabelFormat(value) {
   return `${value} ${'%'}`;
@@ -50,7 +51,8 @@ function hslToHex(h, s, l) {
  */
 const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [sliderPoint, setSliderPoint] = useState(50)
+  const [sliderPoint, setSliderPoint] = useState(50);
+  const [lightnessDif, setLightnessDif] = useState(lightness);
 
   const handleSliderDragStart = () => {
     setIsDragging(true);
@@ -66,7 +68,10 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
 
   const handleOnHSLChange = (newValue => {
     setSliderPoint(newValue);
-    onHSLChange([hue, saturation, newValue], layerId)
+    setLightnessDif(newValue - lightness); //todo define lightness limits
+    console.log("new value:",newValue)
+    console.log("lightness:", lightness)
+    onHSLChange([hue, saturation, lightnessDif], layerId)
   })
 
 
