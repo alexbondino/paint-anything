@@ -53,10 +53,12 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [sliderPoint, setSliderPoint] = useState(50);
   const [newLightness, setNewLightness] = useState(lightness);
-  const [lightnessDif, setLightnessDif] = useState(0);
+  const [now, setNow] = useState(new Date().getTime())
 
   const handleSliderDragStart = () => {
     setIsDragging(true);
+    setNow(new Date().getTime())
+    
   };
   const handleSliderDragEnd = () => {
     setIsDragging(false);
@@ -68,7 +70,10 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   };
 
   const handleOnHSLChange = (newValue => {
+
     setSliderPoint(newValue);
+    const then = (new Date().getTime() - now)/1000;
+
     if (newValue>50){
       setNewLightness(newLightness + (newValue-50)/100);
     } else if (newValue<50) {
@@ -81,6 +86,8 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
     adjustedLightness = Math.min(100, Math.max(0, adjustedLightness));
     setNewLightness(adjustedLightness);
 
+    console.log("now: ", now)
+    console.log("tiempo: ", then)
     console.log("adjusted value: ", adjustedLightness)
     console.log("new value:",newValue)
     console.log("lightness:", lightness)
@@ -134,6 +141,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         }}}
         onDragStart={handleSliderDragStart}
         onDragEnd={handleSliderDragEnd}
+        
       ></Slider>
     </Box>
   );
