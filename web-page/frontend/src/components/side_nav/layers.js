@@ -60,18 +60,16 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
     setNow(new Date().getTime())
     
   };
-  const handleSliderDragEnd = () => {
+  const handleSliderDragEnd = (newValue) => {
     setIsDragging(false);
-  };
-
-  const handleSliderChange = (newValue) => {
     const newLightness = Math.min(100, Math.max(0, newValue));
     setSliderPoint(newLightness)
   };
 
   const handleOnHSLChange = (newValue => {
 
-    setSliderPoint(newValue);
+    setIsDragging(true);
+
     const then = (new Date().getTime() - now)/1000;
 
     if (newValue>50){
@@ -92,8 +90,29 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
     console.log("new value:",newValue)
     console.log("lightness:", lightness)
     console.log("new lightness: ", newLightness)
-    onHSLChange([hue, saturation, newLightness], layerId)
+    if (!isDragging) {
+      onHSLChange([hue, saturation, newLightness], layerId);
+    }
   })
+
+  useEffect(() => {
+    
+    // Establece un temporizador para llamar a onHSLChange cada 1000 ms (1 segundo)
+    const timer = setInterval(() => {
+      if (isDragging) {
+        onHSLChange([hue, saturation, newLightness], layerId);
+        console.log("now: ", now);
+        console.log("new lightness: ", newLightness);
+        console.log("lightness:", lightness)
+      }
+    }, 1000);  
+    return () => clearInterval(timer);
+  }, [newLightness, layerId, hue, saturation, onHSLChange]);
+
+  const sliderOnChange = (newValue) => {
+    setSliderPoint(newValue)
+    console.log("slider on change: ",sliderPoint)
+  }
 
 
   return (
@@ -128,19 +147,17 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
       </Typography>
       <Slider
         aria-label="Lightness"
-        value={sliderPoint}
+
         size="small"
         min={0}
         max={100}
+        value={sliderPoint}
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
-        onChange={(e) => handleOnHSLChange(e.target.value)}
-        onMouseUp={() => {
-          if (!isDragging) {
-            handleSliderChange(50);
-        }}}
+        onMouseDown={(e) => handleOnHSLChange(sliderPoint)}
+        onChange={(e) => sliderOnChange(e.target.value)}
+        onMouseUp={(e) => {handleSliderDragEnd(50)}}
         onDragStart={handleSliderDragStart}
-        onDragEnd={handleSliderDragEnd}
         
       ></Slider>
     </Box>
