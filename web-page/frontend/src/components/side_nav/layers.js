@@ -134,10 +134,11 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         value={sliderPoint}
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
-        onMouseDown={(e) => handleOnHSLChange(sliderPoint)}
+        onMouseDown={() => handleOnHSLChange(sliderPoint)}
         onChange={(e) => sliderOnChange(e.target.value)}
-        onMouseUp={(e) => {handleSliderDragEnd(50)}}
+        onMouseUp={() => {handleSliderDragEnd(50)}}
         onDragStart={handleSliderDragStart}
+        onMouseLeave={() => {handleSliderDragEnd(50)}}
         
       ></Slider>
     </Box>
