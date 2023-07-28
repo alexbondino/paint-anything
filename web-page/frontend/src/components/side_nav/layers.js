@@ -58,8 +58,8 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   const handleSliderDragStart = () => {
     setIsDragging(true);
     setNow(new Date().getTime())
-    
   };
+
   const handleSliderDragEnd = (newValue) => {
     setIsDragging(false);
     const newLightness = Math.min(100, Math.max(0, newValue));
@@ -67,47 +67,28 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   };
 
   const handleOnHSLChange = (newValue => {
-
     setIsDragging(true);
-
-    const then = (new Date().getTime() - now)/1000;
-
-    if (newValue>50){
-      setNewLightness(newLightness + (newValue-50)/100);
-    } else if (newValue<50) {
-      setNewLightness(newLightness - (newValue-50)/100);
-    } else if (newValue===50){
-      setNewLightness(newLightness);
-    } 
-
-    let adjustedLightness = newLightness + (newValue - 50)/10;
-    adjustedLightness = Math.min(100, Math.max(0, adjustedLightness));
-    setNewLightness(adjustedLightness);
-
-    console.log("now: ", now)
-    console.log("tiempo: ", then)
-    console.log("adjusted value: ", adjustedLightness)
-    console.log("new value:",newValue)
-    console.log("lightness:", lightness)
-    console.log("new lightness: ", newLightness)
-    if (!isDragging) {
-      onHSLChange([hue, saturation, newLightness], layerId);
-    }
   })
 
   useEffect(() => {
     
-    // Establece un temporizador para llamar a onHSLChange cada 1000 ms (1 segundo)
+    // Establece un temporizador para llamar a onHSLChange cada 10 ms (1 segundo)
     const timer = setInterval(() => {
       if (isDragging) {
-        onHSLChange([hue, saturation, newLightness], layerId);
+
+        let adjustedLightness = newLightness + (sliderPoint - 50)/50;
+        adjustedLightness = Math.min(100, Math.max(0, adjustedLightness));
+        setNewLightness(adjustedLightness);
+
         console.log("now: ", now);
         console.log("new lightness: ", newLightness);
         console.log("lightness:", lightness)
+
+        onHSLChange([hue, saturation, newLightness], layerId);
       }
-    }, 1000);  
+    }, 10);  
     return () => clearInterval(timer);
-  }, [newLightness, layerId, hue, saturation, onHSLChange]);
+  }, [newLightness, layerId, hue, saturation, onHSLChange, sliderPoint]);
 
   const sliderOnChange = (newValue) => {
     setSliderPoint(newValue)
