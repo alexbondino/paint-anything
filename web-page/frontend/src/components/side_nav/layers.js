@@ -72,7 +72,6 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
 
   useEffect(() => {
     
-    // Establece un temporizador para llamar a onHSLChange cada 10 ms (1 segundo)
     const timer = setInterval(() => {
       if (isDragging) {
 
