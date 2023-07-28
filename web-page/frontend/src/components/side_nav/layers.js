@@ -128,10 +128,10 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
       </Typography>
       <Slider
         aria-label="Lightness"
-
         size="small"
         min={0}
         max={100}
+        color="info"
         value={sliderPoint}
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
