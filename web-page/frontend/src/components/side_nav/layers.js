@@ -79,6 +79,8 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         adjustedLightness = Math.min(100, Math.max(0, adjustedLightness));
         setNewLightness(adjustedLightness);
 
+        console.log(sliderPoint-50)
+
         console.log("now: ", now);
         console.log("new lightness: ", newLightness);
         console.log("lightness:", lightness)
@@ -133,7 +135,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         color="info"
         value={sliderPoint}
         valueLabelDisplay="auto"
-        valueLabelFormat={valueLabelFormat}
+        valueLabelFormat={valueLabelFormat((sliderPoint-50)/10)}
         onMouseDown={() => handleOnHSLChange(sliderPoint)}
         onChange={(e) => sliderOnChange(e.target.value)}
         onMouseUp={() => {handleSliderDragEnd(50)}}
