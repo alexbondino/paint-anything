@@ -17,6 +17,13 @@ const PreviewTransition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
+/**
+ * Component for the preview image. Visibility of layers is respected
+ *
+ * @param baseImg corresponds to the image user uploaded
+ * @param layersDef layer definition
+ * @returns box with curent state of edition
+ */
 function PreviewImage({ baseImg, layersDef }) {
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null && l.visibility)
