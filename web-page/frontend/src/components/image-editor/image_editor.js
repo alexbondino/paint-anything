@@ -34,6 +34,9 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
   // listens to changes in imgURL to update canvas image accordingly
   useEffect(() => {
     setImgComplete(false);
+    if (imgUrl === null) {
+      return;
+    }
     const newImg = new Image();
     newImg.src = imgUrl;
     newImg.onload = () => {
@@ -87,7 +90,11 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
       const l = getBaseImageSize();
       c.width = l[0];
       c.height = l[1];
-
+      if (points.length === 0) {
+        console.log('clearing canvas');
+        context.clearRect(0, 0, c.width, c.height);
+        return;
+      }
       var hue = currentHSL[0];
       var sat = currentHSL[1];
       var lightness = currentHSL[2];
@@ -130,10 +137,8 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange }) 
       try {
         // extract cooords up until pointer
         let coords = [];
-        if (layerPoints.length > 0) {
-          const pointsDef = layerPoints.find((l) => l.id === layer.id);
-          coords = pointsDef ? pointsDef.coords.slice(0, pointsDef.pointer) : [];
-        }
+        const pointsDef = layerPoints.find((l) => l.id === layer.id);
+        coords = pointsDef ? pointsDef.coords.slice(0, pointsDef.pointer) : [];
         return (
           <Mask
             key={`mask_${layer.id}`}
@@ -246,7 +251,7 @@ export default function ImageEditor({
           alt="base_image"
           onLoad={handleOnBaseImageLoad}
         />
-        {naturalImgSize.length === 2 ? (
+        {naturalImgSize.length === 2 && layerPoints.length > 0 ? (
           <MaskImages
             layersDef={layersDef}
             selectedLayer={selectedLayer}
