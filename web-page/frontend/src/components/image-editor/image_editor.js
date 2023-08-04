@@ -123,13 +123,7 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
  * Renders all visible masks and corresponding points
  * @returns list of mask components
  */
-const MaskImages = ({
-  layersDef,
-  selectedLayer,
-  layerPoints,
-  onPointerChange,
-  onNewPoint,
-}) => {
+const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange }) => {
   return layersDef
     .filter((l) => l.visibility)
     .map((layer) => {
@@ -258,7 +252,6 @@ export default function ImageEditor({
             selectedLayer={selectedLayer}
             layerPoints={layerPoints}
             onPointerChange={onPointerChange}
-            onNewPoint={onNewPoint}
           />
         ) : null}
       </Box>

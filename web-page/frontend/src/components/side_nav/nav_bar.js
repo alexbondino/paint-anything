@@ -164,8 +164,8 @@ export function ImageEditorDrawer({
     // first draw base image
     ctx.drawImage(imgElement, 0, 0, width, height);
     // next draw layers, in same order as shown in editor
-    const newLayersDef = [...layersDef].sort((l) => -l.id);
-    for (const l of newLayersDef) {
+    const drawableLayers = [...layersDef].filter((l) => l.visibility).sort((l) => -l.id);
+    for (const l of drawableLayers) {
       const maskImg = document.getElementById(`canvas-${l.id}`);
       ctx.drawImage(maskImg, 0, 0, width, height);
     }

@@ -17,14 +17,9 @@ const PreviewTransition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-// TODO: fix button focus after exiting preview with escape key
-export default function PreviewDialog({ layersDef, baseImg }) {
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
+function PreviewImage({ baseImg, layersDef }) {
   const maskImgComps = layersDef
-    .filter((l) => l.imgUrl !== null)
+    .filter((l) => l.imgUrl !== null && l.visibility)
     .map((layer) => {
       var canvas = document.getElementById(`canvas-${layer.id}`);
       const img = canvas.toDataURL('image/png');
@@ -52,6 +47,21 @@ export default function PreviewDialog({ layersDef, baseImg }) {
       }
     });
 
+  return (
+    <Box className="preview-image-box" sx={{ position: 'relative' }}>
+      <img src={baseImg} alt="base_image" />
+      {maskImgComps}
+    </Box>
+  );
+}
+
+// TODO: fix button focus after exiting preview with escape key
+export default function PreviewDialog({ layersDef, baseImg }) {
+  console.log('previewDialog');
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   return [
     <ListItemButton key={'preview-button'} onClick={handleOpen}>
       <ListItemIcon>
@@ -76,10 +86,7 @@ export default function PreviewDialog({ layersDef, baseImg }) {
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Box className="preview-image-box" sx={{ position: 'relative' }}>
-        <img src={baseImg} alt="base_image" />
-        {maskImgComps}
-      </Box>
+      {open ? <PreviewImage baseImg={baseImg} layersDef={layersDef} /> : null}
     </Dialog>,
   ];
 }
