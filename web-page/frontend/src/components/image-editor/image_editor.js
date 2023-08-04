@@ -129,7 +129,6 @@ const MaskImages = ({
   layerPoints,
   onPointerChange,
   onNewPoint,
-  naturalImgSize,
 }) => {
   return layersDef
     .filter((l) => l.visibility)
@@ -260,7 +259,6 @@ export default function ImageEditor({
             layerPoints={layerPoints}
             onPointerChange={onPointerChange}
             onNewPoint={onNewPoint}
-            naturalImgSize={naturalImgSize}
           />
         ) : null}
       </Box>

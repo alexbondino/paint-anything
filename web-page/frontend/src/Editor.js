@@ -157,6 +157,7 @@ export function Editor() {
    * @param {int} pointerChange direction of pointer change. -1 for undo and +1 for redo
    */
   async function handlePointerChange(layerId, pointerChange) {
+    console.log('handlePointerChange');
     const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
     const layerDef = layerPoints[layerIndex];
     // computes new pointer
