@@ -26,13 +26,16 @@ export default function PreviewDialog({ layersDef, baseImg }) {
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null)
     .map((layer) => {
+      var canvas = document.getElementById(`canvas-${layer.id}`);
+      const img = canvas.toDataURL('image/png');
       try {
         return (
           <img
             key={layer.id}
-            src={layer.imgUrl}
+            src={img}
             alt={`mask_image_${layer.id}`}
             style={{
+              zIndex: 1000 - layer.id,
               objectFit: 'contain',
               position: 'absolute',
               width: '100%',
