@@ -24,7 +24,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-
 // icons
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -150,24 +149,31 @@ export function ImageEditorDrawer({
   const handleModelConfirmationConfirm = (event) => {
     onConfirmModelConfirmation();
     onImageUpload(currentImage);
-  }
-
+  };
 
   async function handleDownloadButtonClick() {
-    try {
-      const response = await axios.get('http://localhost:8000/api/image_downloader', {
-        responseType: 'blob',
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'image/png' }));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'imagen.png');
-      document.body.appendChild(link);
-      link.click();
-      console.log('imagen descargada correctamente');
-    } catch (error) {
-      console.error('Error al enviar la imagen:', error);
+    // fetch base image
+    const imgElement = document.getElementById('baseImg');
+    const width = imgElement.naturalWidth;
+    const height = imgElement.naturalHeight;
+    // create canvas element with image size
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = width;
+    canvas.height = height;
+    // first draw base image
+    ctx.drawImage(imgElement, 0, 0, width, height);
+    // next draw layers, in same order as shown in editor
+    const newLayersDef = [...layersDef].sort((l) => -l.id);
+    for (const l of newLayersDef) {
+      const maskImg = document.getElementById(`canvas-${l.id}`);
+      ctx.drawImage(maskImg, 0, 0, width, height);
     }
+    // dump image to file
+    const link = document.createElement('a');
+    link.download = 'output.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   }
 
   return (
@@ -222,7 +228,7 @@ export function ImageEditorDrawer({
                 onChange={onHandleSelectModel}
                 labelId="model-select-label"
                 value={modelSelected}
-                style={{ width: '300px', height: '50px', border: 0}}
+                style={{ width: '300px', height: '50px', border: 0 }}
               >
                 <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
                 <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
@@ -294,10 +300,12 @@ export function ImageEditorDrawer({
           </ListItem>
         </List>
       </Drawer>
-      <Dialog open={openModelConfirmation} onClose={handleModelConfirmationClose} >
+      <Dialog open={openModelConfirmation} onClose={handleModelConfirmationClose}>
         <DialogTitle>Model Change Confirmation Dialog</DialogTitle>
         <DialogContent>
-          <DialogContentText>¿Are you sure you want to change the Model Quality? All changes will be errased.</DialogContentText>
+          <DialogContentText>
+            ¿Are you sure you want to change the Model Quality? All changes will be errased.
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleModelConfirmationClose} color="primary">
