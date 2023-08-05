@@ -193,13 +193,6 @@ def cleanup():
     else:
         return {"message": "No temporary directory to clean up."}
 
-
-@app.get("/api/image_downloader")
-def image_downloader():
-    output_path = save_output(temp_dir)
-    return FileResponse(output_path, media_type="image/png")
-
-
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickData):
     layer_id = data.layer_id
