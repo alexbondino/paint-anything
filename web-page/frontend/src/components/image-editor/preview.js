@@ -18,22 +18,27 @@ const PreviewTransition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-// TODO: fix button focus after exiting preview with escape key
-export default function PreviewDialog({ layersDef, baseImg, selectedLayer, selectedLayerVisibility }) {
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
+/**
+ * Component for the preview image. Visibility of layers is respected
+ *
+ * @param baseImg corresponds to the image user uploaded
+ * @param layersDef layer definition
+ * @returns box with curent state of edition
+ */
+function PreviewImage({ baseImg, layersDef }) {
   const maskImgComps = layersDef
-    .filter((l) => l.imgUrl !== null)
+    .filter((l) => l.imgUrl !== null && l.visibility)
     .map((layer) => {
+      var canvas = document.getElementById(`canvas-${layer.id}`);
+      const img = canvas.toDataURL('image/png');
       try {
         return (
           <img
             key={layer.id}
-            src={layer.imgUrl}
+            src={img}
             alt={`mask_image_${layer.id}`}
             style={{
+              zIndex: 1000 - layer.id,
               objectFit: 'contain',
               position: 'absolute',
               width: '100%',
@@ -45,10 +50,24 @@ export default function PreviewDialog({ layersDef, baseImg, selectedLayer, selec
           />
         );
       } catch {
-        console.log(`Image for layer ${layer.id} not found`);
+        console.error(`Image for layer ${layer.id} not found`);
         return;
       }
     });
+
+  return (
+    <Box className="preview-image-box" sx={{ position: 'relative' }}>
+      <img src={baseImg} alt="base_image" />
+      {maskImgComps}
+    </Box>
+  );
+}
+
+// TODO: fix button focus after exiting preview with escape key
+export default function PreviewDialog({ layersDef, baseImg, selectedLayer, selectedLayerVisibility }) {
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return [
 
@@ -78,10 +97,7 @@ export default function PreviewDialog({ layersDef, baseImg, selectedLayer, selec
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Box className="preview-image-box" sx={{ position: 'relative' }}>
-        <img src={baseImg} alt="base_image" />
-        {maskImgComps}
-      </Box>
+      {open ? <PreviewImage baseImg={baseImg} layersDef={layersDef} /> : null}
     </Dialog>,
   ];
 }

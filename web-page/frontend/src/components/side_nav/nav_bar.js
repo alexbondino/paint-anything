@@ -2,7 +2,6 @@ import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import './nav-bar.scss';
-import axios from 'axios';
 
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
@@ -23,7 +22,6 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
 
 // icons
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -149,7 +147,7 @@ export function ImageEditorDrawer({
     onConfirmModelConfirmation();
     onImageUpload(currentImage);
   }
-
+  
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />

@@ -1,19 +1,13 @@
-import numpy as np
 import os
-from segment_anything import sam_model_registry, SamPredictor
 import torch
-from typing import List, Dict
-from PIL import Image
-
 import onnxruntime
+import numpy as np
+from segment_anything import sam_model_registry, SamPredictor
+from typing import List, Dict, Literal
+from PIL import Image
+from logger import color_logger
 
-# TODO: restrict device choice based on available virtual RAM on gpu
-# use gpu if available
-device = torch.device(
-    "cuda"
-    if torch.cuda.is_available() and torch.cuda.mem_get_info()[0] / (10**9) >= 5.0
-    else "cpu"
-)
+logger = color_logger(__name__, "INFO")
 
 
 ## Defining the mask and the points
@@ -50,8 +44,41 @@ def show_points(coords: np.ndarray, labels: np.ndarray, ax, marker_size=200):
     )
 
 
+def get_torch_device(model_type: Literal["vit_b", "vit_l", "vit_h"]) -> torch.device:
+    """Creates a torch device to run the model. If gpu is available, memory
+    is evaluated for given model. Defaults to cpu
+
+    Args:
+        model_type (str): sam model type
+
+    Returns:
+        torch.device: device to run embedding generation
+    """
+    if torch.cuda.is_available():
+        # clean cuda cache
+        torch.cuda.empty_cache()
+        # only load model into gpu if there is enough memoery
+        device = torch.device("cuda")
+        device_properties = torch.cuda.get_device_properties(device)
+        available_memory = (
+            device_properties.total_memory - torch.cuda.max_memory_allocated()
+        ) / (1024**3)
+        if model_type == "vit_b" and available_memory >= 2.0:
+            return device
+        elif model_type == "vit_l" and available_memory >= 6.0:
+            return device
+        elif model_type == "vit_h" and available_memory >= 11.0:
+            return device
+        else:
+            logger.error(
+                "Your GPU doesn't have enough memory to load desired model. Defaulting to cpu"
+            )
+    return torch.device("cpu")
+
+
 def create_sam(type: str, checkpoint_path: str):
     """Initializes the SAM model"""
+    device = get_torch_device(type)
     sam = sam_model_registry[type](checkpoint=checkpoint_path)
     sam.to(device=device)
     return sam
@@ -153,12 +180,14 @@ def update_stored_mask(
         image_embedding (np_ndarray):
         ort_session (onnxruntime):
     """
-    points = layer_coords.get(layer_id, {})
-    if len(points) == 0:
+    points = layer_coords.get(layer_id, None)
+    # layer doesn't have points assigned
+    if points is None:
         return
-    effective_points = layer_coords[layer_id]["points"][
-        : layer_coords[layer_id]["pointer"]
-    ]
+    # pointer will return 0 points
+    if points["pointer"] == 0:
+        return
+    effective_points = points["points"][: points["pointer"]]
     # create new mask
     mask_img = gen_new_mask(
         img, effective_points, predictor, image_embedding, ort_session
