@@ -5,15 +5,18 @@ from fastapi.responses import FileResponse
 import os
 import tempfile
 import shutil
+import numpy as np
+import onnxruntime
 from typing import Literal
 from pydantic import BaseModel, Field
+from segment_anything import SamPredictor
+from PIL import Image
 from masking.predictor import create_sam, update_stored_mask
 from utils import load_image, clean_mask_files, save_output
 from color_transform.transform import extract_median_h_sat, hsl_cv2_2_js
-from segment_anything import SamPredictor
-from PIL import Image
-import numpy as np
-import onnxruntime
+from logger import color_logger
+
+logger = color_logger(__name__, "INFO")
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -28,11 +31,11 @@ image_embedding = None
 
 # TODO: choose which SAM variant can be used
 # segment anything model
-print("-> loading sam predictor")
+logger.info("-> loading sam predictor")
 onnx_model_path = "./assets/vit_l_quantized.onnx"
 ort_session = onnxruntime.InferenceSession(onnx_model_path)
 predictor = SamPredictor(create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth"))
-print("-> sam predictor successfully loaded")
+logger.info("-> sam predictor successfully loaded")
 
 
 class Layer(BaseModel):
@@ -87,11 +90,11 @@ def reset_points():
 
 def set_new_img(img_path: str) -> SamPredictor:
     global img, image_embedding
-    print("-> generating embeddings for base image ...")
+    logger.info("-> generating embeddings for base image ...")
     img = load_image(img_path)
     predictor.set_image(img)
     image_embedding = predictor.get_image_embedding().detach().cpu().numpy()
-    print("-> embeddings generated")
+    logger.info("-> embeddings generated")
 
 
 def delete_points(layer_id: int):
@@ -225,7 +228,7 @@ def point_and_click(data: PointAndClickData):
 
 @app.post("/api/move-pointer")
 def move_layer_pointer(layer_pointer: LayerPointer):
-    print(f"new pointer: {layer_pointer.pointer}")
+    logger.debug(f"new pointer: {layer_pointer.pointer}")
     layer_id = layer_pointer.layer_id
     layer_coords[layer_id]["pointer"] = layer_pointer.pointer
     update_stored_mask(layer_id, img, predictor, layer_coords, temp_dir)

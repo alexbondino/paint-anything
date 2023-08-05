@@ -5,6 +5,9 @@ import numpy as np
 from segment_anything import sam_model_registry, SamPredictor
 from typing import List, Dict, Literal
 from PIL import Image
+from logger import color_logger
+
+logger = color_logger(__name__, "INFO")
 
 
 ## Defining the mask and the points
@@ -67,7 +70,7 @@ def get_torch_device(model_type: Literal["vit_b", "vit_l", "vit_h"]) -> torch.de
         elif type == "vit_h" and available_memory >= 11.0:
             return device
         else:
-            print(
+            logger.error(
                 "Your GPU doesn't have enough memory to load desired model. Defaulting to cpu"
             )
     return torch.device("cpu")
