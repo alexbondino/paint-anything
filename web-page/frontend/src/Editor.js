@@ -6,7 +6,6 @@ import LoadingComponent from './components/loading/loading.js';
 import ModelSelector from './components/model-selector/model-selector.js';
 import axios from 'axios';
 
-// TODO: show loading status while image embeddings are being computed
 export function Editor() {
   // base image to be edited
   const [baseImg, setBaseImg] = useState(null);

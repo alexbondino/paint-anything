@@ -1,19 +1,23 @@
+import os
+import tempfile
+import shutil
+import numpy as np
+import onnxruntime
+import torch
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-import os
-import tempfile
-import shutil
 from typing import Literal
 from pydantic import BaseModel, Field
+from segment_anything import SamPredictor
+from PIL import Image
 from masking.predictor import create_sam, update_stored_mask
 from utils import load_image, clean_mask_files, save_output
 from color_transform.transform import extract_median_h_sat, hsl_cv2_2_js
-from segment_anything import SamPredictor
-from PIL import Image
-import numpy as np
-import onnxruntime
+from logger import color_logger
+
+logger = color_logger(__name__, "INFO")
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,13 +30,12 @@ layer_coords = {}
 img = None
 image_embedding = None
 
-# TODO: choose which SAM variant can be used
 # segment anything model
-print("-> loading sam predictor")
+logger.info("-> loading sam predictor")
 onnx_model_path = "./assets/vit_l_quantized.onnx"
 ort_session = onnxruntime.InferenceSession(onnx_model_path)
 predictor = SamPredictor(create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth"))
-print("-> sam predictor successfully loaded")
+logger.info("-> sam predictor successfully loaded")
 
 
 class Layer(BaseModel):
@@ -87,11 +90,13 @@ def reset_points():
 
 def set_new_img(img_path: str) -> SamPredictor:
     global img, image_embedding
-    print("-> generating embeddings for base image ...")
+    logger.info("-> generating embeddings for base image ...")
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     img = load_image(img_path)
     predictor.set_image(img)
     image_embedding = predictor.get_image_embedding().detach().cpu().numpy()
-    print("-> embeddings generated")
+    logger.info("-> embeddings generated")
 
 
 def delete_points(layer_id: int):
@@ -134,7 +139,6 @@ async def upload_image(image: UploadFile = None):
     """
     if image is None:
         raise HTTPException(status_code=400, detail="No image provided.")
-
     file_path = os.path.join(temp_dir, "image.jpg")
     with open(file_path, "wb") as file:
         file.write(await image.read())
@@ -180,6 +184,8 @@ def cleanup():
     global temp_dir
     clean_mask_files(temp_dir)
     reset_points()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     if temp_dir is not None:
         shutil.rmtree(temp_dir)
         temp_dir = tempfile.mkdtemp()
@@ -187,18 +193,16 @@ def cleanup():
     else:
         return {"message": "No temporary directory to clean up."}
 
-
-@app.get("/api/image_downloader")
-def image_downloader():
-    output_path = save_output(temp_dir)
-    return FileResponse(output_path, media_type="image/png")
-
-
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickData):
     layer_id = data.layer_id
-    # coordinates transformed to real image coordinates
-    new_point = [data.x_coord * img.shape[1], data.y_coord * img.shape[0], data.type]
+    # coordinates transformed to real image coordinates. This resets a 5 pixel offset
+    # established in frontend
+    new_point = [
+        min(data.x_coord * img.shape[1] + 5, img.shape[1]),
+        min(data.y_coord * img.shape[0] + 5, img.shape[0]),
+        data.type,
+    ]
     if layer_id in layer_coords:
         layer_data = layer_coords[layer_id]
         # continue adding points from where pointer is at
@@ -225,7 +229,7 @@ def point_and_click(data: PointAndClickData):
 
 @app.post("/api/move-pointer")
 def move_layer_pointer(layer_pointer: LayerPointer):
-    print(f"new pointer: {layer_pointer.pointer}")
+    logger.debug(f"new pointer: {layer_pointer.pointer}")
     layer_id = layer_pointer.layer_id
     layer_coords[layer_id]["pointer"] = layer_pointer.pointer
     update_stored_mask(
@@ -237,16 +241,23 @@ def move_layer_pointer(layer_pointer: LayerPointer):
 @app.post("/api/model-selected")
 def model_selected(data: ModelSelection):
     global predictor, ort_session
-    if data.model == "base_model":
-        onnx_model_path = "./assets/vit_b_quantized.onnx"
-        ort_session = onnxruntime.InferenceSession(onnx_model_path)
-        predictor = SamPredictor(create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth"))
-    elif data.model == "large_model":
-        onnx_model_path = "./assets/vit_l_quantized.onnx"
-        ort_session = onnxruntime.InferenceSession(onnx_model_path)
-        predictor = SamPredictor(create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth"))
-    elif data.model == "huge_model":
-        onnx_model_path = "./assets/vit_h_quantized.onnx"
-        ort_session = onnxruntime.InferenceSession(onnx_model_path)
-        predictor = SamPredictor(create_sam("vit_h", "./assets/sam_vit_h_4b8939.pth"))
+    match data.model:
+        case "large_model":
+            onnx_model_path = "./assets/vit_l_quantized.onnx"
+            ort_session = onnxruntime.InferenceSession(onnx_model_path)
+            predictor = SamPredictor(
+                create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth")
+            )
+        case "huge_model":
+            onnx_model_path = "./assets/vit_h_quantized.onnx"
+            ort_session = onnxruntime.InferenceSession(onnx_model_path)
+            predictor = SamPredictor(
+                create_sam("vit_h", "./assets/sam_vit_h_4b8939.pth")
+            )
+        case "base_model":
+            onnx_model_path = "./assets/vit_b_quantized.onnx"
+            ort_session = onnxruntime.InferenceSession(onnx_model_path)
+            predictor = SamPredictor(
+                create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth")
+            )
     return {"message": "model selected successfuly"}
