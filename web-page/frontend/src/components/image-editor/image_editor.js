@@ -225,7 +225,7 @@ export default function ImageEditor({
       <ButtonGroup className="history-box" variant="contained" aria-label="outlined primary button group" sx={{ marginBottom: -5.5 }}>
         <PreviewDialog layersDef={layersDef} baseImg={baseImg} selectedLayer={selectedLayer} selectedLayerVisibility={selectedLayerVisibility} />
         <Tooltip title="Download" placement="top">
-          <Button className="download-button" disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility} onClick={handleDownloadButtonClick}>
+          <Button className="download-button" onClick={handleDownloadButtonClick}>
             <DownloadIcon style={{ width: '43px' }} />
           </Button>
         </Tooltip>

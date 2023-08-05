@@ -38,7 +38,7 @@ import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 import Layers from './layers';
 
 // controls the width of the drawer
-const drawerWidth = "20%";
+const drawerWidth = "300px";
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -187,7 +187,7 @@ export function ImageEditorDrawer({
             '& .MuiDrawer-paper': {
               width: drawerWidth,
               display: sidebarVisibility,
-              height: "715px",
+              height: "90%",
             },
           }}
           variant="persistent"
