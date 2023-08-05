@@ -29,7 +29,6 @@ layer_coords = {}
 img = None
 image_embedding = None
 
-# TODO: choose which SAM variant can be used
 # segment anything model
 logger.info("-> loading sam predictor")
 onnx_model_path = "./assets/vit_l_quantized.onnx"
