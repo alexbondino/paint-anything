@@ -14,6 +14,9 @@ import { List, ListItem, ListItemButton, ListItemIcon } from '@mui/material';
 import { Box, Button, IconButton, Slider, Typography, TextField } from '@mui/material';
 import { Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
 
+import DraggableList from './DraggableList';
+import reorder from '../../helpers';
+
 function valueLabelFormat(value) {
   return `${value} ${'%'}`;
 }
@@ -221,7 +224,7 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
           </DialogActions>
         </Dialog>
       </ListItem>
-      {selectedLayer === layerDef.id && layerDef.hsl.length === 3? (
+      {selectedLayer === layerDef.id && layerDef.hsl.length === 3 ? (
         <ListItem>
           <HSLSlider
             layerId={layerDef.id}
@@ -243,7 +246,14 @@ export default function Layers({
   onDeleteLayer,
   onVisibilityClicked,
   onHSLChange,
+  onNewLayerDef,
 }) {
+  const onDragEnd = ({ destination, source }) => {
+    // dropped outside of the list
+    if (!destination) return;
+    const newLayersDef = reorder(layersDef, source.index, destination.index);
+    onNewLayerDef(newLayersDef);
+  };
   const layers = layersDef.map((l) => {
     return (
       <NavLayer

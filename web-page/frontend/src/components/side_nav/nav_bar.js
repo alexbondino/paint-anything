@@ -265,6 +265,7 @@ export function ImageEditorDrawer({
               onDeleteLayer={onDeleteLayer}
               onVisibilityClicked={onHandleLayerVisibilityClick}
               onHSLChange={onHSLChange}
+              onNewLayerDef={onNewLayerDef}
             />
           </Collapse>
           <ListItem key="open_preview" disablePadding>
