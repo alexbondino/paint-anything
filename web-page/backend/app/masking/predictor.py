@@ -192,12 +192,5 @@ def update_stored_mask(
     mask_img = gen_new_mask(
         img, effective_points, predictor, image_embedding, ort_session
     )
-    mask_draw = ImageDraw.Draw(mask_img)
-    for pt in effective_points:
-        mask_draw.ellipse(
-            [(pt[0] - 5, pt[1] - 5), (pt[0] + 5, pt[1] + 5)],
-            fill="green",
-            outline="red",
-        )
     # update mask by overwriting stored image
     mask_img.save(os.path.join(mask_dir, f"{layer_id}.png"))
