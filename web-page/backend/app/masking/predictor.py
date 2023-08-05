@@ -63,11 +63,11 @@ def get_torch_device(model_type: Literal["vit_b", "vit_l", "vit_h"]) -> torch.de
         available_memory = (
             device_properties.total_memory - torch.cuda.max_memory_allocated()
         ) / (1024**3)
-        if type == "vit_b" and available_memory >= 2.0:
+        if model_type == "vit_b" and available_memory >= 2.0:
             return device
-        elif type == "vit_l" and available_memory >= 6.0:
+        elif model_type == "vit_l" and available_memory >= 6.0:
             return device
-        elif type == "vit_h" and available_memory >= 11.0:
+        elif model_type == "vit_h" and available_memory >= 11.0:
             return device
         else:
             logger.error(
@@ -180,6 +180,8 @@ def update_stored_mask(
         image_embedding (np_ndarray):
         ort_session (onnxruntime):
     """
+    from PIL import ImageDraw
+
     points = layer_coords.get(layer_id, {})
     if len(points) == 0:
         return
@@ -190,5 +192,12 @@ def update_stored_mask(
     mask_img = gen_new_mask(
         img, effective_points, predictor, image_embedding, ort_session
     )
+    mask_draw = ImageDraw.Draw(mask_img)
+    for pt in effective_points:
+        mask_draw.ellipse(
+            [(pt[0] - 5, pt[1] - 5), (pt[0] + 5, pt[1] + 5)],
+            fill="green",
+            outline="red",
+        )
     # update mask by overwriting stored image
     mask_img.save(os.path.join(mask_dir, f"{layer_id}.png"))

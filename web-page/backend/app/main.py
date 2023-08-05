@@ -1,12 +1,12 @@
-from fastapi import FastAPI, UploadFile, HTTPException
-from fastapi.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 import os
 import tempfile
 import shutil
 import numpy as np
 import onnxruntime
+from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from typing import Literal
 from pydantic import BaseModel, Field
 from segment_anything import SamPredictor
@@ -199,8 +199,13 @@ def image_downloader():
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickData):
     layer_id = data.layer_id
-    # coordinates transformed to real image coordinates
-    new_point = [data.x_coord * img.shape[1], data.y_coord * img.shape[0], data.type]
+    # coordinates transformed to real image coordinates. This resets a 5 pixel offset
+    # established in frontend
+    new_point = [
+        min(data.x_coord * img.shape[1] + 5, img.shape[1]),
+        min(data.y_coord * img.shape[0] + 5, img.shape[0]),
+        data.type,
+    ]
     if layer_id in layer_coords:
         layer_data = layer_coords[layer_id]
         # continue adding points from where pointer is at
