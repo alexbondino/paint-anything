@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import Box from '@mui/material/Box';
 import Slide from '@mui/material/Slide';
+import { Tooltip, Button } from '@mui/material';
 
 // transition for preview dialogue
 const PreviewTransition = React.forwardRef(function Transition(props, ref) {
@@ -63,18 +64,21 @@ function PreviewImage({ baseImg, layersDef }) {
 }
 
 // TODO: fix button focus after exiting preview with escape key
-export default function PreviewDialog({ layersDef, baseImg }) {
+export default function PreviewDialog({ layersDef, baseImg, selectedLayer, selectedLayerVisibility }) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   return [
-    <ListItemButton key={'preview-button'} onClick={handleOpen}>
-      <ListItemIcon>
-        <PreviewIcon />
-      </ListItemIcon>
-      <ListItemText primary="See Preview" />
-    </ListItemButton>,
+
+    <Tooltip title="Preview" placement="top">
+          <Button
+          className="preview-button"
+          onClick={handleOpen}
+          >
+            <PreviewIcon style={{ width: '43px' }}/>
+          </Button>
+    </Tooltip>,
     <Dialog
       key={'preview-dialogue'}
       fullScreen

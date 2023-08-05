@@ -29,7 +29,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuIcon from '@mui/icons-material/Menu';
 import BrushIcon from '@mui/icons-material/Brush';
 import LayersIcon from '@mui/icons-material/Layers';
-import DownloadIcon from '@mui/icons-material/Download';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
@@ -37,10 +36,9 @@ import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 // project module
 import Layers from './layers';
-import PreviewDialog from './preview';
 
 // controls the width of the drawer
-const drawerWidth = 300;
+const drawerWidth = '300px';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -107,7 +105,7 @@ export function ImageEditorDrawer({
   currentImage,
 }) {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
   const [expandLayers, setExpandLayers] = React.useState(true);
   const lastLayerId = layersDef.length > 0 ? Math.max(...layersDef.map((l) => l.id)) : -1;
 
@@ -150,172 +148,169 @@ export function ImageEditorDrawer({
     onImageUpload(currentImage);
   };
 
-  async function handleDownloadButtonClick() {
-    // fetch base image
-    const imgElement = document.getElementById('baseImg');
-    const width = imgElement.naturalWidth;
-    const height = imgElement.naturalHeight;
-    // create canvas element with image size
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = width;
-    canvas.height = height;
-    // first draw base image
-    ctx.drawImage(imgElement, 0, 0, width, height);
-    // next draw layers, in same order as shown in editor
-    const drawableLayers = [...layersDef].filter((l) => l.visibility).sort((l) => -l.id);
-    for (const l of drawableLayers) {
-      const maskImg = document.getElementById(`canvas-${l.id}`);
-      ctx.drawImage(maskImg, 0, 0, width, height);
-    }
-    // dump image to file
-    const link = document.createElement('a');
-    link.download = 'output.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  }
-
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <TitleBar position="fixed" open={open}>
+      <IconButton
+        color="inherit"
+        aria-label="open drawer"
+        edge="end"
+        onClick={handleDrawerOpen}
+        sx={{
+          display: sidebarVisibility ? 'flex' : 'none',
+          position: 'absolute',
+          top: '15px',
+          right: '25px',
+          zIndex: 1,
+        }}
+      >
+        <MenuIcon sx={{ color: 'white' }} />
+      </IconButton>
+      <TitleBar position="relative" open={open} sx={{ height: '65px', width: '100%' }}>
         <Toolbar>
           <BrushIcon sx={{ marginRight: 2 }} />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
             Imagine Houses
           </Typography>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="end"
-            onClick={handleDrawerOpen}
-            sx={{
-              display: sidebarVisibility ? 'flex' : 'none',
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
         </Toolbar>
       </TitleBar>
-      <Main open={open}>
-        <DrawerHeader />
-      </Main>
-      <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            display: sidebarVisibility,
-          },
-        }}
-        variant="persistent"
-        anchor="right"
-        open={open}
-      >
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-          <ListItem key="model_select" disablePadding>
-            <FormControl>
-              <InputLabel id="model-select-label">Model Quality</InputLabel>
-              <Select
-                onChange={onHandleSelectModel}
-                labelId="model-select-label"
-                value={modelSelected}
-                style={{ width: '300px', height: '50px', border: 0 }}
+
+      {sidebarVisibility ? (
+        <Box>
+          <Main>
+            <DrawerHeader />
+          </Main>
+          <Drawer
+            sx={{
+              width: drawerWidth,
+              flexShrink: 0,
+              '& .MuiDrawer-paper': {
+                width: drawerWidth,
+                display: sidebarVisibility,
+                height: '90%',
+              },
+            }}
+            variant="persistent"
+            anchor="right"
+            open={open}
+          >
+            <DrawerHeader>
+              <IconButton onClick={handleDrawerClose}>
+                {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+              </IconButton>
+            </DrawerHeader>
+            <Divider />
+            <Box>
+              <List>
+                <ListItem key="layers">
+                  <ListItemIcon>
+                    <LayersIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Layers" />
+                  <IconButton
+                    color="inherit"
+                    aria-label="add layer"
+                    onClick={async () => await handleAddLayer()}
+                  >
+                    <AddIcon />
+                  </IconButton>
+                  {expandLayers ? (
+                    <IconButton
+                      color="inherit"
+                      aria-label="retract layers"
+                      onClick={handleLayersClick}
+                    >
+                      <ExpandLess />{' '}
+                    </IconButton>
+                  ) : (
+                    <IconButton
+                      color="inherit"
+                      aria-label="retract layers"
+                      onClick={handleLayersClick}
+                    >
+                      <ExpandMore />{' '}
+                    </IconButton>
+                  )}
+                </ListItem>
+                <Collapse key="layer_drawer" in={expandLayers} timeout="auto" unmountOnExit>
+                  <Layers
+                    layersDef={layersDef}
+                    selectedLayer={selectedLayer}
+                    onSelectLayer={onSelectLayer}
+                    onDeleteLayer={onDeleteLayer}
+                    onVisibilityClicked={onHandleLayerVisibilityClick}
+                    onHSLChange={onHSLChange}
+                    onNewLayerDef={onNewLayerDef}
+                  />
+                </Collapse>
+              </List>
+            </Box>
+            <Box>
+              <List
+                sx={{
+                  position: 'fixed',
+                  bottom: 0,
+                  backgroundColor: 'white',
+                  width: '100%',
+                  borderLeft: '1px solid #e0e0e0',
+                  m: -0.15,
+                }}
               >
-                <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
-                <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
-                <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
-              </Select>
-            </FormControl>
-          </ListItem>
-          <ListItem key="layers">
-            <ListItemIcon>
-              <LayersIcon />
-            </ListItemIcon>
-            <ListItemText primary="Layers" />
-            <IconButton
-              color="inherit"
-              aria-label="add layer"
-              onClick={async () => await handleAddLayer()}
-            >
-              <AddIcon />
-            </IconButton>
-            {expandLayers ? (
-              <IconButton color="inherit" aria-label="retract layers" onClick={handleLayersClick}>
-                <ExpandLess />{' '}
-              </IconButton>
-            ) : (
-              <IconButton color="inherit" aria-label="retract layers" onClick={handleLayersClick}>
-                <ExpandMore />{' '}
-              </IconButton>
-            )}
-          </ListItem>
-          <Collapse key="layer_drawer" in={expandLayers} timeout="auto" unmountOnExit>
-            <Layers
-              layersDef={layersDef}
-              selectedLayer={selectedLayer}
-              onSelectLayer={onSelectLayer}
-              onDeleteLayer={onDeleteLayer}
-              onVisibilityClicked={onHandleLayerVisibilityClick}
-              onHSLChange={onHSLChange}
-              onNewLayerDef={onNewLayerDef}
-            />
-          </Collapse>
-          <ListItem key="open_preview" disablePadding>
-            <PreviewDialog layersDef={layersDef} baseImg={baseImg} />
-          </ListItem>
-          <ListItem key="download_result" disablePadding>
-            <ListItemButton onClick={handleDownloadButtonClick}>
-              <ListItemIcon>
-                <DownloadIcon />
-              </ListItemIcon>
-              <ListItemText primary="Download Result" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton variant="contained" component="label">
-              <ListItemIcon>
-                <DownloadForOfflineIcon />
-              </ListItemIcon>
-              <ListItemText primary="Upload Image" />
-              <input
-                hidden
-                type="file"
-                onChange={(event) => onImageUpload(event.target.files[0])}
-                onClick={(event) => {
-                  event.target.value = null;
-                  event.stopPropagation();
-                }} // Stop Propagation to parent components (Avoids "cancel button" to call "On Change")
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Drawer>
-      <Dialog open={openModelConfirmation} onClose={handleModelConfirmationClose}>
-        <DialogTitle>Model Change Confirmation Dialog</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            ¿Are you sure you want to change the Model Quality? All changes will be errased.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleModelConfirmationClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleModelConfirmationConfirm} color="primary" autoFocus>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
+                <Divider />
+                <ListItem key="model_select" disablePadding>
+                  <FormControl sx={{ width: '100%', height: '50px' }}>
+                    <InputLabel id="model-select-label">Model Quality</InputLabel>
+                    <Select
+                      onChange={onHandleSelectModel}
+                      labelId="model-select-label"
+                      value={modelSelected}
+                      style={{ width: drawerWidth, height: '50px', border: 0 }}
+                    >
+                      <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
+                      <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
+                      <MenuItem value="huge_model">High Quality (Slow)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </ListItem>
+                <Divider />
+                <ListItem disablePadding>
+                  <ListItemButton variant="contained" component="label">
+                    <ListItemIcon>
+                      <DownloadForOfflineIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Upload Image" />
+                    <input
+                      hidden
+                      type="file"
+                      onChange={(event) => onImageUpload(event.target.files[0])}
+                      onClick={(event) => {
+                        event.target.value = null;
+                        event.stopPropagation();
+                      }} // Stop Propagation to parent components (Avoids "cancel button" to call "On Change")
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </List>
+              <Dialog open={openModelConfirmation} onClose={handleModelConfirmationClose}>
+                <DialogTitle>Model Change Confirmation Dialog</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    ¿Are you sure you want to change the Model Quality? All changes will be errased.
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleModelConfirmationClose} color="primary">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleModelConfirmationConfirm} color="primary" autoFocus>
+                    Confirm
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </Box>
+          </Drawer>
+        </Box>
+      ) : null}
     </Box>
   );
 }

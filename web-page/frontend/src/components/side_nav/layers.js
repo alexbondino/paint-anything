@@ -9,10 +9,12 @@ import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 
+
 // other components
 import { List, ListItem, ListItemButton, ListItemIcon } from '@mui/material';
 import { Box, Button, IconButton, Slider, Typography, TextField } from '@mui/material';
 import { Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
+import { light } from '@mui/material/styles/createPalette';
 
 import DraggableList from './DraggableList';
 import reorder from '../../helpers';
@@ -51,6 +53,53 @@ function hslToHex(h, s, l) {
  * @returns HSL slider for modifying hsl color of layer
  */
 const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
+  const [isDragging, setIsDragging] = useState(false);
+  const [sliderPoint, setSliderPoint] = useState(50);
+  const [newLightness, setNewLightness] = useState(lightness);
+  const [now, setNow] = useState(new Date().getTime())
+
+  const handleSliderDragStart = () => {
+    setIsDragging(true);
+    setNow(new Date().getTime())
+  };
+
+  const handleSliderDragEnd = (newValue) => {
+    setIsDragging(false);
+    const newLightness = Math.min(100, Math.max(0, newValue));
+    setSliderPoint(newLightness)
+  };
+
+  const handleOnHSLChange = (newValue => {
+    setIsDragging(true);
+  })
+
+  useEffect(() => {
+    
+    const timer = setInterval(() => {
+      if (isDragging) {
+
+        let adjustedLightness = newLightness + (sliderPoint - 50)/50;
+        adjustedLightness = Math.min(100, Math.max(0, adjustedLightness));
+        setNewLightness(adjustedLightness);
+
+        console.log(sliderPoint-50)
+
+        console.log("now: ", now);
+        console.log("new lightness: ", newLightness);
+        console.log("lightness:", lightness)
+
+        onHSLChange([hue, saturation, newLightness], layerId);
+      }
+    }, 10);  
+    return () => clearInterval(timer);
+  }, [newLightness, layerId, hue, saturation, onHSLChange, sliderPoint]);
+
+  const sliderOnChange = (newValue) => {
+    setSliderPoint(newValue)
+    console.log("slider on change: ",sliderPoint)
+  }
+
+
   return (
     <Box className="sliders-box">
       <Typography variant="button" id="input-slider" gutterBottom>
@@ -86,13 +135,19 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
       <Slider
         id="rL"
         aria-label="Lightness"
-        value={lightness}
         size="small"
         min={0}
         max={100}
+        color="info"
+        value={sliderPoint}
         valueLabelDisplay="auto"
-        valueLabelFormat={valueLabelFormat}
-        onChange={(e) => onHSLChange([hue, saturation, e.target.value], layerId)}
+        valueLabelFormat={valueLabelFormat((sliderPoint-50)/10)}
+        onMouseDown={() => handleOnHSLChange(sliderPoint)}
+        onChange={(e) => sliderOnChange(e.target.value)}
+        onMouseUp={() => {handleSliderDragEnd(50)}}
+        onDragStart={handleSliderDragStart}
+        onMouseLeave={() => {handleSliderDragEnd(50)}}
+        
       ></Slider>
     </Box>
   );
