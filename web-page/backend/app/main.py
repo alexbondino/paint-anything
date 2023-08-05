@@ -3,6 +3,7 @@ import tempfile
 import shutil
 import numpy as np
 import onnxruntime
+import torch
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -90,6 +91,8 @@ def reset_points():
 def set_new_img(img_path: str) -> SamPredictor:
     global img, image_embedding
     logger.info("-> generating embeddings for base image ...")
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     img = load_image(img_path)
     predictor.set_image(img)
     image_embedding = predictor.get_image_embedding().detach().cpu().numpy()
@@ -136,7 +139,6 @@ async def upload_image(image: UploadFile = None):
     """
     if image is None:
         raise HTTPException(status_code=400, detail="No image provided.")
-
     file_path = os.path.join(temp_dir, "image.jpg")
     with open(file_path, "wb") as file:
         file.write(await image.read())
@@ -182,6 +184,8 @@ def cleanup():
     global temp_dir
     clean_mask_files(temp_dir)
     reset_points()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     if temp_dir is not None:
         shutil.rmtree(temp_dir)
         temp_dir = tempfile.mkdtemp()
