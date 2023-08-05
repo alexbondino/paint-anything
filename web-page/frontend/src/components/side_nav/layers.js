@@ -54,6 +54,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         Hue
       </Typography>
       <Slider
+        id="rHue"
         aria-label="Hue"
         size="small"
         value={hue}
@@ -66,6 +67,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         Saturation
       </Typography>
       <Slider
+        id="rSat"
         aria-label="Saturation"
         value={saturation}
         size="small"
@@ -79,6 +81,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
         Lightness
       </Typography>
       <Slider
+        id="rL"
         aria-label="Lightness"
         value={lightness}
         size="small"
@@ -145,7 +148,7 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
           sx={{ borderRadius: '5%' }}
         >
           <ListItemIcon sx={{ minWidth: '30%' }}>
-            {layerDef.hsl.length === 3 ? (
+            {layerDef.hsl.length === 3 && layerDef.imgUrl !== null ? (
               <SquareRoundedIcon
                 sx={{
                   color: hslToHex(layerDef.hsl[0], layerDef.hsl[1], layerDef.hsl[2]),
@@ -218,7 +221,7 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
           </DialogActions>
         </Dialog>
       </ListItem>
-      {selectedLayer === layerDef.id && layerDef.hsl.length === 3 ? (
+      {selectedLayer === layerDef.id && layerDef.hsl.length === 3? (
         <ListItem>
           <HSLSlider
             layerId={layerDef.id}

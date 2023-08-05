@@ -235,7 +235,9 @@ def move_layer_pointer(layer_pointer: LayerPointer):
     logger.debug(f"new pointer: {layer_pointer.pointer}")
     layer_id = layer_pointer.layer_id
     layer_coords[layer_id]["pointer"] = layer_pointer.pointer
-    update_stored_mask(layer_id, img, predictor, layer_coords, temp_dir)
+    update_stored_mask(
+        layer_id, img, predictor, layer_coords, temp_dir, image_embedding, ort_session
+    )
     return {"message": "layer pointer moved successfully"}
 
 

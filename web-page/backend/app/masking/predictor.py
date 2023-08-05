@@ -180,14 +180,14 @@ def update_stored_mask(
         image_embedding (np_ndarray):
         ort_session (onnxruntime):
     """
-    from PIL import ImageDraw
-
-    points = layer_coords.get(layer_id, {})
-    if len(points) == 0:
+    points = layer_coords.get(layer_id, None)
+    # layer doesn't have points assigned
+    if points is None:
         return
-    effective_points = layer_coords[layer_id]["points"][
-        : layer_coords[layer_id]["pointer"]
-    ]
+    # pointer will return 0 points
+    if points["pointer"] == 0:
+        return
+    effective_points = points["points"][: points["pointer"]]
     # create new mask
     mask_img = gen_new_mask(
         img, effective_points, predictor, image_embedding, ort_session

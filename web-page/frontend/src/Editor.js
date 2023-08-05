@@ -116,9 +116,21 @@ export function Editor() {
     setSelectedLayer(layerId);
   }
 
+  async function extractMaskHSL(layerId) {
+    try {
+      const hslResponse = await axios.get('http://localhost:8000/api/mask-base-hsl', {
+        params: { layer_id: layerId },
+      });
+      return hslResponse.data.hsl;
+    } catch (error) {
+      console.error('failed trying to set initial hsl');
+      return [];
+    }
+  }
+
   async function handleMaskUpdate(layerId) {
-    const newLayersDef = [...layersDef];
     const layerPos = layersDef.findIndex((l) => l.id === layerId);
+    const newLayersDef = [...layersDef];
     // fetch mask for this layer from backend
     try {
       const imgResponse = await fetch(
@@ -136,16 +148,8 @@ export function Editor() {
       return;
     }
     // set initial hsl with base img values if not set
-    if (!newLayersDef[layerPos].hslInput) {
-      try {
-        const hslResponse = await axios.get('http://localhost:8000/api/mask-base-hsl', {
-          params: { layer_id: layerId },
-        });
-        const newHSL = hslResponse.data.hsl;
-        newLayersDef[layerPos].hsl = newHSL;
-      } catch (error) {
-        console.error('failed trying to set initial hsl');
-      }
+    if (!newLayersDef[layerPos].hslInput || newLayersDef[layerPos].hsl.length === 0) {
+      newLayersDef[layerPos].hsl = await extractMaskHSL(layerId);
     }
     setLayersDef(newLayersDef);
   }
@@ -156,12 +160,13 @@ export function Editor() {
    * @param {int} pointerChange direction of pointer change. -1 for undo and +1 for redo
    */
   async function handlePointerChange(layerId, pointerChange) {
+    console.log('handlePointerChange');
     const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
-    const layerDef = layerPoints[layerIndex];
+    const layerPtsData = layerPoints[layerIndex];
     // computes new pointer
-    const newPointer = layerDef.pointer + pointerChange;
+    const newPointer = layerPtsData.pointer + pointerChange;
     // retrieves most recent coordinates in history
-    const lastPoints = layerDef.history[layerDef.history.length - 1];
+    const lastPoints = layerPtsData.history[layerPtsData.history.length - 1];
     // handle pointer overflow
     if (newPointer < 0 || newPointer > lastPoints.length) {
       return;
@@ -176,6 +181,14 @@ export function Editor() {
     axios
       .post('http://localhost:8000/api/move-pointer', layer_pointer)
       .then((response) => {
+        // image is reset if points are null
+        if (newLayerPoints[layerIndex].coords.length === 0) {
+          const newLayersDef = [...layersDef];
+          newLayersDef[layerIndex].imgUrl = null;
+          newLayersDef[layerIndex].hsl = [];
+          setLayersDef(newLayersDef);
+          return;
+        }
         handleMaskUpdate(layerId);
       })
       .catch((error) => console.error('Error moving layer pointer:', error));

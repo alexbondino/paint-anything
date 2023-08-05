@@ -101,3 +101,5 @@ package-lock.json
 web-page/backend/env/API/__pycache__/app.cpython-310.pyc
 assets/
 
+#Prettier config file
+.prettierrc
