@@ -91,7 +91,6 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
       c.width = l[0];
       c.height = l[1];
       if (points.length === 0) {
-        console.log('clearing canvas');
         context.clearRect(0, 0, c.width, c.height);
         return;
       }
@@ -151,7 +150,7 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange }) 
           />
         );
       } catch (error) {
-        console.log(`Error rendering mask ${layer.id}`, error);
+        console.error(`Error rendering mask ${layer.id}`, error);
         return;
       }
     });

@@ -49,7 +49,7 @@ function PreviewImage({ baseImg, layersDef }) {
           />
         );
       } catch {
-        console.log(`Image for layer ${layer.id} not found`);
+        console.error(`Image for layer ${layer.id} not found`);
         return;
       }
     });
@@ -64,7 +64,6 @@ function PreviewImage({ baseImg, layersDef }) {
 
 // TODO: fix button focus after exiting preview with escape key
 export default function PreviewDialog({ layersDef, baseImg }) {
-  console.log('previewDialog');
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);

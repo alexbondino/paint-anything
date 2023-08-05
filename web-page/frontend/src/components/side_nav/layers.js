@@ -148,7 +148,7 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
           sx={{ borderRadius: '5%' }}
         >
           <ListItemIcon sx={{ minWidth: '30%' }}>
-            {layerDef.hsl.length === 3 ? (
+            {layerDef.hsl.length === 3 && layerDef.imgUrl !== null ? (
               <SquareRoundedIcon
                 sx={{
                   color: hslToHex(layerDef.hsl[0], layerDef.hsl[1], layerDef.hsl[2]),
@@ -221,7 +221,7 @@ const NavLayer = ({ layerDef, selectedLayer, onSelected, onDelete, onVisClick, o
           </DialogActions>
         </Dialog>
       </ListItem>
-      {selectedLayer === layerDef.id && layerDef.hsl.length === 3 ? (
+      {selectedLayer === layerDef.id && layerDef.hsl.length === 3? (
         <ListItem>
           <HSLSlider
             layerId={layerDef.id}

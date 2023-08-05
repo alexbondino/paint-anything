@@ -185,8 +185,8 @@ export function Editor() {
         // image is reset if points are null
         if (newLayerPoints[layerIndex].coords.length === 0) {
           const newLayersDef = [...layersDef];
-          newLayersDef[layerIndex].hsl = [];
           newLayersDef[layerIndex].imgUrl = null;
+          newLayersDef[layerIndex].hsl = [];
           setLayersDef(newLayersDef);
           return;
         }
