@@ -8,6 +8,7 @@
 __author__ = "Mikko Ohtamaa <mikko@opensourcehacker.com>"
 __license__ = "MIT"
 
+import sys
 import logging
 
 from logutils.colorize import ColorizingStreamHandler
