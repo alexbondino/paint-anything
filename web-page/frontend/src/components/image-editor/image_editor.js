@@ -18,7 +18,7 @@ function getBaseImageSize(type) {
   return null;
 }
 
-function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL }) {
+function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL, drawIndex }) {
   const [img, setImg] = useState(null);
   const [imgComplete, setImgComplete] = useState(false);
 
@@ -106,7 +106,12 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
 
   return (
     <React.Fragment>
-      <Canvas key={`mask-${layerId}-canvas`} layerId={layerId} draw={draw} zIndex={1000 - layerId} />
+      <Canvas
+        key={`mask-${layerId}-canvas`}
+        layerId={layerId}
+        draw={draw}
+        zIndex={100 + drawIndex}
+      />
       {pointBoxes}
     </React.Fragment>
   );
@@ -117,7 +122,7 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, on
     <React.Fragment>
       {layersDef
         .filter((l) => l.visibility)
-        .map((layer) => {
+        .map((layer, index) => {
           try {
             let coords = [];
             if (layerPoints.length > 0) {
@@ -133,6 +138,7 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, on
                 points={coords}
                 onPointerChange={onPointerChange}
                 currentHSL={layer.hsl}
+                drawIndex={index}
               />
             );
           } catch (error) {
@@ -222,30 +228,64 @@ export default function ImageEditor({
       }}
       spacing={1}
     >
-      <ButtonGroup className="history-box" variant="contained" aria-label="outlined primary button group" sx={{ marginBottom: -5.5 }}>
-        <PreviewDialog layersDef={layersDef} baseImg={baseImg} selectedLayer={selectedLayer} selectedLayerVisibility={selectedLayerVisibility} />
+      <ButtonGroup
+        className="history-box"
+        variant="contained"
+        aria-label="outlined primary button group"
+        sx={{ marginBottom: -5.5 }}
+      >
+        <PreviewDialog
+          layersDef={layersDef}
+          baseImg={baseImg}
+          selectedLayer={selectedLayer}
+          selectedLayerVisibility={selectedLayerVisibility}
+        />
         <Tooltip title="Download" placement="top">
           <Button className="download-button" onClick={handleDownloadButtonClick}>
             <DownloadIcon style={{ width: '43px' }} />
           </Button>
         </Tooltip>
       </ButtonGroup>
-      <ButtonGroup className="history-box" variant="contained" aria-label="outlined primary button group">
+      <ButtonGroup
+        className="history-box"
+        variant="contained"
+        aria-label="outlined primary button group"
+      >
         <Tooltip title="Undo (Ctrl + z)" placement="top">
-          <Button className="history-button" disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility} onClick={() => onPointerChange(selectedLayerVisibility.id, -1)}>
+          <Button
+            className="history-button"
+            disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
+            onClick={() => onPointerChange(selectedLayerVisibility.id, -1)}
+          >
             <UndoIcon />
           </Button>
         </Tooltip>
         <Tooltip title="Redo (Ctrl + y)" placement="top">
-          <Button className="history-button" disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility} onClick={() => onPointerChange(selectedLayerVisibility.id, 1)}>
+          <Button
+            className="history-button"
+            disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
+            onClick={() => onPointerChange(selectedLayerVisibility.id, 1)}
+          >
             <RedoIcon />
           </Button>
         </Tooltip>
       </ButtonGroup>
       <Box className="image-box" onClick={handlePointAndClick} onContextMenu={handlePointAndClick}>
-        <img id="baseImg" src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
+        <img
+          id="baseImg"
+          src={baseImg}
+          className="image"
+          alt="base_image"
+          onLoad={handleOnBaseImageLoad}
+        />
         {naturalImgSize.length === 2 && layerPoints.length > 0 ? (
-          <MaskImages layersDef={layersDef} selectedLayer={selectedLayer} layerPoints={layerPoints} onPointerChange={onPointerChange} onNewPoint={onNewPoint} />
+          <MaskImages
+            layersDef={layersDef}
+            selectedLayer={selectedLayer}
+            layerPoints={layerPoints}
+            onPointerChange={onPointerChange}
+            onNewPoint={onNewPoint}
+          />
         ) : null}
       </Box>
     </Stack>
