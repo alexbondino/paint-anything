@@ -17,12 +17,6 @@ import { Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/ma
 
 const grid = 8;
 
-const getListStyle = (isDraggingOver) => ({
-  background: isDraggingOver ? 'lightblue' : 'lightgrey',
-  padding: grid,
-  width: 250,
-});
-
 function valueLabelFormat(value) {
   return `${value} ${'%'}`;
 }
@@ -102,7 +96,7 @@ const HSLSlider = ({ layerId, hue, saturation, lightness, onHSLChange }) => {
   };
 
   return (
-    <Box className="sliders-box">
+    <Box className="sliders-box" sx={{ draggable: false }}>
       <Typography variant="button" id="input-slider" gutterBottom>
         Hue
       </Typography>
@@ -197,14 +191,9 @@ const DraggableLayer = ({
   };
 
   return (
-    <Draggable key={`${layerDef.id}`} draggableId={`${layerDef.id}`} index={index}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          style={getListStyle(snapshot.isDraggingOver)}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-        >
+    <Draggable key={`${layerDef.id}`} draggableId={`${layerDef.id}`} index={index} d>
+      {(provided) => (
+        <div ref={provided.innerRef} {...provided.draggableProps}>
           <ListItem>
             <ListItemButton
               id={layerDef.id}
@@ -212,6 +201,7 @@ const DraggableLayer = ({
               selected={selectedLayer === layerDef.id}
               onClick={() => (openEditionMode ? null : onSelected(layerDef.id))}
               sx={{ borderRadius: '5%' }}
+              {...provided.dragHandleProps}
             >
               <ListItemIcon sx={{ minWidth: '30%' }}>
                 {layerDef.hsl.length === 3 && layerDef.imgUrl !== null ? (
