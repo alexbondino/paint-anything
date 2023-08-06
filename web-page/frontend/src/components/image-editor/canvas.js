@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 /**
  * Canvas wrapper for React. This is used to draw masks
- * 
+ *
  * @param {int} layerId id of layer to draw
  * @param {function} draw this callable handles the drawing of the layer, with its appropriate hsl values
  * @param {int} zIndex indicates draw priority. When comparing two layers, the layer with the higher this
@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 const Canvas = ({ layerId, draw, zIndex }) => {
   const canvas = React.useRef();
   React.useEffect(() => {
-    const context = canvas.current.getContext('2d');
+    const context = canvas.current.getContext('2d', { willReadFrequently: true });
     draw(context, canvas);
   });
   return (

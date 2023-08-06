@@ -154,7 +154,6 @@ const DraggableLayer = ({
                 layerId={layerDef.id}
                 hue={layerDef.hsl[0]}
                 saturation={layerDef.hsl[1]}
-                lightness={layerDef.hsl[2]}
                 onHSLChange={onHSLChange}
               />
             </ListItem>

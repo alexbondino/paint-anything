@@ -8,6 +8,8 @@ import RedoIcon from '@mui/icons-material/Redo';
 import DownloadIcon from '@mui/icons-material/Download';
 import Canvas from './canvas';
 
+import { hslToRGB, rgbToHSL } from '../../helpers';
+
 function getBaseImageSize(type) {
   const imgElement = document.querySelector('img');
   if (imgElement) {
@@ -81,27 +83,30 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
       }
       var hue = currentHSL[0];
       var sat = currentHSL[1];
-      var lightness = currentHSL[2];
+      var lightnessOffset = currentHSL[2];
 
       context.globalCompositeOperation = 'source-over';
-      context.filter = `brightness(${lightness}%)`;
       context.drawImage(img, 0, 0, c.width, c.height);
 
-      // context.globalCompositeOperation = lightness < 100 ? 'color-burn' : 'color-dodge';
-      // //lightness = lightness >= 100 ? lightness - 100 : 100 - (100 - lightness);
-      // context.fillStyle = 'hsl(0, 50%, ' + lightness + '%)';
-      // context.fillRect(0, 0, c.width, c.height);
-
-      context.globalCompositeOperation = 'saturation';
-      context.fillStyle = 'hsl(0,' + sat + '%, 50%)';
-      context.fillRect(0, 0, c.width, c.height);
-
-      context.globalCompositeOperation = 'hue';
-      context.fillStyle = 'hsl(' + hue + ',1%, 50%)';
-      context.fillRect(0, 0, c.width, c.height);
-
-      context.globalCompositeOperation = 'destination-in';
-      context.drawImage(img, 0, 0, c.width, c.height);
+      var imgData = context.getImageData(0, 0, c.width, c.height);
+      var data = imgData.data;
+      for (var i = 0; i < data.length; i += 4) {
+        // Get the each channel color value
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        // skip transparent pixels
+        if (a < 230) {
+          continue;
+        }
+        const imgLightness = rgbToHSL(r, g, b)[2];
+        const newRgb = hslToRGB(hue, sat, imgLightness + lightnessOffset);
+        data[i] = newRgb[0];
+        data[i + 1] = newRgb[1];
+        data[i + 2] = newRgb[2];
+      }
+      context.putImageData(imgData, 0, 0);
     });
   };
 
