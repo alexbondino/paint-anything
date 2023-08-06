@@ -9,11 +9,12 @@ export const reorder = (list, startIndex, endIndex) => {
  *  Converts hsl color model to hexadecimal string representation
  * @param {int} h hue value [0-360]
  * @param {int} s saturation value [0-100]
- * @param {int} l lightness value [0-100]
+ * @param {int} l lightness value [-100-100]
  * @returns hexadecimal string rep
  */
 export function hslToHex(h, s, l) {
-  l /= 100;
+  l = (l + 100) / 200; // normalize to 0-1 range
+  console.log(`lightness: ${l}`);
   const a = (s * Math.min(l, 1 - l)) / 100;
   const f = (n) => {
     const k = (n + h / 30) % 12;
