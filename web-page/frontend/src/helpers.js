@@ -17,7 +17,6 @@ export function hslToPreviewHex(h, s, deltaL, meanL) {
   // adjust deltaL so that when it is applied to meanL it is in 0-100 range
   const adjustedDelta = deltaL > 0 ? (deltaL / 100) * (100 - meanL) : (deltaL / 100) * meanL;
   const l = (meanL + adjustedDelta) / 100;
-  console.log(`lightness: ${l}`);
   const a = (s * Math.min(l, 1 - l)) / 100;
   const f = (n) => {
     const k = (n + h / 30) % 12;

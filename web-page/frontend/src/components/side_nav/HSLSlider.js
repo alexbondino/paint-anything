@@ -18,11 +18,9 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [sliderPoint, setSliderPoint] = useState(50);
   const [lightnessOffset, setLightnessOffset] = useState(0);
-  const [now, setNow] = useState(new Date().getTime());
 
   const handleSliderDragStart = () => {
     setIsDragging(true);
-    setNow(new Date().getTime());
   };
 
   const handleSliderDragEnd = (newValue) => {
