@@ -103,6 +103,15 @@ const DraggableLayer = ({
                 }}
               />
             </ListItemButton>
+            {openEditionMode ? (
+              <IconButton onClick={handleLayerEditClose}>
+                <CheckIcon fontSize="small" sx={{ color: 'green' }} />
+              </IconButton>
+            ) : (
+              <IconButton onClick={handleLayerEditOpen}>
+                <EditIcon fontSize="small" />
+              </IconButton>
+            )}
             <IconButton
               disableTouchRipple
               aria-label="layer visibility"
@@ -114,15 +123,6 @@ const DraggableLayer = ({
                 <VisibilityOffIcon fontSize="small" />
               )}
             </IconButton>
-            {openEditionMode ? (
-              <IconButton onClick={handleLayerEditClose}>
-                <CheckIcon fontSize="small" sx={{ color: 'green' }} />
-              </IconButton>
-            ) : (
-              <IconButton onClick={handleLayerEditOpen}>
-                <EditIcon fontSize="small" />
-              </IconButton>
-            )}
             <IconButton
               disableTouchRipple
               aria-label="delete layer"
