@@ -156,7 +156,7 @@ def mask_base_hsl(layer_id: int):
     mask = img[:, :, -1] > 0
     hue, saturation = extract_median_h_sat(img, mask)
     hue, saturation, _ = hsl_cv2_2_js(hue, saturation, 0)
-    return {"hsl": [int(hue), int(saturation), 50]}
+    return {"hsl": [int(hue), int(saturation), 0]}
 
 
 @app.get("/api/mask-img")
@@ -192,6 +192,7 @@ def cleanup():
         return {"message": "Temporary directory cleaned up."}
     else:
         return {"message": "No temporary directory to clean up."}
+
 
 @app.post("/api/point_&_click")
 def point_and_click(data: PointAndClickData):
