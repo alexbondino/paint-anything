@@ -14,7 +14,7 @@ from segment_anything import SamPredictor
 from PIL import Image
 from masking.predictor import create_sam, update_stored_mask
 from utils import load_image, clean_mask_files, save_output
-from color_transform.transform import extract_median_h_sat, hsl_cv2_2_js
+from color_transform.transform import extract_median_hsl, hsl_cv2_2_js
 from logger import color_logger
 
 logger = color_logger(__name__, "INFO")
@@ -154,9 +154,9 @@ def mask_base_hsl(layer_id: int):
     """returns the mask base hsl values"""
     img = np.array(Image.open(os.path.join(temp_dir, f"{layer_id}.png")))
     mask = img[:, :, -1] > 0
-    hue, saturation = extract_median_h_sat(img, mask)
-    hue, saturation, _ = hsl_cv2_2_js(hue, saturation, 0)
-    return {"hsl": [int(hue), int(saturation), 0]}
+    hue, saturation, lightness = extract_median_hsl(img, mask)
+    hue, saturation, lightness = hsl_cv2_2_js(hue, saturation, lightness)
+    return {"hsl": [int(hue), int(saturation), int(lightness)]}
 
 
 @app.get("/api/mask-img")

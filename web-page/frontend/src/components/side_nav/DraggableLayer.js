@@ -74,7 +74,11 @@ const DraggableLayer = ({
                 {layerDef.hsl.length === 3 && layerDef.imgUrl !== null ? (
                   <SquareRoundedIcon
                     sx={{
-                      color: hslToHex(layerDef.hsl[0], layerDef.hsl[1], layerDef.hsl[2]),
+                      color: hslToHex(
+                        layerDef.hsl[0],
+                        layerDef.hsl[1],
+                        layerDef.meanLightness + layerDef.hsl[2]
+                      ),
                       stroke: 'black',
                       strokeWidth: 1,
                     }}
