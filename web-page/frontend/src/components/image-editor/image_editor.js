@@ -85,10 +85,10 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
 
       context.globalCompositeOperation = 'source-over';
       context.drawImage(img, 0, 0, c.width, c.height);
-      context.globalCompositeOperation = lightness < 100 ? 'color-burn' : 'color-dodge';
 
-      lightness = lightness >= 100 ? lightness - 100 : 100 - (100 - lightness);
-      context.fillStyle = 'hsl(0, 50%, ' + currentHSL[2] + '%)';
+      context.globalCompositeOperation = lightness < 100 ? 'color-burn' : 'color-dodge';
+      //lightness = lightness >= 100 ? lightness - 100 : 100 - (100 - lightness);
+      context.fillStyle = 'hsl(0, 50%, ' + lightness + '%)';
       context.fillRect(0, 0, c.width, c.height);
 
       context.globalCompositeOperation = 'saturation';
