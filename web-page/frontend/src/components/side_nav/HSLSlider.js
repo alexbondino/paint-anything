@@ -6,11 +6,12 @@ function valueLabelFormat(value) {
 }
 
 /**
- * Hue, saturation and lightness sliders
+ * Hue, saturation and lightness sliders. For each pixel of the mask, hue and saturation values will be replaced with
+ * those given by these sliders. Instead, lightness will be adjusted by applying an 'offset' to the pixel lightness, which
+ * will be determined by the lightness joystick.
  * @param {int} layerId
  * @param {int} hue
  * @param {int} saturation
- * @param {int} lightness
  * @param {function} onHSLChange
  * @returns HSL slider for modifying hsl color of layer
  */
