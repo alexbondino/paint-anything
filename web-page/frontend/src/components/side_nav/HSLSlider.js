@@ -46,7 +46,6 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
 
         console.log('now: ', now);
         console.log('new lightness: ', lightnessOffset);
-        console.log('lightness:', lightness);
 
         onHSLChange([hue, saturation, lightnessOffset], layerId);
       }
@@ -72,7 +71,7 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
         min={0}
         max={360}
         valueLabelDisplay="auto"
-        onChange={(e) => onHSLChange([e.target.value, saturation, lightness], layerId)}
+        onChange={(e) => onHSLChange([e.target.value, saturation, lightnessOffset], layerId)}
       ></Slider>
       <Typography variant="button" id="input-slider" gutterBottom>
         Saturation
@@ -86,7 +85,7 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
         max={100}
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
-        onChange={(e) => onHSLChange([hue, e.target.value, lightness], layerId)}
+        onChange={(e) => onHSLChange([hue, e.target.value, lightnessOffset], layerId)}
       ></Slider>
       <Typography variant="button" id="input-slider" gutterBottom>
         Lightness
