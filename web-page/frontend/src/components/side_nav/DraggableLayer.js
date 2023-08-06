@@ -16,7 +16,7 @@ import { Button, IconButton, TextField } from '@mui/material';
 import { Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
 
 import HSLSlider from './HSLSlider';
-import { hslToHex } from '../../helpers';
+import { hslToPreviewHex } from '../../helpers';
 
 const DraggableLayer = ({
   layerDef,
@@ -74,10 +74,11 @@ const DraggableLayer = ({
                 {layerDef.hsl.length === 3 && layerDef.imgUrl !== null ? (
                   <SquareRoundedIcon
                     sx={{
-                      color: hslToHex(
+                      color: hslToPreviewHex(
                         layerDef.hsl[0],
                         layerDef.hsl[1],
-                        layerDef.meanLightness + layerDef.hsl[2]
+                        layerDef.hsl[2],
+                        layerDef.meanLightness
                       ),
                       stroke: 'black',
                       strokeWidth: 1,

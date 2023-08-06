@@ -9,11 +9,14 @@ export const reorder = (list, startIndex, endIndex) => {
  *  Converts hsl color model to hexadecimal string representation
  * @param {int} h hue value [0-360]
  * @param {int} s saturation value [0-100]
- * @param {int} l lightness value [-100-100]
+ * @param {int} deltaL lightness offset [-100-100]
+ * @param {int} meanL mean lightness taken from original mask [0-100]
  * @returns hexadecimal string rep
  */
-export function hslToHex(h, s, l) {
-  l = (l + 100) / 200; // normalize to 0-1 range
+export function hslToPreviewHex(h, s, deltaL, meanL) {
+  // adjust deltaL so that when it is applied to meanL it is in 0-100 range
+  const adjustedDelta = deltaL > 0 ? (deltaL / 100) * (100 - meanL) : (deltaL / 100) * meanL;
+  const l = (meanL + adjustedDelta) / 100;
   console.log(`lightness: ${l}`);
   const a = (s * Math.min(l, 1 - l)) / 100;
   const f = (n) => {

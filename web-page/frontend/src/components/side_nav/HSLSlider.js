@@ -42,10 +42,7 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
         adjustedOffset = Math.min(100, Math.max(-100, adjustedOffset));
         setLightnessOffset(adjustedOffset);
 
-        console.log(sliderPoint - 50);
-
-        console.log('now: ', now);
-        console.log('new lightness: ', lightnessOffset);
+        console.log('new lightness offset: ', lightnessOffset);
 
         onHSLChange([hue, saturation, lightnessOffset], layerId);
       }
@@ -55,7 +52,6 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
 
   const sliderOnChange = (newValue) => {
     setSliderPoint(newValue);
-    console.log('slider on change: ', sliderPoint);
   };
 
   return (

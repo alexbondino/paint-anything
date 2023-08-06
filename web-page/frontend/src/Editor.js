@@ -153,6 +153,7 @@ export function Editor() {
       const maskHSL = await extractMaskHSL(layerId);
       newLayersDef[layerPos].hsl = [maskHSL[0], maskHSL[1], 0];
       newLayersDef[layerPos].meanLightness = maskHSL[2];
+      console.log(`meanLightness: ${maskHSL[2]}`);
     }
     setLayersDef(newLayersDef);
   }
