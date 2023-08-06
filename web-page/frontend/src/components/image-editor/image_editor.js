@@ -191,8 +191,9 @@ export default function ImageEditor({
     onNewPoint(selectedLayer, newPoint);
   }
 
-  const selectedLayerVisibility = layersDef.find((l) => l.id === selectedLayer) ?? {
+  const selectedLayerDef = layersDef.find((l) => l.id === selectedLayer) ?? {
     visibility: false,
+    hsl: [],
   };
 
   async function handleDownloadButtonClick() {
@@ -238,7 +239,7 @@ export default function ImageEditor({
           layersDef={layersDef}
           baseImg={baseImg}
           selectedLayer={selectedLayer}
-          selectedLayerVisibility={selectedLayerVisibility}
+          selectedLayerVisibility={selectedLayerDef}
         />
         <Tooltip title="Download" placement="top">
           <Button className="download-button" onClick={handleDownloadButtonClick}>
@@ -254,8 +255,8 @@ export default function ImageEditor({
         <Tooltip title="Undo (Ctrl + z)" placement="top">
           <Button
             className="history-button"
-            disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
-            onClick={() => onPointerChange(selectedLayerVisibility.id, -1)}
+            disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+            onClick={() => onPointerChange(selectedLayerDef.id, -1)}
           >
             <UndoIcon />
           </Button>
@@ -263,8 +264,8 @@ export default function ImageEditor({
         <Tooltip title="Redo (Ctrl + y)" placement="top">
           <Button
             className="history-button"
-            disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility}
-            onClick={() => onPointerChange(selectedLayerVisibility.id, 1)}
+            disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+            onClick={() => onPointerChange(selectedLayerDef.id, 1)}
           >
             <RedoIcon />
           </Button>
