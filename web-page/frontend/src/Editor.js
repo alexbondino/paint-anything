@@ -66,6 +66,7 @@ export function Editor() {
       visibility: true,
       imgUrl: null,
       hsl: [],
+      meanLightness: 0,
       hslInput: false,
     };
     console.log('Se ingresó a handle Image uploade');
@@ -149,7 +150,9 @@ export function Editor() {
     }
     // set initial hsl with base img values if not set
     if (!newLayersDef[layerPos].hslInput || newLayersDef[layerPos].hsl.length === 0) {
-      newLayersDef[layerPos].hsl = await extractMaskHSL(layerId);
+      const maskHSL = await extractMaskHSL(layerId);
+      newLayersDef[layerPos].hsl = [maskHSL[0], maskHSL[1], 0];
+      newLayersDef[layerPos].meanLightness = maskHSL[2];
     }
     setLayersDef(newLayersDef);
   }

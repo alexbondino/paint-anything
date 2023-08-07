@@ -35,10 +35,10 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 // project module
-import Layers from './layers';
+import Layers from './Layers';
 
 // controls the width of the drawer
-const drawerWidth = "300px";
+const drawerWidth = '300px';
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
@@ -240,6 +240,7 @@ export function ImageEditorDrawer({
                     onDeleteLayer={onDeleteLayer}
                     onVisibilityClicked={onHandleLayerVisibilityClick}
                     onHSLChange={onHSLChange}
+                    onNewLayerDef={onNewLayerDef}
                   />
                 </Collapse>
               </List>

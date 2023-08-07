@@ -22,10 +22,10 @@ def hsl_cv2_2_js(hue: int, saturation: int, lightness: int):
     return hue / 180 * 360, saturation / 255 * 100, lightness / 255 * 100
 
 
-def extract_median_h_sat(
+def extract_median_hsl(
     rgb_img: np.ndarray, roi_mask: np.ndarray = []
 ) -> Tuple[int, int]:
-    """Extracts median hue and saturation values from RGB image. Can also receive a
+    """Extracts median hsl values from RGB image. Can also receive a
     mask, of the same dim than input img, to mask only relevant pixels
 
     Args:
@@ -34,12 +34,16 @@ def extract_median_h_sat(
         specifies the area to extract the median values from. If None, uses entire image. Defaults to None.
 
     Returns:
-        Tuple[int, int]: median hue and median saturation
+        Tuple[int, int, int]: median hsl
     """
-    h, _, s = __extract_hls_from_rgb(rgb_img)
+    h, l, s = __extract_hls_from_rgb(rgb_img)
     if len(roi_mask) == 0:
-        return np.median(h), np.median(s)
-    return np.median(h[roi_mask]), np.median(s[roi_mask])
+        return (
+            np.median(h),
+            np.median(s),
+            np.median(l),
+        )
+    return np.median(h[roi_mask]), np.median(s[roi_mask]), np.median(l[roi_mask])
 
 
 def replace_mask_color(

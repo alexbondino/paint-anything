@@ -8,6 +8,8 @@ import RedoIcon from '@mui/icons-material/Redo';
 import DownloadIcon from '@mui/icons-material/Download';
 import Canvas from './canvas';
 
+import { hslToRGB, rgbToHSL } from '../../helpers';
+
 function getBaseImageSize(type) {
   const imgElement = document.querySelector('img');
   if (imgElement) {
@@ -18,7 +20,7 @@ function getBaseImageSize(type) {
   return null;
 }
 
-function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL }) {
+function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL, drawIndex }) {
   const [img, setImg] = useState(null);
   const [imgComplete, setImgComplete] = useState(false);
 
@@ -81,32 +83,41 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
       }
       var hue = currentHSL[0];
       var sat = currentHSL[1];
-      var lightness = currentHSL[2];
+      var lightnessOffset = currentHSL[2];
 
       context.globalCompositeOperation = 'source-over';
       context.drawImage(img, 0, 0, c.width, c.height);
-      context.globalCompositeOperation = lightness < 100 ? 'color-burn' : 'color-dodge';
 
-      lightness = lightness >= 100 ? lightness - 100 : 100 - (100 - lightness);
-      context.fillStyle = 'hsl(0, 50%, ' + currentHSL[2] + '%)';
-      context.fillRect(0, 0, c.width, c.height);
-
-      context.globalCompositeOperation = 'saturation';
-      context.fillStyle = 'hsl(0,' + sat + '%, 50%)';
-      context.fillRect(0, 0, c.width, c.height);
-
-      context.globalCompositeOperation = 'hue';
-      context.fillStyle = 'hsl(' + hue + ',1%, 50%)';
-      context.fillRect(0, 0, c.width, c.height);
-
-      context.globalCompositeOperation = 'destination-in';
-      context.drawImage(img, 0, 0, c.width, c.height);
+      var imgData = context.getImageData(0, 0, c.width, c.height);
+      var data = imgData.data;
+      for (var i = 0; i < data.length; i += 4) {
+        // Get the each channel color value
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        // skip transparent pixels
+        if (a < 230) {
+          continue;
+        }
+        const imgLightness = rgbToHSL(r, g, b)[2];
+        const newRgb = hslToRGB(hue, sat, imgLightness + lightnessOffset);
+        data[i] = newRgb[0];
+        data[i + 1] = newRgb[1];
+        data[i + 2] = newRgb[2];
+      }
+      context.putImageData(imgData, 0, 0);
     });
   };
 
   return (
     <React.Fragment>
-      <Canvas key={`mask-${layerId}-canvas`} layerId={layerId} draw={draw} zIndex={1000 - layerId} />
+      <Canvas
+        key={`mask-${layerId}-canvas`}
+        layerId={layerId}
+        draw={draw}
+        zIndex={100 + drawIndex}
+      />
       {pointBoxes}
     </React.Fragment>
   );
@@ -117,7 +128,7 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, on
     <React.Fragment>
       {layersDef
         .filter((l) => l.visibility)
-        .map((layer) => {
+        .map((layer, index) => {
           try {
             let coords = [];
             if (layerPoints.length > 0) {
@@ -133,6 +144,7 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, on
                 points={coords}
                 onPointerChange={onPointerChange}
                 currentHSL={layer.hsl}
+                drawIndex={index}
               />
             );
           } catch (error) {
@@ -185,8 +197,9 @@ export default function ImageEditor({
     onNewPoint(selectedLayer, newPoint);
   }
 
-  const selectedLayerVisibility = layersDef.find((l) => l.id === selectedLayer) ?? {
+  const selectedLayerDef = layersDef.find((l) => l.id === selectedLayer) ?? {
     visibility: false,
+    hsl: [],
   };
 
   async function handleDownloadButtonClick() {
@@ -222,30 +235,64 @@ export default function ImageEditor({
       }}
       spacing={1}
     >
-      <ButtonGroup className="history-box" variant="contained" aria-label="outlined primary button group" sx={{ marginBottom: -5.5 }}>
-        <PreviewDialog layersDef={layersDef} baseImg={baseImg} selectedLayer={selectedLayer} selectedLayerVisibility={selectedLayerVisibility} />
+      <ButtonGroup
+        className="history-box"
+        variant="contained"
+        aria-label="outlined primary button group"
+        sx={{ marginBottom: -5.5 }}
+      >
+        <PreviewDialog
+          layersDef={layersDef}
+          baseImg={baseImg}
+          selectedLayer={selectedLayer}
+          selectedLayerVisibility={selectedLayerDef}
+        />
         <Tooltip title="Download" placement="top">
           <Button className="download-button" onClick={handleDownloadButtonClick}>
             <DownloadIcon style={{ width: '43px' }} />
           </Button>
         </Tooltip>
       </ButtonGroup>
-      <ButtonGroup className="history-box" variant="contained" aria-label="outlined primary button group">
+      <ButtonGroup
+        className="history-box"
+        variant="contained"
+        aria-label="outlined primary button group"
+      >
         <Tooltip title="Undo (Ctrl + z)" placement="top">
-          <Button className="history-button" disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility} onClick={() => onPointerChange(selectedLayerVisibility.id, -1)}>
+          <Button
+            className="history-button"
+            disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+            onClick={() => onPointerChange(selectedLayerDef.id, -1)}
+          >
             <UndoIcon />
           </Button>
         </Tooltip>
         <Tooltip title="Redo (Ctrl + y)" placement="top">
-          <Button className="history-button" disabled={selectedLayer === -1 || !selectedLayerVisibility.visibility} onClick={() => onPointerChange(selectedLayerVisibility.id, 1)}>
+          <Button
+            className="history-button"
+            disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+            onClick={() => onPointerChange(selectedLayerDef.id, 1)}
+          >
             <RedoIcon />
           </Button>
         </Tooltip>
       </ButtonGroup>
       <Box className="image-box" onClick={handlePointAndClick} onContextMenu={handlePointAndClick}>
-        <img id="baseImg" src={baseImg} className="image" alt="base_image" onLoad={handleOnBaseImageLoad} />
+        <img
+          id="baseImg"
+          src={baseImg}
+          className="image"
+          alt="base_image"
+          onLoad={handleOnBaseImageLoad}
+        />
         {naturalImgSize.length === 2 && layerPoints.length > 0 ? (
-          <MaskImages layersDef={layersDef} selectedLayer={selectedLayer} layerPoints={layerPoints} onPointerChange={onPointerChange} onNewPoint={onNewPoint} />
+          <MaskImages
+            layersDef={layersDef}
+            selectedLayer={selectedLayer}
+            layerPoints={layerPoints}
+            onPointerChange={onPointerChange}
+            onNewPoint={onNewPoint}
+          />
         ) : null}
       </Box>
     </Stack>
