@@ -130,8 +130,8 @@ function Mask({
               context.beginPath();
               context.moveTo(x1, y1);
               context.lineCap = 'round';
-              context.lineWidth = 4;
-              context.strokeStyle = 'rgb(84,204,255)';
+              context.lineWidth = 2;
+              context.strokeStyle = '#FAE869';
               context.lineTo(x2, y2);
               context.stroke();
             }
