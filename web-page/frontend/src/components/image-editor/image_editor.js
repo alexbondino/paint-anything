@@ -268,6 +268,7 @@ export default function ImageEditor({
       sx={{
         aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
         visibility: naturalImgSize && imageVisibility === true ? 'visible' : 'hidden',
+        border: '10px solid blue',
       }}
       spacing={1}
     >

@@ -7,6 +7,8 @@ import ModelSelector from './components/model-selector/model-selector.js';
 import axios from 'axios';
 import { resizeImgFile } from './helpers.js';
 import Title from './components/side_nav/Title.js';
+import Grid from '@mui/material/Unstable_Grid2';
+import Stack from '@mui/material/Stack';
 
 export function Editor() {
   // base image to be edited
@@ -309,30 +311,32 @@ export function Editor() {
     );
 
   return (
-    <div style={{ height: '78vh' }}>
+    <div style={{ height: '78vh', flexGrow: 1 }}>
       <Title sidebarVisibility={sidebarVisibility} onDrawerOpen={handleDrawerOpen} />
-      <ImageEditorDrawer
-        key="side_nav"
-        sidebarVisibility={sidebarVisibility}
-        layersDef={layersDef}
-        selectedLayer={selectedLayer}
-        onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
-        onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
-        onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
-        onSelectLayer={(layerId) => handleSelectLayer(layerId)}
-        onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
-        onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
-        onHandleSelectModel={handleSelectmodel}
-        modelSelected={modelSelected}
-        openModelConfirmation={modelConfirmation}
-        onCancelModelConfirmation={handleCancelModelConfirmation}
-        onConfirmModelConfirmation={handleConfirmModelConfirmation}
-        drawerOpen={drawerOpen}
-        onDrawerClose={handleDrawerClose}
-        currentImage={currentImage}
-      />
+      <Stack direction="row" alignItems="stretch" sx={{ border: '5px solid red' }}>
+        {imgEditor}
+        <ImageEditorDrawer
+          key="side_nav"
+          sidebarVisibility={sidebarVisibility}
+          layersDef={layersDef}
+          selectedLayer={selectedLayer}
+          onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
+          onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
+          onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
+          onSelectLayer={(layerId) => handleSelectLayer(layerId)}
+          onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
+          onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
+          onHandleSelectModel={handleSelectmodel}
+          modelSelected={modelSelected}
+          openModelConfirmation={modelConfirmation}
+          onCancelModelConfirmation={handleCancelModelConfirmation}
+          onConfirmModelConfirmation={handleConfirmModelConfirmation}
+          drawerOpen={drawerOpen}
+          onDrawerClose={handleDrawerClose}
+          currentImage={currentImage}
+        />
+      </Stack>
       {modelSelector}
-      {imgEditor}
       {imgUploader}
       <LoadingComponent loaderVisibility={loaderVisibility} />
     </div>
