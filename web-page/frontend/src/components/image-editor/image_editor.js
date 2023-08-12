@@ -123,11 +123,12 @@ function Mask({
         context.strokeStyle = 'red';
         context.shadowColor = 'red';
         context.shadowBlur = 50;
+        console.log(contour);
         for (var i = 0; i < contour.length; i++) {
           context.beginPath();
           for (var j = 0; j < contour[i].length - 2; j = j + 2) {
-            var x = contour[i][j];
-            var y = contour[i][j + 1];
+            var x = contour[i][j] * c.width;
+            var y = contour[i][j + 1] * c.height;
             context.lineTo(x, y);
           }
           context.closePath();

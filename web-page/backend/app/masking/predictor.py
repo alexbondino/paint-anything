@@ -201,8 +201,17 @@ def update_stored_mask(
 
 def compute_mask_contour(mask: np.ndarray) -> np.ndarray:
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours = [cnt.squeeze().flatten() for cnt in contours]
-    return np.array(contours, dtype=object)
+    normalized_contours = []
+    for cnt in contours:
+        if len(cnt) < 3:
+            continue
+        cnt = cnt.squeeze()
+        xx, yy = cnt[:, 0], cnt[:, 1]
+        xx = xx / mask.shape[1]
+        yy = yy / mask.shape[0]
+        normalized_contours.append(np.stack([xx, yy], axis=1).flatten())
+
+    return np.array(normalized_contours, dtype=object)
 
 
 def load_mask_contour(layer_id: int, mask_dir: str) -> List[int]:
