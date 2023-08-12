@@ -200,6 +200,14 @@ def update_stored_mask(
 
 
 def compute_mask_contour(mask: np.ndarray) -> np.ndarray:
+    """Computes mask contours. Only enveloping contours are returned (no holes)
+
+    Args:
+        mask (np.ndarray): mask to compute contours for
+
+    Returns:
+        np.ndarray: array with contours found for mask in the form [[x1,y1,x2,y2,...],[x1,y1,x2,y2,...],...]
+    """
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     normalized_contours = []
     for cnt in contours:
@@ -214,7 +222,17 @@ def compute_mask_contour(mask: np.ndarray) -> np.ndarray:
     return np.array(normalized_contours, dtype=object)
 
 
-def load_mask_contour(layer_id: int, mask_dir: str) -> List[int]:
+def load_mask_contour(layer_id: int, mask_dir: str) -> List[List[int]]:
+    """Loads mask contours
+
+    Args:
+        layer_id (int): load contours for layer with this id
+        mask_dir (str): directory where masks are stored
+
+    Returns:
+        List[List[int]]: collection of contour points, where these are in
+    the form [x1,y1,x2,y2,...]
+    """
     pts: np.ndarray = np.load(
         os.path.join(mask_dir, f"{layer_id}_cnt.npy"), allow_pickle=True
     )

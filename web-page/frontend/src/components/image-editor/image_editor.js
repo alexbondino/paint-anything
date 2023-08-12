@@ -119,7 +119,7 @@ function Mask({
           data[i + 2] = newRgb[2];
         }
         context.putImageData(imgData, 0, 0);
-
+        // draw outline if image is selected
         if (isSelected) {
           for (var i = 0; i < contour.length; i++) {
             for (var j = 0; j < contour[i].length - 2; j = j + 2) {
