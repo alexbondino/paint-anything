@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 import LoadingComponent from './components/loading/loading.js';
 import ModelSelector from './components/model-selector/model-selector.js';
 import axios from 'axios';
+import { resizeImgFile } from './helpers.js';
 
 export function Editor() {
   // base image to be edited
@@ -76,11 +77,13 @@ export function Editor() {
     setLayersDef(newLayersDef);
     setLayerPoints([]);
     setSelectedLayer(0);
-    const imgObjectURL = URL.createObjectURL(imgFile);
-    setBaseImg(imgObjectURL);
+
+    const resizedImgFile = await resizeImgFile(imgFile, 1024);
+    const imgUrl = URL.createObjectURL(resizedImgFile);
+    setBaseImg(imgUrl);
     // send new image to backend
     const formData = new FormData();
-    formData.append('image', imgFile);
+    formData.append('image', resizedImgFile);
     try {
       await axios.post('http://localhost:8000/api/model-selected', { model: modelSelected });
       console.log('Modelo enviado correctamente.');
@@ -91,12 +94,12 @@ export function Editor() {
     try {
       await axios.post('http://localhost:8000/api/image', formData);
       console.log('Imagen enviada correctamente.');
-      setCurrentImage(imgFile);
+      setCurrentImage(resizedImgFile);
+      setLoaderVisibility(false);
+      setSidebarVisibility(true);
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
-    setLoaderVisibility(false);
-    setSidebarVisibility(true);
   }
 
   function handleHSLChange(newHSL, layerId) {
@@ -162,40 +165,43 @@ export function Editor() {
    * @param {int} layerId layer affected
    * @param {int} pointerChange direction of pointer change. -1 for undo and +1 for redo
    */
-  async function handlePointerChange(layerId, pointerChange) {
-    console.log('handlePointerChange');
-    const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
-    const layerPtsData = layerPoints[layerIndex];
-    // computes new pointer
-    const newPointer = layerPtsData.pointer + pointerChange;
-    // retrieves most recent coordinates in history
-    const lastPoints = layerPtsData.history[layerPtsData.history.length - 1];
-    // handle pointer overflow
-    if (newPointer < 0 || newPointer > lastPoints.length) {
-      return;
-    }
-    // update coordinates with new slice
-    const newLayerPoints = [...layerPoints];
-    newLayerPoints[layerIndex].pointer = newPointer;
-    newLayerPoints[layerIndex].coords = lastPoints.slice(0, newPointer);
-    setLayerPoints(newLayerPoints);
-    // triggers same operation in backend
-    const layer_pointer = { layer_id: layerId, pointer: newPointer };
-    axios
-      .post('http://localhost:8000/api/move-pointer', layer_pointer)
-      .then((response) => {
-        // image is reset if points are null
-        if (newLayerPoints[layerIndex].coords.length === 0) {
-          const newLayersDef = [...layersDef];
-          newLayersDef[layerIndex].imgUrl = null;
-          newLayersDef[layerIndex].hsl = [];
-          setLayersDef(newLayersDef);
-          return;
-        }
-        handleMaskUpdate(layerId);
-      })
-      .catch((error) => console.error('Error moving layer pointer:', error));
-  }
+  const handlePointerChange = useCallback(
+    async (layerId, pointerChange) => {
+      console.log('handlePointerChange');
+      const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
+      const layerPtsData = layerPoints[layerIndex];
+      // computes new pointer
+      const newPointer = layerPtsData.pointer + pointerChange;
+      // retrieves most recent coordinates in history
+      const lastPoints = layerPtsData.history[layerPtsData.history.length - 1];
+      // handle pointer overflow
+      if (newPointer < 0 || newPointer > lastPoints.length) {
+        return;
+      }
+      // update coordinates with new slice
+      const newLayerPoints = [...layerPoints];
+      newLayerPoints[layerIndex].pointer = newPointer;
+      newLayerPoints[layerIndex].coords = lastPoints.slice(0, newPointer);
+      setLayerPoints(newLayerPoints);
+      // triggers same operation in backend
+      const layer_pointer = { layer_id: layerId, pointer: newPointer };
+      axios
+        .post('http://localhost:8000/api/move-pointer', layer_pointer)
+        .then((response) => {
+          // image is reset if points are null
+          if (newLayerPoints[layerIndex].coords.length === 0) {
+            const newLayersDef = [...layersDef];
+            newLayersDef[layerIndex].imgUrl = null;
+            newLayersDef[layerIndex].hsl = [];
+            setLayersDef(newLayersDef);
+            return;
+          }
+          handleMaskUpdate(layerId);
+        })
+        .catch((error) => console.error('Error moving layer pointer:', error));
+    },
+    [layerPoints, layersDef, handleMaskUpdate]
+  );
 
   /**
    * Adds new point to layer

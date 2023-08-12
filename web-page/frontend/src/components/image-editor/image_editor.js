@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './image-editor.scss';
 import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material';
 import axios from 'axios';
@@ -20,138 +20,151 @@ function getBaseImageSize(type) {
   return null;
 }
 
-function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL, drawIndex }) {
-  const [img, setImg] = useState(null);
-  const [imgComplete, setImgComplete] = useState(false);
+const Mask = React.memo(
+  function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL, drawIndex }) {
+    //console.log(`layerId: ${layerId}, isSelected: ${isSelected}, points: ${points}`);
+    const [img, setImg] = useState(null);
+    const [imgComplete, setImgComplete] = useState(false);
 
-  useEffect(() => {
-    setImgComplete(false);
-    if (imgUrl === null) {
-      return;
-    }
-    const newImg = new Image();
-    newImg.src = imgUrl;
-    newImg.onload = () => {
-      setImgComplete(true);
-    };
-    setImg(newImg);
-  }, [imgUrl]);
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyPress);
-    return () => {
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  });
-
-  async function handleKeyPress(event) {
-    if (isSelected && event.keyCode === 90 && event.ctrlKey) {
-      onPointerChange(layerId, -1);
-    } else if (isSelected && event.keyCode === 89 && event.ctrlKey) {
-      onPointerChange(layerId, 1);
-    }
-  }
-
-  const pointBoxes = isSelected
-    ? points.map((point, index) => {
-        return (
-          <Box
-            className="mask-point"
-            key={index}
-            sx={{
-              left: `${point[0] * 100}%`,
-              top: `${point[1] * 100}%`,
-              backgroundColor: point[2] === 1 ? 'green' : 'red',
-            }}
-          />
-        );
-      })
-    : null;
-
-  const draw = (context, canvas) => {
-    if (img === null || !imgComplete) {
-      return;
-    }
-    requestAnimationFrame(function () {
-      const c = canvas.current;
-      const l = getBaseImageSize();
-      c.width = l[0];
-      c.height = l[1];
-      if (points.length === 0) {
-        context.clearRect(0, 0, c.width, c.height);
+    useEffect(() => {
+      console.log('Mask.useEffect');
+      setImgComplete(false);
+      if (imgUrl === null) {
         return;
       }
-      var hue = currentHSL[0];
-      var sat = currentHSL[1];
-      var lightnessOffset = currentHSL[2];
+      const newImg = new Image();
+      newImg.src = imgUrl;
+      newImg.onload = () => {
+        setImgComplete(true);
+      };
+      setImg(newImg);
+    }, [imgUrl]);
 
-      context.globalCompositeOperation = 'source-over';
-      context.drawImage(img, 0, 0, c.width, c.height);
-
-      var imgData = context.getImageData(0, 0, c.width, c.height);
-      var data = imgData.data;
-      for (var i = 0; i < data.length; i += 4) {
-        // Get the each channel color value
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const a = data[i + 3];
-        // skip transparent pixels
-        if (a < 230) {
-          continue;
-        }
-        const imgLightness = rgbToHSL(r, g, b)[2];
-        const newRgb = hslToRGB(hue, sat, imgLightness + lightnessOffset);
-        data[i] = newRgb[0];
-        data[i + 1] = newRgb[1];
-        data[i + 2] = newRgb[2];
-      }
-      context.putImageData(imgData, 0, 0);
+    useEffect(() => {
+      document.addEventListener('keydown', handleKeyPress);
+      return () => {
+        document.removeEventListener('keydown', handleKeyPress);
+      };
     });
-  };
 
-  return (
-    <React.Fragment>
-      <Canvas
-        key={`mask-${layerId}-canvas`}
-        layerId={layerId}
-        draw={draw}
-        zIndex={100 + drawIndex}
-      />
-      {pointBoxes}
-    </React.Fragment>
-  );
-}
+    async function handleKeyPress(event) {
+      if (isSelected && event.keyCode === 90 && event.ctrlKey) {
+        onPointerChange(layerId, -1);
+      } else if (isSelected && event.keyCode === 89 && event.ctrlKey) {
+        onPointerChange(layerId, 1);
+      }
+    }
 
-const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, onNewPoint }) => {
-  return (
-    <React.Fragment>
-      {layersDef
-        .filter((l) => l.visibility)
-        .map((layer, index) => {
-          try {
-            let coords = [];
-            if (layerPoints.length > 0) {
-              const pointsDef = layerPoints.find((l) => l.id === layer.id);
-              coords = pointsDef ? pointsDef.coords.slice(0, pointsDef.pointer) : [];
-            }
-            return (
-              <Mask
-                key={`mask_${layer.id}`}
-                layerId={layer.id}
-                imgUrl={layer.imgUrl}
-                isSelected={layer.id === selectedLayer}
-                points={coords}
-                onPointerChange={onPointerChange}
-                currentHSL={layer.hsl}
-                drawIndex={index}
-              />
-            );
-          } catch (error) {
-            console.log(`Error rendering mask ${layer.id}`, error);
-            return null;
+    const pointBoxes = isSelected
+      ? points.map((point, index) => {
+          return (
+            <Box
+              className="mask-point"
+              key={index}
+              sx={{
+                left: `${point[0] * 100}%`,
+                top: `${point[1] * 100}%`,
+                backgroundColor: point[2] === 1 ? 'green' : 'red',
+              }}
+            />
+          );
+        })
+      : null;
+
+    const draw = useCallback(
+      (context, canvas) => {
+        if (img === null || !imgComplete) {
+          return;
+        }
+        requestAnimationFrame(function () {
+          console.info(`drawing canvas for mask: ${layerId}`);
+          const c = canvas.current;
+          const l = getBaseImageSize();
+          c.width = l[0];
+          c.height = l[1];
+          if (points.length === 0) {
+            context.clearRect(0, 0, c.width, c.height);
+            return;
           }
-        })}
+          var hue = currentHSL[0];
+          var sat = currentHSL[1];
+          var lightnessOffset = currentHSL[2];
+
+          context.globalCompositeOperation = 'source-over';
+          context.drawImage(img, 0, 0, c.width, c.height);
+
+          var imgData = context.getImageData(0, 0, c.width, c.height);
+          var data = imgData.data;
+          for (var i = 0; i < data.length; i += 4) {
+            // Get the each channel color value
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const a = data[i + 3];
+            // skip transparent pixels
+            if (a < 230) {
+              continue;
+            }
+            const imgLightness = rgbToHSL(r, g, b)[2];
+            const newRgb = hslToRGB(hue, sat, imgLightness + lightnessOffset);
+            data[i] = newRgb[0];
+            data[i + 1] = newRgb[1];
+            data[i + 2] = newRgb[2];
+          }
+          context.putImageData(imgData, 0, 0);
+        });
+      },
+      [img, imgComplete, currentHSL]
+    );
+
+    return (
+      <React.Fragment>
+        <Canvas
+          key={`mask-${layerId}-canvas`}
+          layerId={layerId}
+          draw={draw}
+          zIndex={100 + drawIndex}
+        />
+        {pointBoxes}
+      </React.Fragment>
+    );
+  },
+  (prevProps, nextProps) =>
+    prevProps.imUrl === nextProps.imgUrl && prevProps.currentHSL === nextProps.currentHSL
+);
+
+const extractLayerCoords = (layerId, layerPoints) => {
+  let coords = [];
+  if (layerPoints.length > 0) {
+    const pointsDef = layerPoints.find((l) => l.id === layerId);
+    coords = pointsDef ? pointsDef.coords.slice(0, pointsDef.pointer) : [];
+  }
+  return coords;
+};
+
+const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange }) => {
+  const visibleLayers = useMemo(() => layersDef.filter((l) => l.visibility), [layersDef]);
+  return (
+    <React.Fragment>
+      {visibleLayers.map((layer, index) => {
+        try {
+          return (
+            <Mask
+              key={`mask_${layer.id}`}
+              layerId={layer.id}
+              imgUrl={layer.imgUrl}
+              isSelected={layer.id === selectedLayer}
+              points={extractLayerCoords(layer.id, layerPoints)}
+              onPointerChange={onPointerChange}
+              currentHSL={layer.hsl}
+              drawIndex={index}
+            />
+          );
+        } catch (error) {
+          console.log(`Error rendering mask ${layer.id}`, error);
+          return null;
+        }
+      })}
     </React.Fragment>
   );
 };
@@ -291,7 +304,6 @@ export default function ImageEditor({
             selectedLayer={selectedLayer}
             layerPoints={layerPoints}
             onPointerChange={onPointerChange}
-            onNewPoint={onNewPoint}
           />
         ) : null}
       </Box>
