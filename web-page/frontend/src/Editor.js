@@ -6,6 +6,7 @@ import LoadingComponent from './components/loading/loading.js';
 import ModelSelector from './components/model-selector/model-selector.js';
 import axios from 'axios';
 import { resizeImgFile } from './helpers.js';
+import Title from './components/side_nav/Title.js';
 
 export function Editor() {
   // base image to be edited
@@ -29,6 +30,8 @@ export function Editor() {
   const [currentImage, setCurrentImage] = useState(null);
   // previous selected model
   const [previousModel, setPreviousModel] = useState('large_model');
+  // drawer open
+  const [drawerOpen, setDrawerOpen] = useState(true);
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -58,6 +61,14 @@ export function Editor() {
 
   const handleConfirmModelConfirmation = () => {
     setModelConfirmation(false);
+  };
+
+  const handleDrawerOpen = () => {
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
   };
 
   async function handleImageUpload(imgFile) {
@@ -299,6 +310,7 @@ export function Editor() {
 
   return (
     <div style={{ height: '78vh' }}>
+      <Title sidebarVisibility={sidebarVisibility} onDrawerOpen={handleDrawerOpen} />
       <ImageEditorDrawer
         key="side_nav"
         sidebarVisibility={sidebarVisibility}
@@ -315,6 +327,8 @@ export function Editor() {
         openModelConfirmation={modelConfirmation}
         onCancelModelConfirmation={handleCancelModelConfirmation}
         onConfirmModelConfirmation={handleConfirmModelConfirmation}
+        drawerOpen={drawerOpen}
+        onDrawerClose={handleDrawerClose}
         currentImage={currentImage}
       />
       {modelSelector}

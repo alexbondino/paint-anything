@@ -37,9 +37,6 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 // project module
 import Layers from './Layers';
 
-// controls the width of the drawer
-const drawerWidth = '300px';
-
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
     flexGrow: 1,
@@ -48,7 +45,6 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginRight: -drawerWidth,
     ...(open && {
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.easeOut,
@@ -67,12 +63,10 @@ const TitleBar = styled(MuiAppBar, {
     duration: theme.transitions.duration.leavingScreen,
   }),
   ...(open && {
-    width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    marginRight: drawerWidth,
   }),
 }));
 
@@ -100,23 +94,16 @@ export function ImageEditorDrawer({
   openModelConfirmation,
   onCancelModelConfirmation,
   onConfirmModelConfirmation,
+  drawerOpen,
+  onDrawerClose,
   currentImage,
 }) {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(true);
   const [expandLayers, setExpandLayers] = React.useState(true);
   const lastLayerId = layersDef.length > 0 ? Math.max(...layersDef.map((l) => l.id)) : -1;
 
   const handleLayersClick = () => {
     setExpandLayers(!expandLayers);
-  };
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDrawerClose = () => {
-    setOpen(false);
   };
 
   const handleAddLayer = async () => {
@@ -150,51 +137,14 @@ export function ImageEditorDrawer({
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <IconButton
-        color="inherit"
-        aria-label="open drawer"
-        edge="end"
-        onClick={handleDrawerOpen}
-        sx={{
-          display: sidebarVisibility ? 'flex' : 'none',
-          position: 'absolute',
-          top: '15px',
-          right: '25px',
-          zIndex: 1,
-        }}
-      >
-        <MenuIcon sx={{ color: 'white' }} />
-      </IconButton>
-      <TitleBar position="relative" open={open} sx={{ height: '65px', width: '100%' }}>
-        <Toolbar>
-          <BrushIcon sx={{ marginRight: 2 }} />
-          <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
-            Imagine Houses
-          </Typography>
-        </Toolbar>
-      </TitleBar>
-
       {sidebarVisibility ? (
         <Box>
           <Main>
             <DrawerHeader />
           </Main>
-          <Drawer
-            sx={{
-              width: drawerWidth,
-              flexShrink: 0,
-              '& .MuiDrawer-paper': {
-                width: drawerWidth,
-                display: sidebarVisibility,
-                height: '90%',
-              },
-            }}
-            variant="persistent"
-            anchor="right"
-            open={open}
-          >
+          <Drawer className="sidenav" variant="persistent" anchor="right" open={drawerOpen}>
             <DrawerHeader>
-              <IconButton onClick={handleDrawerClose}>
+              <IconButton onClick={onDrawerClose}>
                 {theme.direction === 'rtl' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
               </IconButton>
             </DrawerHeader>
@@ -260,10 +210,10 @@ export function ImageEditorDrawer({
                   <FormControl sx={{ width: '100%', height: '50px' }}>
                     <InputLabel id="model-select-label">Model Quality</InputLabel>
                     <Select
+                      className="model-selector"
                       onChange={onHandleSelectModel}
                       labelId="model-select-label"
                       value={modelSelected}
-                      style={{ width: drawerWidth, height: '50px', border: 0 }}
                     >
                       <MenuItem value="base_model">Low Quality (Fast)</MenuItem>
                       <MenuItem value="large_model">Medium Quality (Normal)</MenuItem>
