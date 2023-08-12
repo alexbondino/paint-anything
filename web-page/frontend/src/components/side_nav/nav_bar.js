@@ -24,6 +24,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 // icons
+import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -32,7 +33,6 @@ import LayersIcon from '@mui/icons-material/Layers';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import DownloadForOfflineIcon from '@mui/icons-material/DownloadForOffline';
 
 // project module
 import Layers from './Layers';
@@ -275,9 +275,9 @@ export function ImageEditorDrawer({
                 <ListItem disablePadding>
                   <ListItemButton variant="contained" component="label">
                     <ListItemIcon>
-                      <DownloadForOfflineIcon />
+                      <DriveFolderUploadIcon />
                     </ListItemIcon>
-                    <ListItemText primary="Upload Image" />
+                    <ListItemText primary="Replace Image" />
                     <input
                       hidden
                       type="file"
