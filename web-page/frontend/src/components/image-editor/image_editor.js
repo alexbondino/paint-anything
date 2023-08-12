@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './image-editor.scss';
 import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material';
 import axios from 'axios';
@@ -20,118 +20,113 @@ function getBaseImageSize(type) {
   return null;
 }
 
-const Mask = React.memo(
-  function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL, drawIndex }) {
-    //console.log(`layerId: ${layerId}, isSelected: ${isSelected}, points: ${points}`);
-    const [img, setImg] = useState(null);
-    const [imgComplete, setImgComplete] = useState(false);
+function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL, drawIndex }) {
+  //console.log(`layerId: ${layerId}, isSelected: ${isSelected}, points: ${points}`);
+  const [img, setImg] = useState(null);
+  const [imgComplete, setImgComplete] = useState(false);
 
-    useEffect(() => {
-      console.log('Mask.useEffect');
-      setImgComplete(false);
-      if (imgUrl === null) {
+  useEffect(() => {
+    setImgComplete(false);
+    if (imgUrl === null) {
+      return;
+    }
+    const newImg = new Image();
+    newImg.src = imgUrl;
+    newImg.onload = () => {
+      setImgComplete(true);
+    };
+    setImg(newImg);
+  }, [imgUrl]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  });
+
+  async function handleKeyPress(event) {
+    if (isSelected && event.keyCode === 90 && event.ctrlKey) {
+      onPointerChange(layerId, -1);
+    } else if (isSelected && event.keyCode === 89 && event.ctrlKey) {
+      onPointerChange(layerId, 1);
+    }
+  }
+
+  const pointBoxes = isSelected
+    ? points.map((point, index) => {
+        return (
+          <Box
+            className="mask-point"
+            key={index}
+            sx={{
+              left: `${point[0] * 100}%`,
+              top: `${point[1] * 100}%`,
+              backgroundColor: point[2] === 1 ? 'green' : 'red',
+            }}
+          />
+        );
+      })
+    : null;
+
+  const draw = useCallback(
+    (context, canvas) => {
+      if (img === null || !imgComplete) {
         return;
       }
-      const newImg = new Image();
-      newImg.src = imgUrl;
-      newImg.onload = () => {
-        setImgComplete(true);
-      };
-      setImg(newImg);
-    }, [imgUrl]);
-
-    useEffect(() => {
-      document.addEventListener('keydown', handleKeyPress);
-      return () => {
-        document.removeEventListener('keydown', handleKeyPress);
-      };
-    });
-
-    async function handleKeyPress(event) {
-      if (isSelected && event.keyCode === 90 && event.ctrlKey) {
-        onPointerChange(layerId, -1);
-      } else if (isSelected && event.keyCode === 89 && event.ctrlKey) {
-        onPointerChange(layerId, 1);
-      }
-    }
-
-    const pointBoxes = isSelected
-      ? points.map((point, index) => {
-          return (
-            <Box
-              className="mask-point"
-              key={index}
-              sx={{
-                left: `${point[0] * 100}%`,
-                top: `${point[1] * 100}%`,
-                backgroundColor: point[2] === 1 ? 'green' : 'red',
-              }}
-            />
-          );
-        })
-      : null;
-
-    const draw = useCallback(
-      (context, canvas) => {
-        if (img === null || !imgComplete) {
+      requestAnimationFrame(function () {
+        console.info(`drawing canvas for mask: ${layerId}`);
+        const c = canvas.current;
+        const l = getBaseImageSize();
+        c.width = l[0];
+        c.height = l[1];
+        if (points.length === 0) {
+          context.clearRect(0, 0, c.width, c.height);
           return;
         }
-        requestAnimationFrame(function () {
-          console.info(`drawing canvas for mask: ${layerId}`);
-          const c = canvas.current;
-          const l = getBaseImageSize();
-          c.width = l[0];
-          c.height = l[1];
-          if (points.length === 0) {
-            context.clearRect(0, 0, c.width, c.height);
-            return;
+        var hue = currentHSL[0];
+        var sat = currentHSL[1];
+        var lightnessOffset = currentHSL[2];
+
+        context.globalCompositeOperation = 'source-over';
+        context.drawImage(img, 0, 0, c.width, c.height);
+
+        var imgData = context.getImageData(0, 0, c.width, c.height);
+        var data = imgData.data;
+        for (var i = 0; i < data.length; i += 4) {
+          // Get the each channel color value
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const a = data[i + 3];
+          // skip transparent pixels
+          if (a < 230) {
+            continue;
           }
-          var hue = currentHSL[0];
-          var sat = currentHSL[1];
-          var lightnessOffset = currentHSL[2];
+          const imgLightness = rgbToHSL(r, g, b)[2];
+          const newRgb = hslToRGB(hue, sat, imgLightness + lightnessOffset);
+          data[i] = newRgb[0];
+          data[i + 1] = newRgb[1];
+          data[i + 2] = newRgb[2];
+        }
+        context.putImageData(imgData, 0, 0);
+      });
+    },
+    [img, imgComplete, currentHSL]
+  );
 
-          context.globalCompositeOperation = 'source-over';
-          context.drawImage(img, 0, 0, c.width, c.height);
-
-          var imgData = context.getImageData(0, 0, c.width, c.height);
-          var data = imgData.data;
-          for (var i = 0; i < data.length; i += 4) {
-            // Get the each channel color value
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            const a = data[i + 3];
-            // skip transparent pixels
-            if (a < 230) {
-              continue;
-            }
-            const imgLightness = rgbToHSL(r, g, b)[2];
-            const newRgb = hslToRGB(hue, sat, imgLightness + lightnessOffset);
-            data[i] = newRgb[0];
-            data[i + 1] = newRgb[1];
-            data[i + 2] = newRgb[2];
-          }
-          context.putImageData(imgData, 0, 0);
-        });
-      },
-      [img, imgComplete, currentHSL]
-    );
-
-    return (
-      <React.Fragment>
-        <Canvas
-          key={`mask-${layerId}-canvas`}
-          layerId={layerId}
-          draw={draw}
-          zIndex={100 + drawIndex}
-        />
-        {pointBoxes}
-      </React.Fragment>
-    );
-  },
-  (prevProps, nextProps) =>
-    prevProps.imUrl === nextProps.imgUrl && prevProps.currentHSL === nextProps.currentHSL
-);
+  return (
+    <React.Fragment>
+      <Canvas
+        key={`mask-${layerId}-canvas`}
+        layerId={layerId}
+        draw={draw}
+        zIndex={100 + drawIndex}
+      />
+      {pointBoxes}
+    </React.Fragment>
+  );
+}
 
 const extractLayerCoords = (layerId, layerPoints) => {
   let coords = [];
@@ -143,7 +138,7 @@ const extractLayerCoords = (layerId, layerPoints) => {
 };
 
 const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange }) => {
-  const visibleLayers = useMemo(() => layersDef.filter((l) => l.visibility), [layersDef]);
+  const visibleLayers = layersDef.filter((l) => l.visibility);
   return (
     <React.Fragment>
       {visibleLayers.map((layer, index) => {
