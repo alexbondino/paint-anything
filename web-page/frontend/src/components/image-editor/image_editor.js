@@ -121,17 +121,20 @@ function Mask({
         context.putImageData(imgData, 0, 0);
 
         if (isSelected) {
-          context.strokeStyle = 'white';
-          context.lineWidth = 3;
           for (var i = 0; i < contour.length; i++) {
-            context.beginPath();
             for (var j = 0; j < contour[i].length - 2; j = j + 2) {
-              var x = contour[i][j] * c.width;
-              var y = contour[i][j + 1] * c.height;
-              context.lineTo(x, y);
+              const x1 = contour[i][j] * c.width;
+              const y1 = contour[i][j + 1] * c.height;
+              const x2 = contour[i][j + 2] * c.width;
+              const y2 = contour[i][j + 2 + 1] * c.height;
+              context.beginPath();
+              context.moveTo(x1, y1);
+              context.lineCap = 'round';
+              context.lineWidth = 4;
+              context.strokeStyle = 'rgb(84,204,255)';
+              context.lineTo(x2, y2);
+              context.stroke();
             }
-            context.closePath();
-            context.stroke();
           }
         }
       });
