@@ -85,9 +85,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-start',
 }));
 
-// TODO: add item for choosing which SAM model to run
 export function ImageEditorDrawer({
-  baseImg,
   sidebarVisibility,
   layersDef,
   selectedLayer,
@@ -124,19 +122,20 @@ export function ImageEditorDrawer({
   const handleAddLayer = async () => {
     // by default, each layer is created with the name as the index of last layer created + 1
     const newLayersDef = [
-      ...layersDef,
       {
         id: lastLayerId + 1,
         visibility: true,
         imgUrl: null,
         hsl: [],
       },
+      ...layersDef,
     ];
     onNewLayerDef(newLayersDef);
     // open layer list if it is not already open
     if (!expandLayers) {
       setExpandLayers(!expandLayers);
     }
+    onSelectLayer(lastLayerId + 1);
   };
 
   const handleModelConfirmationClose = () => {

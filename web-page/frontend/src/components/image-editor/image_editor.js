@@ -75,7 +75,6 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
         return;
       }
       requestAnimationFrame(function () {
-        console.info(`drawing canvas for mask: ${layerId}`);
         const c = canvas.current;
         const l = getBaseImageSize();
         c.width = l[0];
@@ -121,7 +120,7 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
         key={`mask-${layerId}-canvas`}
         layerId={layerId}
         draw={draw}
-        zIndex={100 + drawIndex}
+        zIndex={1000 - drawIndex}
       />
       {pointBoxes}
     </React.Fragment>

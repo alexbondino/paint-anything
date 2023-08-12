@@ -302,7 +302,6 @@ export function Editor() {
     <div style={{ height: '78vh' }}>
       <ImageEditorDrawer
         key="side_nav"
-        baseImg={baseImg}
         sidebarVisibility={sidebarVisibility}
         layersDef={layersDef}
         selectedLayer={selectedLayer}
