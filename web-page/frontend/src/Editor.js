@@ -66,6 +66,7 @@ export function Editor() {
       id: 0,
       visibility: true,
       imgUrl: null,
+      imgContour: null,
       hsl: [],
       meanLightness: 0,
       hslInput: false,
@@ -137,16 +138,14 @@ export function Editor() {
     const newLayersDef = [...layersDef];
     // fetch mask for this layer from backend
     try {
-      const imgResponse = await fetch(
-        'http://localhost:8000/api/mask-img?' +
-          new URLSearchParams({
-            layer_id: layerId,
-          })
-      );
-      // parse image and construct url
-      const url = URL.createObjectURL(await imgResponse.blob());
+      const payload = new URLSearchParams({
+        layer_id: layerId,
+      });
+      const imgResponse = await fetch('http://localhost:8000/api/mask-img?' + payload);
+      const maskContour = await fetch('http://localhost:8000/api/mask-contour?' + payload);
       // update url in layer definition
-      newLayersDef[layerPos].imgUrl = url;
+      newLayersDef[layerPos].imgUrl = URL.createObjectURL(await imgResponse.blob());
+      newLayersDef[layerPos].imgContour = await maskContour.json();
     } catch (error) {
       console.error('failed trying to update mask data');
       return;

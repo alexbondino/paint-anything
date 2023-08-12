@@ -20,7 +20,16 @@ function getBaseImageSize(type) {
   return null;
 }
 
-function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL, drawIndex }) {
+function Mask({
+  layerId,
+  imgUrl,
+  isSelected,
+  points,
+  onPointerChange,
+  currentHSL,
+  contour,
+  drawIndex,
+}) {
   //console.log(`layerId: ${layerId}, isSelected: ${isSelected}, points: ${points}`);
   const [img, setImg] = useState(null);
   const [imgComplete, setImgComplete] = useState(false);
@@ -83,6 +92,7 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
           context.clearRect(0, 0, c.width, c.height);
           return;
         }
+
         var hue = currentHSL[0];
         var sat = currentHSL[1];
         var lightnessOffset = currentHSL[2];
@@ -109,9 +119,23 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
           data[i + 2] = newRgb[2];
         }
         context.putImageData(imgData, 0, 0);
+
+        context.strokeStyle = 'red';
+        context.shadowColor = 'red';
+        context.shadowBlur = 50;
+        for (var i = 0; i < contour.length; i++) {
+          context.beginPath();
+          for (var j = 0; j < contour[i].length - 2; j = j + 2) {
+            var x = contour[i][j];
+            var y = contour[i][j + 1];
+            context.lineTo(x, y);
+          }
+          context.closePath();
+          context.stroke();
+        }
       });
     },
-    [img, imgComplete, currentHSL]
+    [img, imgComplete, currentHSL, contour]
   );
 
   return (
@@ -151,6 +175,7 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange }) 
               points={extractLayerCoords(layer.id, layerPoints)}
               onPointerChange={onPointerChange}
               currentHSL={layer.hsl}
+              contour={layer.imgContour}
               drawIndex={index}
             />
           );

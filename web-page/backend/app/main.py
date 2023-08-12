@@ -12,8 +12,8 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from segment_anything import SamPredictor
 from PIL import Image
-from masking.predictor import create_sam, update_stored_mask
-from utils import load_image, clean_mask_files, save_output
+from masking.predictor import create_sam, update_stored_mask, load_mask_contour
+from utils import load_image, clean_mask_files
 from color_transform.transform import extract_median_hsl, hsl_cv2_2_js
 from logger import color_logger
 
@@ -166,6 +166,13 @@ def fetch_mask(layer_id: int):
         return FileResponse(os.path.join(temp_dir, f"{layer_id}.png"))
     except:
         raise HTTPException(status_code=400, detail="Image not found")
+
+
+@app.get("/api/mask-contour")
+def fetch_contour(layer_id: int):
+    """returns the contour of the mask from given layer_id"""
+    contour = load_mask_contour(layer_id, temp_dir)
+    return contour
 
 
 @app.get("/api/delete-mask")

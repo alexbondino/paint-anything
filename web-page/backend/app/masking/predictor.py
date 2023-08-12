@@ -2,6 +2,7 @@ import os
 import torch
 import onnxruntime
 import numpy as np
+import cv2
 from segment_anything import sam_model_registry, SamPredictor
 from typing import List, Dict, Literal
 from PIL import Image
@@ -157,7 +158,8 @@ def gen_new_mask(
     alpha_channel[mask] = 255
     mask_img = Image.fromarray(mask_img)
     mask_img.putalpha(Image.fromarray(alpha_channel))
-    return mask_img
+    contours = compute_mask_contour(alpha_channel)
+    return mask_img, contours
 
 
 def update_stored_mask(
@@ -189,8 +191,23 @@ def update_stored_mask(
         return
     effective_points = points["points"][: points["pointer"]]
     # create new mask
-    mask_img = gen_new_mask(
+    mask_img, contours = gen_new_mask(
         img, effective_points, predictor, image_embedding, ort_session
     )
+    np.save(os.path.join(mask_dir, f"{layer_id}_cnt.npy"), contours, allow_pickle=True)
     # update mask by overwriting stored image
     mask_img.save(os.path.join(mask_dir, f"{layer_id}.png"))
+
+
+def compute_mask_contour(mask: np.ndarray) -> np.ndarray:
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = [cnt.squeeze().flatten() for cnt in contours]
+    return np.array(contours, dtype=object)
+
+
+def load_mask_contour(layer_id: int, mask_dir: str) -> List[int]:
+    pts: np.ndarray = np.load(
+        os.path.join(mask_dir, f"{layer_id}_cnt.npy"), allow_pickle=True
+    )
+    pts = [cnt.tolist() for cnt in pts]
+    return pts
