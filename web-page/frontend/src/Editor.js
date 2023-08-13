@@ -313,7 +313,7 @@ export function Editor() {
   return (
     <div style={{ height: '78vh', flexGrow: 1 }}>
       <Title sidebarVisibility={sidebarVisibility} onDrawerOpen={handleDrawerOpen} />
-      <Stack direction="row" alignItems="stretch" sx={{ border: '5px solid red' }}>
+      <Stack direction="row" spacing={1} alignItems="stretch" sx={{ border: '5px solid red' }}>
         {imgEditor}
         <ImageEditorDrawer
           key="side_nav"
