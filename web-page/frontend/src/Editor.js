@@ -311,34 +311,41 @@ export function Editor() {
     );
 
   return (
-    <div style={{ height: '78vh', flexGrow: 1 }}>
+    <React.Fragment>
       <Title sidebarVisibility={sidebarVisibility} onDrawerOpen={handleDrawerOpen} />
-      <Stack direction="row" spacing={1} alignItems="stretch" sx={{ border: '5px solid red' }}>
-        {imgEditor}
-        <ImageEditorDrawer
-          key="side_nav"
-          sidebarVisibility={sidebarVisibility}
-          layersDef={layersDef}
-          selectedLayer={selectedLayer}
-          onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
-          onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
-          onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
-          onSelectLayer={(layerId) => handleSelectLayer(layerId)}
-          onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
-          onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
-          onHandleSelectModel={handleSelectmodel}
-          modelSelected={modelSelected}
-          openModelConfirmation={modelConfirmation}
-          onCancelModelConfirmation={handleCancelModelConfirmation}
-          onConfirmModelConfirmation={handleConfirmModelConfirmation}
-          drawerOpen={drawerOpen}
-          onDrawerClose={handleDrawerClose}
-          currentImage={currentImage}
-        />
-      </Stack>
+      {sidebarVisibility ? (
+        <Stack
+          direction="row"
+          spacing={1}
+          justifyContent="center"
+          sx={{ border: '3px solid red', height: '90vh', flexGrow: 1 }}
+        >
+          {imgEditor}
+          <ImageEditorDrawer
+            key="side_nav"
+            sidebarVisibility={sidebarVisibility}
+            layersDef={layersDef}
+            selectedLayer={selectedLayer}
+            onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
+            onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
+            onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
+            onSelectLayer={(layerId) => handleSelectLayer(layerId)}
+            onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
+            onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
+            onHandleSelectModel={handleSelectmodel}
+            modelSelected={modelSelected}
+            openModelConfirmation={modelConfirmation}
+            onCancelModelConfirmation={handleCancelModelConfirmation}
+            onConfirmModelConfirmation={handleConfirmModelConfirmation}
+            drawerOpen={drawerOpen}
+            onDrawerClose={handleDrawerClose}
+            currentImage={currentImage}
+          />
+        </Stack>
+      ) : null}
       {modelSelector}
       {imgUploader}
       <LoadingComponent loaderVisibility={loaderVisibility} />
-    </div>
+    </React.Fragment>
   );
 }

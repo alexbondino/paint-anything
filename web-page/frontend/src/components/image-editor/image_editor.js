@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './image-editor.scss';
-import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material';
-import axios from 'axios';
+import { Tooltip, ButtonGroup, Button, Stack, Box, Grid } from '@mui/material';
 import PreviewDialog from './preview';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
@@ -121,12 +120,12 @@ function Mask({
         context.putImageData(imgData, 0, 0);
         // draw outline if image is selected
         if (isSelected) {
-          for (var i = 0; i < contour.length; i++) {
-            for (var j = 0; j < contour[i].length - 2; j = j + 2) {
-              const x1 = contour[i][j] * c.width;
-              const y1 = contour[i][j + 1] * c.height;
-              const x2 = contour[i][j + 2] * c.width;
-              const y2 = contour[i][j + 2 + 1] * c.height;
+          for (var cntId = 0; cntId < contour.length; cntId++) {
+            for (var j = 0; j < contour[cntId].length - 2; j = j + 2) {
+              const x1 = contour[cntId][j] * c.width;
+              const y1 = contour[cntId][j + 1] * c.height;
+              const x2 = contour[cntId][j + 2] * c.width;
+              const y2 = contour[cntId][j + 2 + 1] * c.height;
               context.beginPath();
               context.moveTo(x1, y1);
               context.lineCap = 'round';
@@ -139,7 +138,7 @@ function Mask({
         }
       });
     },
-    [img, imgComplete, currentHSL, contour, isSelected]
+    [img, imgComplete, points, currentHSL, contour, isSelected]
   );
 
   return (
@@ -204,8 +203,7 @@ export default function ImageEditor({
   const [naturalImgSize, setNaturalImgSize] = useState([]);
 
   const handleOnBaseImageLoad = () => {
-    const newImageSize = getBaseImageSize('natural');
-    setNaturalImgSize(newImageSize);
+    setNaturalImgSize(getBaseImageSize('natural'));
   };
 
   async function handlePointAndClick(event) {
@@ -263,74 +261,94 @@ export default function ImageEditor({
   }
 
   return (
-    <Stack
+    <Grid
       className="editor-stack"
       sx={{
-        aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
+        aspectRatio: naturalImgSize ? `${naturalImgSize[0] / naturalImgSize[1] - 0.05}` : '1/1',
+        height: 'auto',
+        width: 'auto',
         visibility: naturalImgSize && imageVisibility === true ? 'visible' : 'hidden',
-        border: '10px solid blue',
+        border: '3px solid blue',
       }}
+      container
       spacing={1}
     >
-      <ButtonGroup
-        className="history-box"
-        variant="contained"
-        aria-label="outlined primary button group"
-        sx={{ marginBottom: -5.5 }}
-      >
-        <PreviewDialog
-          layersDef={layersDef}
-          baseImg={baseImg}
-          selectedLayer={selectedLayer}
-          selectedLayerVisibility={selectedLayerDef}
-        />
-        <Tooltip title="Download" placement="top">
-          <Button className="download-button" onClick={handleDownloadButtonClick}>
-            <DownloadIcon style={{ width: '43px' }} />
-          </Button>
-        </Tooltip>
-      </ButtonGroup>
-      <ButtonGroup
-        className="history-box"
-        variant="contained"
-        aria-label="outlined primary button group"
-      >
-        <Tooltip title="Undo (Ctrl + z)" placement="top">
-          <Button
-            className="history-button"
-            disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
-            onClick={() => onPointerChange(selectedLayerDef.id, -1)}
-          >
-            <UndoIcon />
-          </Button>
-        </Tooltip>
-        <Tooltip title="Redo (Ctrl + y)" placement="top">
-          <Button
-            className="history-button"
-            disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
-            onClick={() => onPointerChange(selectedLayerDef.id, 1)}
-          >
-            <RedoIcon />
-          </Button>
-        </Tooltip>
-      </ButtonGroup>
-      <Box className="image-box" onClick={handlePointAndClick} onContextMenu={handlePointAndClick}>
-        <img
-          id="baseImg"
-          src={baseImg}
-          className="image"
-          alt="base_image"
-          onLoad={handleOnBaseImageLoad}
-        />
-        {naturalImgSize.length === 2 && layerPoints.length > 0 ? (
-          <MaskImages
+      <Grid item xs={6} className="history-buttons">
+        <ButtonGroup
+          className="editor-button-group"
+          variant="contained"
+          aria-label="outlined primary button group"
+        >
+          <Tooltip title="Undo (Ctrl + z)" placement="top">
+            <Button
+              className="history-button"
+              disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+              onClick={() => onPointerChange(selectedLayerDef.id, -1)}
+            >
+              <UndoIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Redo (Ctrl + y)" placement="top">
+            <Button
+              className="history-button"
+              disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+              onClick={() => onPointerChange(selectedLayerDef.id, 1)}
+            >
+              <RedoIcon />
+            </Button>
+          </Tooltip>
+        </ButtonGroup>
+      </Grid>
+      <Grid item xs={6} className="download-preview-buttons">
+        <ButtonGroup
+          className="editor-button-group"
+          variant="contained"
+          aria-label="outlined primary button group"
+        >
+          <PreviewDialog
             layersDef={layersDef}
+            baseImg={baseImg}
             selectedLayer={selectedLayer}
-            layerPoints={layerPoints}
-            onPointerChange={onPointerChange}
+            selectedLayerVisibility={selectedLayerDef}
           />
-        ) : null}
-      </Box>
-    </Stack>
+          <Tooltip title="Download" placement="top">
+            <Button className="download-button" onClick={handleDownloadButtonClick}>
+              <DownloadIcon style={{ width: '43px' }} />
+            </Button>
+          </Tooltip>
+        </ButtonGroup>
+      </Grid>
+      <Grid
+        className="image-grid"
+        item
+        onClick={handlePointAndClick}
+        onContextMenu={handlePointAndClick}
+        xs={12}
+        sx={{ border: '4px solid yellow' }}
+      >
+        <Box
+          className="image-box"
+          sx={{
+            aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
+          }}
+        >
+          <img
+            id="baseImg"
+            src={baseImg}
+            className="image"
+            alt="base_image"
+            onLoad={handleOnBaseImageLoad}
+          />
+          {naturalImgSize.length === 2 && layerPoints.length > 0 ? (
+            <MaskImages
+              layersDef={layersDef}
+              selectedLayer={selectedLayer}
+              layerPoints={layerPoints}
+              onPointerChange={onPointerChange}
+            />
+          ) : null}
+        </Box>
+      </Grid>
+    </Grid>
   );
 }

@@ -31,11 +31,8 @@ img = None
 image_embedding = None
 
 # segment anything model
-logger.info("-> loading sam predictor")
-onnx_model_path = "./assets/vit_l_quantized.onnx"
-ort_session = onnxruntime.InferenceSession(onnx_model_path)
-predictor = SamPredictor(create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth"))
-logger.info("-> sam predictor successfully loaded")
+ort_session = None
+predictor = None
 
 
 class Layer(BaseModel):
@@ -251,21 +248,17 @@ def model_selected(data: ModelSelection):
     global predictor, ort_session
     match data.model:
         case "large_model":
-            onnx_model_path = "./assets/vit_l_quantized.onnx"
-            ort_session = onnxruntime.InferenceSession(onnx_model_path)
-            predictor = SamPredictor(
-                create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth")
-            )
+            quantized_path = "./assets/vit_l_quantized.onnx"
+            model_type = "vit_l"
+            model_path = "./assets/sam_vit_l_0b3195.pth"
         case "huge_model":
-            onnx_model_path = "./assets/vit_h_quantized.onnx"
-            ort_session = onnxruntime.InferenceSession(onnx_model_path)
-            predictor = SamPredictor(
-                create_sam("vit_h", "./assets/sam_vit_h_4b8939.pth")
-            )
+            quantized_path = "./assets/vit_h_quantized.onnx"
+            model_type = "vit_h"
+            model_path = "./assets/sam_vit_h_4b8939.pth"
         case "base_model":
-            onnx_model_path = "./assets/vit_b_quantized.onnx"
-            ort_session = onnxruntime.InferenceSession(onnx_model_path)
-            predictor = SamPredictor(
-                create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth")
-            )
+            quantized_path = "./assets/vit_b_quantized.onnx"
+            model_type = "vit_b"
+            model_path = "./assets/sam_vit_b_01ec64.pth"
+    ort_session = onnxruntime.InferenceSession(quantized_path)
+    predictor = SamPredictor(create_sam(model_type, model_path))
     return {"message": "model selected successfuly"}
