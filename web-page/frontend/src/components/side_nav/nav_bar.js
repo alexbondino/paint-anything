@@ -114,7 +114,14 @@ export function ImageEditorDrawer({
   };
 
   return (
-    <Box sx={{ display: 'flex', border: '5px solid pink', aligSelf: 'end' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        border: '5px solid pink',
+        aligSelf: 'end',
+        display: drawerOpen ? 'flex' : 'none',
+      }}
+    >
       <CssBaseline />
       {sidebarVisibility ? (
         <Box>
