@@ -206,13 +206,21 @@ export default function ImageEditor({
 }) {
   const [naturalImgSize, setNaturalImgSize] = useState([]);
   const [lastSelectedLayer, setLastSelectedLayer] = useState(-1);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadState, setDownloadState] = useState(null);
 
   useEffect(() => {
-    if (isDownloading) {
+    console.log('useEffect');
+    if (downloadState === 'prepare') {
+      // triggers download after canvas is rerendered
+      setDownloadState('download');
+    } else if (downloadState === 'download') {
+      // download output and reset other states
       downloadOutput();
+      setDownloadState(null);
+      setLastSelectedLayer(-1);
+      onSelectLayer(lastSelectedLayer);
     }
-  }, [isDownloading]);
+  }, [downloadState]);
 
   const handleOnBaseImageLoad = () => {
     setNaturalImgSize(getBaseImageSize('natural'));
@@ -270,12 +278,14 @@ export default function ImageEditor({
     link.download = 'output.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
-    setIsDownloading(false);
   }
 
   function handleDownloadButtonClick() {
+    // deselect layer
+    setLastSelectedLayer(selectedLayer);
     onSelectLayer(-1);
-    setIsDownloading(true);
+    // initiate download
+    setDownloadState('prepare');
   }
 
   const aspectRatio = naturalImgSize ? `${naturalImgSize[0] / naturalImgSize[1]}` : '1/1';
