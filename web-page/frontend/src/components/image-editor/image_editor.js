@@ -270,6 +270,8 @@ export default function ImageEditor({
       className="editor-stack"
       sx={{
         aspectRatio: aspectRatio,
+        width: 'auto',
+        height: 'auto',
         visibility: naturalImgSize && imageVisibility === true ? 'visible' : 'hidden',
       }}
       container
