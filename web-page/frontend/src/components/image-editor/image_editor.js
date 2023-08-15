@@ -198,6 +198,7 @@ export default function ImageEditor({
   baseImg,
   layersDef,
   selectedLayer,
+  onSelectLayer,
   layerPoints,
   onPointerChange,
   onNewPoint,
@@ -284,7 +285,7 @@ export default function ImageEditor({
           aria-label="outlined primary button group"
         >
           <Tooltip title="Undo (Ctrl + z)" placement="top">
-            <Button 
+            <Button
               disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
               onClick={() => onPointerChange(selectedLayerDef.id, -1)}
             >
@@ -310,8 +311,8 @@ export default function ImageEditor({
           <PreviewDialog
             layersDef={layersDef}
             baseImg={baseImg}
+            onSelectLayer={onSelectLayer}
             selectedLayer={selectedLayer}
-            selectedLayerVisibility={selectedLayerDef}
           />
           <Tooltip title="Download" placement="top">
             <Button className="download-button" onClick={handleDownloadButtonClick}>

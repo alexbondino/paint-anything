@@ -1,8 +1,6 @@
 import * as React from 'react';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
+import { useEffect } from 'react';
 import PreviewIcon from '@mui/icons-material/Preview';
-import ListItemText from '@mui/material/ListItemText';
 import Dialog from '@mui/material/Dialog';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -64,20 +62,36 @@ function PreviewImage({ baseImg, layersDef }) {
 }
 
 // TODO: fix button focus after exiting preview with escape key
-export default function PreviewDialog({ layersDef, baseImg, selectedLayer, selectedLayerVisibility }) {
+export default function PreviewDialog({
+  layersDef,
+  baseImg,
+  onSelectLayer,
+  selectedLayer,
+}) {
   const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [previewActive, setPreviewActive] = React.useState(false);
+  const [lastSelectedLayer, setLastSelectedLayer] = React.useState(selectedLayer);
+
+  useEffect(() => {
+    setOpen(previewActive);
+  }, [previewActive]);
+
+  const handleOpen = () => {
+    setLastSelectedLayer(selectedLayer);
+    onSelectLayer(-1);
+    setPreviewActive(true);
+  };
+  const handleClose = () => {
+    setLastSelectedLayer(-1);
+    onSelectLayer(lastSelectedLayer);
+    setPreviewActive(false);
+  };
 
   return [
-
     <Tooltip title="Preview" placement="top">
-          <Button
-          className="preview-button"
-          onClick={handleOpen}
-          >
-            <PreviewIcon style={{ width: '43px' }}/>
-          </Button>
+      <Button className="preview-button" onClick={handleOpen}>
+        <PreviewIcon style={{ width: '43px' }} />
+      </Button>
     </Tooltip>,
     <Dialog
       key={'preview-dialogue'}

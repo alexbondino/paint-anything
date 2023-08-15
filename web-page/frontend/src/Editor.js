@@ -296,6 +296,7 @@ export function Editor() {
       baseImg={baseImg}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
+      onSelectLayer={handleSelectLayer}
       imageVisibility={sidebarVisibility}
       layerPoints={layerPoints}
       onPointerChange={handlePointerChange}
