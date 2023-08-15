@@ -173,6 +173,7 @@ const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange }) 
         try {
           return (
             <Mask
+              className="mask-img"
               key={`mask_${layer.id}`}
               layerId={layer.id}
               imgUrl={layer.imgUrl}
@@ -336,15 +337,7 @@ export default function ImageEditor({
         <Box
           className="image-box"
           sx={{
-            display: 'flex',
-            flexGrow: 1,
             aspectRatio: naturalImgSize ? `${naturalImgSize[0] / naturalImgSize[1]}` : '1/1',
-            maxWidth: '100%',
-            maxHeight: '100%',
-            height: 'auto',
-            width: 'auto',
-            margin: 'auto',
-            alignitems: 'center',
           }}
         >
           <img
