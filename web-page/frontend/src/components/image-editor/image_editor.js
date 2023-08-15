@@ -263,18 +263,14 @@ export default function ImageEditor({
     link.click();
   }
 
+  const aspectRatio = naturalImgSize ? `${naturalImgSize[0] / naturalImgSize[1]}` : '1/1';
+
   return (
     <Grid
       className="editor-stack"
       sx={{
-        aspectRatio: naturalImgSize ? `${naturalImgSize[0] / naturalImgSize[1]}` : '1/1',
-        height: 'auto',
-        width: 'auto',
-        maxWidth: '100%',
-        maxHeight: '100%',
-        margin: 'auto',
+        aspectRatio: aspectRatio,
         visibility: naturalImgSize && imageVisibility === true ? 'visible' : 'hidden',
-        border: '3px solid blue',
       }}
       container
       spacing={1}
@@ -330,14 +326,11 @@ export default function ImageEditor({
         onClick={handlePointAndClick}
         onContextMenu={handlePointAndClick}
         xs={12}
-        sx={{
-          border: '4px solid yellow',
-        }}
       >
         <Box
           className="image-box"
           sx={{
-            aspectRatio: naturalImgSize ? `${naturalImgSize[0] / naturalImgSize[1]}` : '1/1',
+            aspectRatio: aspectRatio,
           }}
         >
           <img

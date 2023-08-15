@@ -318,7 +318,7 @@ export function Editor() {
           direction="row"
           spacing={1}
           justifyContent="center"
-          sx={{ border: '3px solid red', height: '90vh', flexGrow: 1 }}
+          sx={{ height: '90vh', flexGrow: 1 }}
         >
           {imgEditor}
           <ImageEditorDrawer

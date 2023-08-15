@@ -1,8 +1,8 @@
 // editor stack
 .editor-stack {
     display:flex;
-    height:auto;
     width:auto;
+    height:auto;
     max-width:100%;
     max-height:100%;
     min-width:200px;
@@ -38,12 +38,10 @@
 .image-grid{
     display:block;
     flex-grow:1;
-    max-height:95%;
+    max-height:90%;
     max-width:100%;
     width:auto;
     height:auto;
-    min-height:0px; 
-    min-width:0px; 
 }
 
 // image container
@@ -58,7 +56,6 @@
     max-width: 100%;
     max-height:100%;
     z-index: 1001;
-    min-height:0;
 }
 // base image
 .image-box .image{
