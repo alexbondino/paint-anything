@@ -205,6 +205,14 @@ export default function ImageEditor({
   imageVisibility,
 }) {
   const [naturalImgSize, setNaturalImgSize] = useState([]);
+  const [lastSelectedLayer, setLastSelectedLayer] = useState(-1);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  useEffect(() => {
+    if (isDownloading) {
+      downloadOutput();
+    }
+  }, [isDownloading]);
 
   const handleOnBaseImageLoad = () => {
     setNaturalImgSize(getBaseImageSize('natural'));
@@ -240,7 +248,7 @@ export default function ImageEditor({
     hsl: [],
   };
 
-  async function handleDownloadButtonClick() {
+  async function downloadOutput() {
     const imgElement = document.getElementById('baseImg');
     const width = imgElement.naturalWidth;
     const height = imgElement.naturalHeight;
@@ -252,7 +260,7 @@ export default function ImageEditor({
     // first draw base image
     ctx.drawImage(imgElement, 0, 0, width, height);
     // next draw layers, in same order as shown in editor
-    const drawableLayers = [...layersDef].filter((l) => l.visibility).sort((l) => -l.id);
+    const drawableLayers = layersDef.filter((l) => l.visibility).reverse();
     for (const l of drawableLayers) {
       const maskImg = document.getElementById(`canvas-${l.id}`);
       ctx.drawImage(maskImg, 0, 0, width, height);
@@ -262,6 +270,12 @@ export default function ImageEditor({
     link.download = 'output.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
+    setIsDownloading(false);
+  }
+
+  function handleDownloadButtonClick() {
+    onSelectLayer(-1);
+    setIsDownloading(true);
   }
 
   const aspectRatio = naturalImgSize ? `${naturalImgSize[0] / naturalImgSize[1]}` : '1/1';

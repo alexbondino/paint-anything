@@ -26,7 +26,7 @@ const PreviewTransition = React.forwardRef(function Transition(props, ref) {
 function PreviewImage({ baseImg, layersDef }) {
   const maskImgComps = layersDef
     .filter((l) => l.imgUrl !== null && l.visibility)
-    .map((layer) => {
+    .map((layer, idx) => {
       var canvas = document.getElementById(`canvas-${layer.id}`);
       const img = canvas.toDataURL('image/png');
       try {
@@ -36,7 +36,7 @@ function PreviewImage({ baseImg, layersDef }) {
             src={img}
             alt={`mask_image_${layer.id}`}
             style={{
-              zIndex: 1000 - layer.id,
+              zIndex: 1000 - idx,
               objectFit: 'contain',
               position: 'absolute',
               width: '100%',
@@ -62,15 +62,10 @@ function PreviewImage({ baseImg, layersDef }) {
 }
 
 // TODO: fix button focus after exiting preview with escape key
-export default function PreviewDialog({
-  layersDef,
-  baseImg,
-  onSelectLayer,
-  selectedLayer,
-}) {
+export default function PreviewDialog({ layersDef, baseImg, onSelectLayer, selectedLayer }) {
   const [open, setOpen] = React.useState(false);
   const [previewActive, setPreviewActive] = React.useState(false);
-  const [lastSelectedLayer, setLastSelectedLayer] = React.useState(selectedLayer);
+  const [lastSelectedLayer, setLastSelectedLayer] = React.useState(-1);
 
   useEffect(() => {
     setOpen(previewActive);
