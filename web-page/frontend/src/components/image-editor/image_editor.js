@@ -82,6 +82,7 @@ function Mask({
       if (img === null || !imgComplete) {
         return;
       }
+      console.log(`draw: ${layerId}`);
       requestAnimationFrame(function () {
         const c = canvas.current;
         const l = getBaseImageSize();
@@ -138,12 +139,13 @@ function Mask({
         }
       });
     },
-    [img, imgComplete, points, currentHSL, contour, isSelected]
+    [img, imgComplete, currentHSL, points.length, contour, isSelected]
   );
 
   return (
     <React.Fragment>
       <Canvas
+        className="mask-img"
         key={`mask-${layerId}-canvas`}
         layerId={layerId}
         draw={draw}

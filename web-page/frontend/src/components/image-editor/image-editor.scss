@@ -59,11 +59,13 @@
 
 // layer image
 .mask-img {
+    display:flex;
+    flex-grow:1;
     object-fit: contain;
     display: block;
     position: absolute;
     width: 100%;
-    height:100%;    
+    height:100%;
 }
 
 .mask-point{
