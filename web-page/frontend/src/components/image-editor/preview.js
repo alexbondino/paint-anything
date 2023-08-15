@@ -29,28 +29,23 @@ function PreviewImage({ baseImg, layersDef }) {
     .map((layer, idx) => {
       var canvas = document.getElementById(`canvas-${layer.id}`);
       const img = canvas.toDataURL('image/png');
-      try {
-        return (
-          <img
-            key={layer.id}
-            src={img}
-            alt={`mask_image_${layer.id}`}
-            style={{
-              zIndex: 1000 - idx,
-              objectFit: 'contain',
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              display: 'block',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-            }}
-          />
-        );
-      } catch {
-        console.error(`Image for layer ${layer.id} not found`);
-        return;
-      }
+      return (
+        <img
+          key={layer.id}
+          src={img}
+          alt={`mask_image_${layer.id}`}
+          style={{
+            zIndex: 1000 - idx,
+            objectFit: 'contain',
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            display: 'block',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+        />
+      );
     });
 
   return (
