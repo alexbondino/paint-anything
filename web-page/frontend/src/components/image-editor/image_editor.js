@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './image-editor.scss';
-import { Tooltip, ButtonGroup, Button, Stack, Box, Grid } from '@mui/material';
+import { Tooltip, ButtonGroup, Button, Box, Grid } from '@mui/material';
 import PreviewDialog from './preview';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
@@ -82,7 +82,6 @@ function Mask({
       if (img === null || !imgComplete) {
         return;
       }
-      console.log(`draw: ${layerId}`);
       requestAnimationFrame(function () {
         const c = canvas.current;
         const l = getBaseImageSize();
@@ -208,8 +207,8 @@ export default function ImageEditor({
   const [lastSelectedLayer, setLastSelectedLayer] = useState(-1);
   const [downloadState, setDownloadState] = useState(null);
 
+  /* eslint-disable */
   useEffect(() => {
-    console.log('useEffect');
     if (downloadState === 'prepare') {
       // triggers download after canvas is rerendered
       setDownloadState('download');
@@ -221,6 +220,7 @@ export default function ImageEditor({
       onSelectLayer(lastSelectedLayer);
     }
   }, [downloadState]);
+  /* eslint-enable */
 
   const handleOnBaseImageLoad = () => {
     setNaturalImgSize(getBaseImageSize('natural'));
