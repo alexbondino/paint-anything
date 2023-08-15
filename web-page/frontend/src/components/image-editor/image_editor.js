@@ -267,7 +267,7 @@ export default function ImageEditor({
 
   return (
     <Grid
-      className="editor-stack"
+      className="editor-grid"
       sx={{
         aspectRatio: aspectRatio,
         width: 'auto',
@@ -284,8 +284,7 @@ export default function ImageEditor({
           aria-label="outlined primary button group"
         >
           <Tooltip title="Undo (Ctrl + z)" placement="top">
-            <Button
-              className="history-button"
+            <Button 
               disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
               onClick={() => onPointerChange(selectedLayerDef.id, -1)}
             >
@@ -294,7 +293,6 @@ export default function ImageEditor({
           </Tooltip>
           <Tooltip title="Redo (Ctrl + y)" placement="top">
             <Button
-              className="history-button"
               disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
               onClick={() => onPointerChange(selectedLayerDef.id, 1)}
             >
