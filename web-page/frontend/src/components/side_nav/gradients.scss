@@ -17,7 +17,7 @@
   }
   
   .hue-saturation-slider {
-    width: 250px;
+    width: 220px;
     margin-right: 20%;
     margin-top: 4px;
 
@@ -41,7 +41,7 @@
   }
 
   .lightness-slider {
-    width: 230px; /* Ajusta el ancho del joystick */
+    width: 220px; /* Ajusta el ancho del joystick */
     margin-right: 20%;
     margin-top: 4px;
     
@@ -50,14 +50,14 @@
       height: 35px; /* Alto del joystick */
       border-radius: 50%; /* Forma circular del joystick */
       background-color: #f0f0f0; /* Color del joystick */
-      border: 1px solid #000; /* Borde del joystick */
+      border: 5px solid #464646; /* Borde del joystick */
       margin-top: -10px; /* Alinea el joystick verticalmente */
       transform: translateX(-50%) rotate(0deg) translateY(-25%); /* Rota y posiciona el joystick */
       transition: background-color 0.2s, box-shadow 0.2s;
     }
     
     .MuiSlider-thumb.Mui-active {
-        background-color: #3fb578; /* Cambia el color al arrastrar */
+        background-color: #525252; /* Cambia el color al arrastrar */
         box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra al arrastrar */
     }
     
@@ -68,7 +68,6 @@
         height: 0px; /* Quita la pista activa horizontal */
       }
   }
-  
 
   .text-slider{
     margin-right: 20%;

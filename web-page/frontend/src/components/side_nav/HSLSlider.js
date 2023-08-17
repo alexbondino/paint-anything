@@ -73,7 +73,7 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
   
 
   return (
-    <Box className="slider-container sliders-box" sx={{ draggable: false }}>
+    <Box className="sliders-box" sx={{ draggable: false }}>
       <Typography variant="button" id="input-slider" gutterBottom className='text-slider'>
         Hue
       </Typography>
