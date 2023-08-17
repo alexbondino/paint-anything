@@ -1,0 +1,76 @@
+.slider-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 20px;
+    height: 5px;
+  }
+  
+  .gradient-slider {
+    width: 80%;
+  }
+  
+  .color-preview {
+    width: 100%;
+    height: 50px;
+    margin: 20px 0;
+  }
+  
+  .hue-saturation-slider {
+    width: 250px;
+    margin-right: 20%;
+    margin-top: 4px;
+
+    .MuiSlider-thumb {
+      width: 3px;
+      height: 40px;
+      border-radius: 0;
+      background-color: yellow;
+      border: 1px solid #000; /* Puedes ajustar el estilo de la barra vertical aquí */
+      margin-top: -20px; /* Alinea la barra vertical con el centro del slider */
+      transform: rotate(-0deg); /* Rota la barra vertical */
+    }
+  
+    .MuiSlider-rail {
+      height: 0px; /* Ajusta la altura de la barra de fondo del slider */
+    }
+    
+    .MuiSlider-track {
+        height: 0px; /* Quita la pista activa horizontal */
+      }
+  }
+
+  .lightness-slider {
+    width: 230px; /* Ajusta el ancho del joystick */
+    margin-right: 20%;
+    margin-top: 4px;
+    
+    .MuiSlider-thumb {
+      width: 35px; /* Ancho del joystick */
+      height: 35px; /* Alto del joystick */
+      border-radius: 50%; /* Forma circular del joystick */
+      background-color: #f0f0f0; /* Color del joystick */
+      border: 1px solid #000; /* Borde del joystick */
+      margin-top: -10px; /* Alinea el joystick verticalmente */
+      transform: translateX(-50%) rotate(0deg) translateY(-25%); /* Rota y posiciona el joystick */
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+    
+    .MuiSlider-thumb.Mui-active {
+        background-color: #3fb578; /* Cambia el color al arrastrar */
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra al arrastrar */
+    }
+    
+    .MuiSlider-rail {
+        height: 0px; /* Ajusta la altura de la barra de fondo del slider */
+      }
+    .MuiSlider-track {
+        height: 0px; /* Quita la pista activa horizontal */
+      }
+  }
+  
+
+  .text-slider{
+    margin-right: 20%;
+    margin-top: 4px;
+  }
