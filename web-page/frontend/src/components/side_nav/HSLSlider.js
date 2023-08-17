@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Slider, Typography } from '@mui/material';
-import './gradients.scss'; // Importa el archivo de estilos
+import './gradients.scss';
 
 function valueLabelFormat(value) {
   return `${value} ${'%'}`;
 }
 
+/**
+ * Hue, saturation and lightness sliders. For each pixel of the mask, hue and saturation values will be replaced with
+ * those given by these sliders. Instead, lightness will be adjusted by applying an 'offset' to the pixel lightness, which
+ * will be determined by the lightness joystick.
+ * @param {int} layerId
+ * @param {int} hue
+ * @param {int} saturation
+ * @param {function} onHSLChange
+ * @returns HSL slider for modifying hsl color of layer
+ */
 const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [sliderPoint, setSliderPoint] = useState(50);
