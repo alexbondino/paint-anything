@@ -345,18 +345,14 @@ export default function ImageEditor({
           </Tooltip>
         </ButtonGroup>
       </Grid>
-      <Grid
-        className="image-grid"
-        item
-        onClick={handlePointAndClick}
-        onContextMenu={handlePointAndClick}
-        xs={12}
-      >
+      <Grid className="image-grid" item xs={12}>
         <Box
           className="image-box"
           sx={{
             aspectRatio: aspectRatio,
           }}
+          onClick={handlePointAndClick}
+          onContextMenu={handlePointAndClick}
         >
           <img
             id="baseImg"
