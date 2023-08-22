@@ -6,66 +6,71 @@
     height: 5px;
   }
   
-  .gradient-slider {
-    width: 80%;
-  }
-  
-  .color-preview {
-    width: 100%;
-    height: 50px;
-    margin: 20px 0;
-  }
-  
-  .hue-saturation-slider {
-    width: 220px;
-    margin-right: 20%;
-    margin-top: 4px;
+.gradient-slider {
+  width: 80%;
+}
 
-    .MuiSlider-thumb {
-      width: 3px;
-      height: 40px;
-      border-radius: 0;
-      background-color: yellow;
-      border: 1px solid #000;
-    }
+.color-preview {
+  width: 100%;
+  height: 50px;
+  margin: 20px 0;
+}
+
+.hue-saturation-slider {
+  width: 220px;
+  margin-right: 20%;
+  margin-top:4px;
+
+  .MuiSlider-thumb {
+    width: 5px;
+    height: 90%;
+    border-radius: 0;
+    background-color: #f0f0f0;
+    border: 0.5px solid #000;
+  }
   
-    .MuiSlider-rail {
+  .MuiSlider-track {
       height: 0px;
     }
-    
-    .MuiSlider-track {
-        height: 0px;
-      }
+}
+
+.lightness-slider {
+  width: 220px;
+  margin-right: 20%;
+  margin-top: 4px;
+  
+  .MuiSlider-thumb {
+    width: 30px; 
+    height: 30px;
+    border-radius: 50%; 
+    background-color: #f0f0f0; 
+    border: 5px solid #464646;
+
   }
 
-  .lightness-slider {
-    width: 220px;
-    margin-right: 20%;
-    margin-top: 4px;
-    
-    .MuiSlider-thumb {
-      width: 35px; 
-      height: 35px;
-      border-radius: 50%; 
-      background-color: #f0f0f0; 
-      border: 5px solid #464646;
-
+  .MuiSlider-thumb.Mui-active {
+      background-color: #525252; /* Cambia el color al arrastrar */
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra al arrastrar */
+  }
+  
+  .MuiSlider-track {
+      height: 0px; /* Quita la pista activa horizontal */
     }
+}
 
-    .MuiSlider-thumb.Mui-active {
-        background-color: #525252; /* Cambia el color al arrastrar */
-        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3); /* Sombra al arrastrar */
-    }
-    
-    .MuiSlider-rail {
-        height: 0px; /* Ajusta la altura de la barra de fondo del slider */
-      }
-    .MuiSlider-track {
-        height: 0px; /* Quita la pista activa horizontal */
-      }
-  }
+.text-slider{
+  margin-right: 20%;
+  margin-top: 4px;
+}
 
-  .text-slider{
-    margin-right: 20%;
-    margin-top: 4px;
-  }
+
+.sliders-box {
+  height:10%;
+  width: 100%;
+  margin-top: 0;
+  margin-left: 10%;
+  margin-right: 10%;
+  display:flex;
+  flex-direction: column;
+  border:'2px solid red'
+}

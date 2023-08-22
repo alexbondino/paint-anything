@@ -63,28 +63,26 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
       hsl(240, ${saturation}%, 50%), 
       hsl(300, ${saturation}%, 50%), 
       hsl(360, ${saturation}%, 50%))`;
-    return { background: hueGradientColor };
+    return hueGradientColor;
   };
 
   const getSaturationGradientBackground = () => {
     const saturationGradientColor = `linear-gradient(to right, 
       hsl(${hue}, 0%, 50%), 
       hsl(${hue}, 100%, 50%))`;
-    return { background: saturationGradientColor };
-  };  
+    return saturationGradientColor;
+  };
 
   const getLightnessGradientBackground = () => {
     const lightnessGradientColor = `linear-gradient(to right, 
       hsl(${hue}, ${saturation}%, 0%), 
       hsl(${hue}, ${saturation}%, 100%))`;
-    return { background: lightnessGradientColor };
+    return lightnessGradientColor;
   };
-  
-  
 
   return (
     <Box className="sliders-box" sx={{ draggable: false }}>
-      <Typography variant="button" id="input-slider" gutterBottom className='text-slider'>
+      <Typography variant="button" id="input-slider" gutterBottom className="text-slider">
         Hue
       </Typography>
       <Slider
@@ -95,11 +93,17 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
         min={0}
         max={360}
         valueLabelDisplay="auto"
-        style={getHueGradientBackground()}
+        sx={{
+          '& .MuiSlider-rail': {
+            height: '10px',
+            backgroundImage: getHueGradientBackground(),
+            opacity: '100%',
+          },
+        }}
         onChange={(e) => onHSLChange([e.target.value, saturation, lightnessOffset], layerId)}
         className="hue-saturation-slider"
       />
-      <Typography variant="button" id="input-slider" gutterBottom className='text-slider'>
+      <Typography variant="button" id="input-slider" gutterBottom className="text-slider">
         Saturation
       </Typography>
       <Slider
@@ -111,22 +115,34 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
         max={100}
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
-        style={getSaturationGradientBackground()}
+        sx={{
+          '& .MuiSlider-rail': {
+            height: '10px',
+            backgroundImage: getSaturationGradientBackground(),
+            opacity: '100%',
+          },
+        }}
         onChange={(e) => onHSLChange([hue, e.target.value, lightnessOffset], layerId)}
         className="hue-saturation-slider"
       />
-      <Typography variant="button" id="input-slider" gutterBottom className='text-slider'>
+      <Typography variant="button" id="input-slider" gutterBottom className="text-slider">
         Lightness
       </Typography>
       <Slider
         id="rL"
         aria-label="Lightness"
-        size='small'
+        size="small"
         min={0}
         max={100}
         color="info"
         value={sliderPoint}
-        style={getLightnessGradientBackground()}
+        sx={{
+          '& .MuiSlider-rail': {
+            height: '10px',
+            backgroundImage: getLightnessGradientBackground(),
+            opacity: '100%',
+          },
+        }}
         className="lightness-slider"
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat((sliderPoint - 50) / 10)}
