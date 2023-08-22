@@ -7,7 +7,6 @@ import ModelSelector from './components/model-selector/model-selector.js';
 import axios from 'axios';
 import { resizeImgFile } from './helpers.js';
 import Title from './components/side_nav/Title.js';
-import Grid from '@mui/material/Unstable_Grid2';
 import Stack from '@mui/material/Stack';
 
 export function Editor() {
@@ -280,15 +279,7 @@ export function Editor() {
     setLayersDef(newLayerDef);
     setLayerPoints(newLayerPoints);
   }
-
-  // render upload if no image has been loaded and the loader is not visible
-  const imgUploader =
-    sidebarVisibility || loaderVisibility ? null : (
-      <ImageUploader
-        key="upload_img"
-        onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
-      />
-    );
+  
   // render image editor only when sidebar is visible
   const imgEditor = sidebarVisibility ? (
     <ImageEditor
@@ -303,13 +294,6 @@ export function Editor() {
       onNewPoint={handleNewPoint}
     />
   ) : null;
-
-  // render model selector if no image has been loaded and the loader is not visible
-
-  const modelSelector =
-    sidebarVisibility || loaderVisibility ? null : (
-      <ModelSelector onHandleSelectModel={handleSelectmodel} baseImg={baseImg} />
-    );
 
   return (
     <React.Fragment>
@@ -344,8 +328,23 @@ export function Editor() {
           />
         </Stack>
       ) : null}
-      {modelSelector}
-      {imgUploader}
+      {sidebarVisibility || loaderVisibility ? null : (
+        <Stack
+          direction="column"
+          spacing={3}
+          sx={{
+            marginTop: '15%',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ModelSelector onHandleSelectModel={handleSelectmodel} baseImg={baseImg} />
+          <ImageUploader
+            key="upload_img"
+            onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
+          />
+        </Stack>
+      )}
       <LoadingComponent loaderVisibility={loaderVisibility} />
     </React.Fragment>
   );
