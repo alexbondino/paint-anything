@@ -4,7 +4,7 @@ import { reorder } from '../../helpers';
 import { Droppable, DragDropContext } from 'react-beautiful-dnd';
 import DraggableLayer from './DraggableLayer';
 
-import './layers.scss';
+
 
 const DraggableList = ({
   layers,

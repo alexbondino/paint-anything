@@ -310,7 +310,7 @@ export default function ImageEditor({
         >
           <Tooltip title="Undo (Ctrl + z)" placement="top">
             <Button
-              disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+              disabled={!selectedLayerDef.visibility}
               onClick={() => onPointerChange(selectedLayerDef.id, -1)}
             >
               <UndoIcon />
@@ -318,7 +318,7 @@ export default function ImageEditor({
           </Tooltip>
           <Tooltip title="Redo (Ctrl + y)" placement="top">
             <Button
-              disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+              disabled={!selectedLayerDef.visibility}
               onClick={() => onPointerChange(selectedLayerDef.id, 1)}
             >
               <RedoIcon />
