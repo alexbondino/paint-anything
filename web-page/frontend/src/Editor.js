@@ -181,6 +181,9 @@ export function Editor() {
     async (layerId, pointerChange) => {
       console.log('handlePointerChange');
       const layerPtsIdx = layerPoints.findIndex((l) => l.id === layerId);
+      if (layerPtsIdx === -1) {
+        return;
+      }
       const layerPtsData = layerPoints[layerPtsIdx];
       // computes new pointer
       const newPointer = layerPtsData.pointer + pointerChange;
