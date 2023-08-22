@@ -180,8 +180,8 @@ export function Editor() {
   const handlePointerChange = useCallback(
     async (layerId, pointerChange) => {
       console.log('handlePointerChange');
-      const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
-      const layerPtsData = layerPoints[layerIndex];
+      const layerPtsIdx = layerPoints.findIndex((l) => l.id === layerId);
+      const layerPtsData = layerPoints[layerPtsIdx];
       // computes new pointer
       const newPointer = layerPtsData.pointer + pointerChange;
       // retrieves most recent coordinates in history
@@ -192,8 +192,8 @@ export function Editor() {
       }
       // update coordinates with new slice
       const newLayerPoints = [...layerPoints];
-      newLayerPoints[layerIndex].pointer = newPointer;
-      newLayerPoints[layerIndex].coords = lastPoints.slice(0, newPointer);
+      newLayerPoints[layerPtsIdx].pointer = newPointer;
+      newLayerPoints[layerPtsIdx].coords = lastPoints.slice(0, newPointer);
       setLayerPoints(newLayerPoints);
       // triggers same operation in backend
       const layer_pointer = { layer_id: layerId, pointer: newPointer };
@@ -201,10 +201,11 @@ export function Editor() {
         .post('http://localhost:8000/api/move-pointer', layer_pointer)
         .then((response) => {
           // image is reset if points are null
-          if (newLayerPoints[layerIndex].coords.length === 0) {
+          if (newLayerPoints[layerPtsIdx].coords.length === 0) {
             const newLayersDef = [...layersDef];
-            newLayersDef[layerIndex].imgUrl = null;
-            newLayersDef[layerIndex].hsl = [];
+            const layerDefIdx = newLayersDef.findIndex((l) => l.id === layerId);
+            newLayersDef[layerDefIdx].imgUrl = null;
+            newLayersDef[layerDefIdx].hsl = [];
             setLayersDef(newLayersDef);
             return;
           }
