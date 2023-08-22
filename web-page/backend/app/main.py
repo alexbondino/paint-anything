@@ -12,8 +12,8 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from segment_anything import SamPredictor
 from PIL import Image
-from masking.predictor import create_sam, update_stored_mask
-from utils import load_image, clean_mask_files, save_output
+from masking.predictor import create_sam, update_stored_mask, load_mask_contour
+from utils import load_image, clean_mask_files
 from color_transform.transform import extract_median_hsl, hsl_cv2_2_js
 from logger import color_logger
 
@@ -31,11 +31,8 @@ img = None
 image_embedding = None
 
 # segment anything model
-logger.info("-> loading sam predictor")
-onnx_model_path = "./assets/vit_l_quantized.onnx"
-ort_session = onnxruntime.InferenceSession(onnx_model_path)
-predictor = SamPredictor(create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth"))
-logger.info("-> sam predictor successfully loaded")
+ort_session = None
+predictor = None
 
 
 class Layer(BaseModel):
@@ -168,6 +165,13 @@ def fetch_mask(layer_id: int):
         raise HTTPException(status_code=400, detail="Image not found")
 
 
+@app.get("/api/mask-contour")
+def fetch_contour(layer_id: int):
+    """returns the contour of the mask from given layer_id"""
+    contour = load_mask_contour(layer_id, temp_dir)
+    return contour
+
+
 @app.get("/api/delete-mask")
 def delete_mask(layer_id: int):
     """Deletes mask associated to specified layer id"""
@@ -244,21 +248,17 @@ def model_selected(data: ModelSelection):
     global predictor, ort_session
     match data.model:
         case "large_model":
-            onnx_model_path = "./assets/vit_l_quantized.onnx"
-            ort_session = onnxruntime.InferenceSession(onnx_model_path)
-            predictor = SamPredictor(
-                create_sam("vit_l", "./assets/sam_vit_l_0b3195.pth")
-            )
+            quantized_path = "./assets/vit_l_quantized.onnx"
+            model_type = "vit_l"
+            model_path = "./assets/sam_vit_l_0b3195.pth"
         case "huge_model":
-            onnx_model_path = "./assets/vit_h_quantized.onnx"
-            ort_session = onnxruntime.InferenceSession(onnx_model_path)
-            predictor = SamPredictor(
-                create_sam("vit_h", "./assets/sam_vit_h_4b8939.pth")
-            )
+            quantized_path = "./assets/vit_h_quantized.onnx"
+            model_type = "vit_h"
+            model_path = "./assets/sam_vit_h_4b8939.pth"
         case "base_model":
-            onnx_model_path = "./assets/vit_b_quantized.onnx"
-            ort_session = onnxruntime.InferenceSession(onnx_model_path)
-            predictor = SamPredictor(
-                create_sam("vit_b", "./assets/sam_vit_b_01ec64.pth")
-            )
+            quantized_path = "./assets/vit_b_quantized.onnx"
+            model_type = "vit_b"
+            model_path = "./assets/sam_vit_b_01ec64.pth"
+    ort_session = onnxruntime.InferenceSession(quantized_path)
+    predictor = SamPredictor(create_sam(model_type, model_path))
     return {"message": "model selected successfuly"}

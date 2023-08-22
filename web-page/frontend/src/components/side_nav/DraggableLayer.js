@@ -7,11 +7,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
-import EditIcon from '@mui/icons-material/Edit';
+import TextFieldsIcon from '@mui/icons-material/TextFields';
 import CheckIcon from '@mui/icons-material/Check';
 
 // other components
-import { ListItem, ListItemButton, ListItemIcon } from '@mui/material';
+import { ListItem, ListItemButton, ListItemIcon, Tooltip } from '@mui/material';
 import { Button, IconButton, TextField } from '@mui/material';
 import { Dialog, DialogActions, DialogContent, DialogContentText } from '@mui/material';
 
@@ -109,12 +109,14 @@ const DraggableLayer = ({
               />
             </ListItemButton>
             {openEditionMode ? (
-              <IconButton onClick={handleLayerEditClose}>
-                <CheckIcon fontSize="small" sx={{ color: 'green' }} />
-              </IconButton>
+              <Tooltip title="confirm" placement="top" arrow>
+                <IconButton onClick={handleLayerEditClose}>
+                  <CheckIcon fontSize="small" sx={{ color: 'green' }} />
+                </IconButton>
+              </Tooltip>
             ) : (
               <IconButton onClick={handleLayerEditOpen}>
-                <EditIcon fontSize="small" />
+                <TextFieldsIcon fontSize="small" />
               </IconButton>
             )}
             <IconButton

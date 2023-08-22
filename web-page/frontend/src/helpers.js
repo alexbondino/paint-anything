@@ -50,3 +50,37 @@ export const hslToRGB = (h, s, l) => {
   const f = (n) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
   return [255 * f(0), 255 * f(8), 255 * f(4)];
 };
+
+export const resizeImgFile = (file, dstSize) =>
+  new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = function (readerEvent) {
+      var img = new Image();
+      img.onload = function (imgEvent) {
+        var canvas = document.createElement('canvas');
+        var imgWidth = img.width;
+        var imgHeight = img.height;
+        if (imgWidth > imgHeight) {
+          if (imgWidth > dstSize) {
+            console.log('img is too wide, resizing it ...');
+            imgHeight *= dstSize / imgWidth;
+            imgWidth = dstSize;
+          }
+        } else {
+          if (imgHeight > dstSize) {
+            console.log('img is to tall, resizing it ...');
+            imgWidth *= dstSize / imgHeight;
+            imgHeight = dstSize;
+          }
+        }
+        canvas.width = imgWidth;
+        canvas.height = imgHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0, imgWidth, imgHeight);
+        canvas.toBlob(function (blob) {
+          resolve(new File([blob], 'image/png'));
+        });
+      };
+      img.src = readerEvent.target.result;
+    };
+    reader.readAsDataURL(file);
+  });

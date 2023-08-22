@@ -2,6 +2,7 @@ import os
 import torch
 import onnxruntime
 import numpy as np
+import cv2
 from segment_anything import sam_model_registry, SamPredictor
 from typing import List, Dict, Literal
 from PIL import Image
@@ -157,7 +158,8 @@ def gen_new_mask(
     alpha_channel[mask] = 255
     mask_img = Image.fromarray(mask_img)
     mask_img.putalpha(Image.fromarray(alpha_channel))
-    return mask_img
+    contours = compute_mask_contour(alpha_channel)
+    return mask_img, contours
 
 
 def update_stored_mask(
@@ -189,8 +191,50 @@ def update_stored_mask(
         return
     effective_points = points["points"][: points["pointer"]]
     # create new mask
-    mask_img = gen_new_mask(
+    mask_img, contours = gen_new_mask(
         img, effective_points, predictor, image_embedding, ort_session
     )
+    np.save(os.path.join(mask_dir, f"{layer_id}_cnt.npy"), contours, allow_pickle=True)
     # update mask by overwriting stored image
     mask_img.save(os.path.join(mask_dir, f"{layer_id}.png"))
+
+
+def compute_mask_contour(mask: np.ndarray) -> np.ndarray:
+    """Computes mask contours. Only enveloping contours are returned (no holes)
+
+    Args:
+        mask (np.ndarray): mask to compute contours for
+
+    Returns:
+        np.ndarray: array with contours found for mask in the form [[x1,y1,x2,y2,...],[x1,y1,x2,y2,...],...]
+    """
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    normalized_contours = []
+    for cnt in contours:
+        if len(cnt) < 3:
+            continue
+        cnt = cnt.squeeze()
+        xx, yy = cnt[:, 0], cnt[:, 1]
+        xx = xx / mask.shape[1]
+        yy = yy / mask.shape[0]
+        normalized_contours.append(np.stack([xx, yy], axis=1).flatten())
+
+    return np.array(normalized_contours, dtype=object)
+
+
+def load_mask_contour(layer_id: int, mask_dir: str) -> List[List[int]]:
+    """Loads mask contours
+
+    Args:
+        layer_id (int): load contours for layer with this id
+        mask_dir (str): directory where masks are stored
+
+    Returns:
+        List[List[int]]: collection of contour points, where these are in
+    the form [x1,y1,x2,y2,...]
+    """
+    pts: np.ndarray = np.load(
+        os.path.join(mask_dir, f"{layer_id}_cnt.npy"), allow_pickle=True
+    )
+    pts = [cnt.tolist() for cnt in pts]
+    return pts

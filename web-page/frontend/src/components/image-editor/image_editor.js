@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './image-editor.scss';
-import { Tooltip, ButtonGroup, Button, Stack, Box } from '@mui/material';
-import axios from 'axios';
+import { Tooltip, ButtonGroup, Button, Box, Grid } from '@mui/material';
 import PreviewDialog from './preview';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
@@ -20,7 +19,17 @@ function getBaseImageSize(type) {
   return null;
 }
 
-function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL, drawIndex }) {
+function Mask({
+  layerId,
+  imgUrl,
+  isSelected,
+  points,
+  onPointerChange,
+  currentHSL,
+  contour,
+  drawIndex,
+}) {
+  //console.log(`layerId: ${layerId}, isSelected: ${isSelected}, points: ${points}`);
   const [img, setImg] = useState(null);
   const [imgComplete, setImgComplete] = useState(false);
 
@@ -68,90 +77,118 @@ function Mask({ layerId, imgUrl, isSelected, points, onPointerChange, currentHSL
       })
     : null;
 
-  const draw = (context, canvas) => {
-    if (img === null || !imgComplete) {
-      return;
-    }
-    requestAnimationFrame(function () {
-      const c = canvas.current;
-      const l = getBaseImageSize();
-      c.width = l[0];
-      c.height = l[1];
-      if (points.length === 0) {
-        context.clearRect(0, 0, c.width, c.height);
+  const draw = useCallback(
+    (context, canvas) => {
+      if (img === null || !imgComplete) {
         return;
       }
-      var hue = currentHSL[0];
-      var sat = currentHSL[1];
-      var lightnessOffset = currentHSL[2];
-
-      context.globalCompositeOperation = 'source-over';
-      context.drawImage(img, 0, 0, c.width, c.height);
-
-      var imgData = context.getImageData(0, 0, c.width, c.height);
-      var data = imgData.data;
-      for (var i = 0; i < data.length; i += 4) {
-        // Get the each channel color value
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const a = data[i + 3];
-        // skip transparent pixels
-        if (a < 230) {
-          continue;
+      requestAnimationFrame(function () {
+        const c = canvas.current;
+        const l = getBaseImageSize();
+        c.width = l[0];
+        c.height = l[1];
+        if (points.length === 0) {
+          context.clearRect(0, 0, c.width, c.height);
+          return;
         }
-        const imgLightness = rgbToHSL(r, g, b)[2];
-        const newRgb = hslToRGB(hue, sat, imgLightness + lightnessOffset);
-        data[i] = newRgb[0];
-        data[i + 1] = newRgb[1];
-        data[i + 2] = newRgb[2];
-      }
-      context.putImageData(imgData, 0, 0);
-    });
-  };
+
+        var hue = currentHSL[0];
+        var sat = currentHSL[1];
+        var lightnessOffset = currentHSL[2];
+
+        context.globalCompositeOperation = 'source-over';
+        context.drawImage(img, 0, 0, c.width, c.height);
+
+        var imgData = context.getImageData(0, 0, c.width, c.height);
+        var data = imgData.data;
+        for (var i = 0; i < data.length; i += 4) {
+          // Get the each channel color value
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const a = data[i + 3];
+          // skip transparent pixels
+          if (a < 230) {
+            continue;
+          }
+          const imgLightness = rgbToHSL(r, g, b)[2];
+          const newRgb = hslToRGB(hue, sat, imgLightness + lightnessOffset);
+          data[i] = newRgb[0];
+          data[i + 1] = newRgb[1];
+          data[i + 2] = newRgb[2];
+        }
+        context.putImageData(imgData, 0, 0);
+        // draw outline if image is selected
+        if (isSelected) {
+          for (var cntId = 0; cntId < contour.length; cntId++) {
+            for (var j = 0; j < contour[cntId].length - 2; j = j + 2) {
+              const x1 = contour[cntId][j] * c.width;
+              const y1 = contour[cntId][j + 1] * c.height;
+              const x2 = contour[cntId][j + 2] * c.width;
+              const y2 = contour[cntId][j + 2 + 1] * c.height;
+              context.beginPath();
+              context.moveTo(x1, y1);
+              context.lineCap = 'round';
+              context.lineWidth = 2;
+              context.strokeStyle = '#FAE869';
+              context.lineTo(x2, y2);
+              context.stroke();
+            }
+          }
+        }
+      });
+    },
+    [img, imgComplete, currentHSL, points.length, contour, isSelected]
+  );
 
   return (
     <React.Fragment>
       <Canvas
+        className="mask-img"
         key={`mask-${layerId}-canvas`}
         layerId={layerId}
         draw={draw}
-        zIndex={100 + drawIndex}
+        zIndex={1000 - drawIndex}
       />
       {pointBoxes}
     </React.Fragment>
   );
 }
 
-const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange, onNewPoint }) => {
+const extractLayerCoords = (layerId, layerPoints) => {
+  let coords = [];
+  if (layerPoints.length > 0) {
+    const pointsDef = layerPoints.find((l) => l.id === layerId);
+    coords = pointsDef ? pointsDef.coords.slice(0, pointsDef.pointer) : [];
+  }
+  return coords;
+};
+
+const MaskImages = ({ layersDef, selectedLayer, layerPoints, onPointerChange }) => {
+  const visibleLayers = layersDef.filter((l) => l.visibility);
   return (
     <React.Fragment>
-      {layersDef
-        .filter((l) => l.visibility)
-        .map((layer, index) => {
-          try {
-            let coords = [];
-            if (layerPoints.length > 0) {
-              const pointsDef = layerPoints.find((l) => l.id === layer.id);
-              coords = pointsDef ? pointsDef.coords.slice(0, pointsDef.pointer) : [];
-            }
-            return (
-              <Mask
-                key={`mask_${layer.id}`}
-                layerId={layer.id}
-                imgUrl={layer.imgUrl}
-                isSelected={layer.id === selectedLayer}
-                points={coords}
-                onPointerChange={onPointerChange}
-                currentHSL={layer.hsl}
-                drawIndex={index}
-              />
-            );
-          } catch (error) {
-            console.log(`Error rendering mask ${layer.id}`, error);
-            return null;
-          }
-        })}
+      {visibleLayers.map((layer, index) => {
+        try {
+          return (
+            <Mask
+              className="mask-img"
+              key={`mask_${layer.id}`}
+              layerId={layer.id}
+              imgUrl={layer.imgUrl}
+              isSelected={layer.id === selectedLayer}
+              points={extractLayerCoords(layer.id, layerPoints)}
+              onPointerChange={onPointerChange}
+              currentHSL={layer.hsl}
+              contour={layer.imgContour}
+              drawIndex={index}
+            />
+          );
+        } catch (error) {
+          console.log(`Error rendering mask ${layer.id}`, error);
+          return null;
+        }
+      })}
     </React.Fragment>
   );
 };
@@ -160,16 +197,33 @@ export default function ImageEditor({
   baseImg,
   layersDef,
   selectedLayer,
+  onSelectLayer,
   layerPoints,
   onPointerChange,
   onNewPoint,
   imageVisibility,
 }) {
   const [naturalImgSize, setNaturalImgSize] = useState([]);
+  const [lastSelectedLayer, setLastSelectedLayer] = useState(-1);
+  const [downloadState, setDownloadState] = useState(null);
+
+  /* eslint-disable */
+  useEffect(() => {
+    if (downloadState === 'prepare') {
+      // triggers download after canvas is rerendered
+      setDownloadState('download');
+    } else if (downloadState === 'download') {
+      // download output and reset other states
+      downloadOutput();
+      setDownloadState(null);
+      setLastSelectedLayer(-1);
+      onSelectLayer(lastSelectedLayer);
+    }
+  }, [downloadState]);
+  /* eslint-enable */
 
   const handleOnBaseImageLoad = () => {
-    const newImageSize = getBaseImageSize('natural');
-    setNaturalImgSize(newImageSize);
+    setNaturalImgSize(getBaseImageSize('natural'));
   };
 
   async function handlePointAndClick(event) {
@@ -202,7 +256,7 @@ export default function ImageEditor({
     hsl: [],
   };
 
-  async function handleDownloadButtonClick() {
+  async function downloadOutput() {
     const imgElement = document.getElementById('baseImg');
     const width = imgElement.naturalWidth;
     const height = imgElement.naturalHeight;
@@ -214,7 +268,7 @@ export default function ImageEditor({
     // first draw base image
     ctx.drawImage(imgElement, 0, 0, width, height);
     // next draw layers, in same order as shown in editor
-    const drawableLayers = [...layersDef].filter((l) => l.visibility).sort((l) => -l.id);
+    const drawableLayers = layersDef.filter((l) => l.visibility).reverse();
     for (const l of drawableLayers) {
       const maskImg = document.getElementById(`canvas-${l.id}`);
       ctx.drawImage(maskImg, 0, 0, width, height);
@@ -226,75 +280,97 @@ export default function ImageEditor({
     link.click();
   }
 
+  function handleDownloadButtonClick() {
+    // deselect layer
+    setLastSelectedLayer(selectedLayer);
+    onSelectLayer(-1);
+    // initiate download
+    setDownloadState('prepare');
+  }
+
+  const aspectRatio = naturalImgSize ? `${naturalImgSize[0] / naturalImgSize[1]}` : '1/1';
+
   return (
-    <Stack
-      className="editor-stack"
+    <Grid
+      className="editor-grid"
       sx={{
-        aspectRatio: naturalImgSize ? `${naturalImgSize[0]} / ${naturalImgSize[1]}` : '1/1',
+        aspectRatio: aspectRatio,
+        width: 'auto',
+        height: 'auto',
         visibility: naturalImgSize && imageVisibility === true ? 'visible' : 'hidden',
       }}
+      container
       spacing={1}
     >
-      <ButtonGroup
-        className="history-box"
-        variant="contained"
-        aria-label="outlined primary button group"
-        sx={{ marginBottom: -5.5 }}
-      >
-        <PreviewDialog
-          layersDef={layersDef}
-          baseImg={baseImg}
-          selectedLayer={selectedLayer}
-          selectedLayerVisibility={selectedLayerDef}
-        />
-        <Tooltip title="Download" placement="top">
-          <Button className="download-button" onClick={handleDownloadButtonClick}>
-            <DownloadIcon style={{ width: '43px' }} />
-          </Button>
-        </Tooltip>
-      </ButtonGroup>
-      <ButtonGroup
-        className="history-box"
-        variant="contained"
-        aria-label="outlined primary button group"
-      >
-        <Tooltip title="Undo (Ctrl + z)" placement="top">
-          <Button
-            className="history-button"
-            disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
-            onClick={() => onPointerChange(selectedLayerDef.id, -1)}
-          >
-            <UndoIcon />
-          </Button>
-        </Tooltip>
-        <Tooltip title="Redo (Ctrl + y)" placement="top">
-          <Button
-            className="history-button"
-            disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
-            onClick={() => onPointerChange(selectedLayerDef.id, 1)}
-          >
-            <RedoIcon />
-          </Button>
-        </Tooltip>
-      </ButtonGroup>
-      <Box className="image-box" onClick={handlePointAndClick} onContextMenu={handlePointAndClick}>
-        <img
-          id="baseImg"
-          src={baseImg}
-          className="image"
-          alt="base_image"
-          onLoad={handleOnBaseImageLoad}
-        />
-        {naturalImgSize.length === 2 && layerPoints.length > 0 ? (
-          <MaskImages
+      <Grid item xs={6} className="history-buttons">
+        <ButtonGroup
+          className="editor-button-group"
+          variant="contained"
+          aria-label="outlined primary button group"
+        >
+          <Tooltip title="Undo (Ctrl + z)" placement="top">
+            <Button
+              disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+              onClick={() => onPointerChange(selectedLayerDef.id, -1)}
+            >
+              <UndoIcon />
+            </Button>
+          </Tooltip>
+          <Tooltip title="Redo (Ctrl + y)" placement="top">
+            <Button
+              disabled={!selectedLayerDef.visibility || selectedLayerDef.hsl.length === 0}
+              onClick={() => onPointerChange(selectedLayerDef.id, 1)}
+            >
+              <RedoIcon />
+            </Button>
+          </Tooltip>
+        </ButtonGroup>
+      </Grid>
+      <Grid item xs={6} className="download-preview-buttons">
+        <ButtonGroup
+          className="editor-button-group"
+          variant="contained"
+          aria-label="outlined primary button group"
+        >
+          <PreviewDialog
             layersDef={layersDef}
+            baseImg={baseImg}
+            onSelectLayer={onSelectLayer}
             selectedLayer={selectedLayer}
-            layerPoints={layerPoints}
-            onPointerChange={onPointerChange}
-            onNewPoint={onNewPoint}
           />
-        ) : null}
-      </Box>
-    </Stack>
+          <Tooltip title="Download" placement="top">
+            <Button className="download-button" onClick={handleDownloadButtonClick}>
+              <DownloadIcon style={{ width: '43px' }} />
+            </Button>
+          </Tooltip>
+        </ButtonGroup>
+      </Grid>
+      <Grid className="image-grid" item xs={12}>
+        <Box
+          className="image-box"
+          sx={{
+            aspectRatio: aspectRatio,
+          }}
+          onClick={handlePointAndClick}
+          onContextMenu={handlePointAndClick}
+        >
+          <img
+            id="baseImg"
+            src={baseImg}
+            className="image"
+            alt="base_image"
+            onLoad={handleOnBaseImageLoad}
+          />
+          {naturalImgSize.length === 2 && layerPoints.length > 0 ? (
+            <MaskImages
+              layersDef={layersDef}
+              selectedLayer={selectedLayer}
+              layerPoints={layerPoints}
+              onPointerChange={onPointerChange}
+            />
+          ) : null}
+        </Box>
+      </Grid>
+    </Grid>
   );
 }

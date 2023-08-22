@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
  * value will have draw priority in overlaps.
  * @returns
  */
-const Canvas = ({ layerId, draw, zIndex }) => {
+const Canvas = React.memo(({ layerId, draw, zIndex }) => {
   const canvas = React.useRef();
   React.useEffect(() => {
     const context = canvas.current.getContext('2d', { willReadFrequently: true });
@@ -24,7 +24,7 @@ const Canvas = ({ layerId, draw, zIndex }) => {
       style={{ zIndex: zIndex }}
     />
   );
-};
+});
 
 Canvas.propTypes = {
   draw: PropTypes.func.isRequired,

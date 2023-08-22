@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ImageUploader } from './components/upload_image/upload_image.js';
 import { ImageEditorDrawer } from './components/side_nav/nav_bar.js';
 import ImageEditor from './components/image-editor/image_editor.js';
 import LoadingComponent from './components/loading/loading.js';
 import ModelSelector from './components/model-selector/model-selector.js';
 import axios from 'axios';
+import { resizeImgFile } from './helpers.js';
+import Title from './components/side_nav/Title.js';
+import Grid from '@mui/material/Unstable_Grid2';
+import Stack from '@mui/material/Stack';
 
 export function Editor() {
   // base image to be edited
@@ -28,6 +32,8 @@ export function Editor() {
   const [currentImage, setCurrentImage] = useState(null);
   // previous selected model
   const [previousModel, setPreviousModel] = useState('large_model');
+  // drawer open
+  const [drawerOpen, setDrawerOpen] = useState(true);
 
   function handleLayerVisibilityClick(layerId) {
     const newLayerDef = [...layersDef];
@@ -59,12 +65,21 @@ export function Editor() {
     setModelConfirmation(false);
   };
 
+  const handleDrawerOpen = () => {
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
+
   async function handleImageUpload(imgFile) {
     // initial layer shown after image is uploaded
     const initialLayer = {
       id: 0,
       visibility: true,
       imgUrl: null,
+      imgContour: null,
       hsl: [],
       meanLightness: 0,
       hslInput: false,
@@ -76,11 +91,13 @@ export function Editor() {
     setLayersDef(newLayersDef);
     setLayerPoints([]);
     setSelectedLayer(0);
-    const imgObjectURL = URL.createObjectURL(imgFile);
-    setBaseImg(imgObjectURL);
+
+    const resizedImgFile = await resizeImgFile(imgFile, 1024);
+    const imgUrl = URL.createObjectURL(resizedImgFile);
+    setBaseImg(imgUrl);
     // send new image to backend
     const formData = new FormData();
-    formData.append('image', imgFile);
+    formData.append('image', resizedImgFile);
     try {
       await axios.post('http://localhost:8000/api/model-selected', { model: modelSelected });
       console.log('Modelo enviado correctamente.');
@@ -91,12 +108,12 @@ export function Editor() {
     try {
       await axios.post('http://localhost:8000/api/image', formData);
       console.log('Imagen enviada correctamente.');
-      setCurrentImage(imgFile);
+      setCurrentImage(resizedImgFile);
+      setLoaderVisibility(false);
+      setSidebarVisibility(true);
     } catch (error) {
       console.error('Error al enviar la imagen:', error);
     }
-    setLoaderVisibility(false);
-    setSidebarVisibility(true);
   }
 
   function handleHSLChange(newHSL, layerId) {
@@ -134,16 +151,14 @@ export function Editor() {
     const newLayersDef = [...layersDef];
     // fetch mask for this layer from backend
     try {
-      const imgResponse = await fetch(
-        'http://localhost:8000/api/mask-img?' +
-          new URLSearchParams({
-            layer_id: layerId,
-          })
-      );
-      // parse image and construct url
-      const url = URL.createObjectURL(await imgResponse.blob());
+      const payload = new URLSearchParams({
+        layer_id: layerId,
+      });
+      const imgResponse = await fetch('http://localhost:8000/api/mask-img?' + payload);
+      const maskContour = await fetch('http://localhost:8000/api/mask-contour?' + payload);
       // update url in layer definition
-      newLayersDef[layerPos].imgUrl = url;
+      newLayersDef[layerPos].imgUrl = URL.createObjectURL(await imgResponse.blob());
+      newLayersDef[layerPos].imgContour = await maskContour.json();
     } catch (error) {
       console.error('failed trying to update mask data');
       return;
@@ -162,40 +177,43 @@ export function Editor() {
    * @param {int} layerId layer affected
    * @param {int} pointerChange direction of pointer change. -1 for undo and +1 for redo
    */
-  async function handlePointerChange(layerId, pointerChange) {
-    console.log('handlePointerChange');
-    const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
-    const layerPtsData = layerPoints[layerIndex];
-    // computes new pointer
-    const newPointer = layerPtsData.pointer + pointerChange;
-    // retrieves most recent coordinates in history
-    const lastPoints = layerPtsData.history[layerPtsData.history.length - 1];
-    // handle pointer overflow
-    if (newPointer < 0 || newPointer > lastPoints.length) {
-      return;
-    }
-    // update coordinates with new slice
-    const newLayerPoints = [...layerPoints];
-    newLayerPoints[layerIndex].pointer = newPointer;
-    newLayerPoints[layerIndex].coords = lastPoints.slice(0, newPointer);
-    setLayerPoints(newLayerPoints);
-    // triggers same operation in backend
-    const layer_pointer = { layer_id: layerId, pointer: newPointer };
-    axios
-      .post('http://localhost:8000/api/move-pointer', layer_pointer)
-      .then((response) => {
-        // image is reset if points are null
-        if (newLayerPoints[layerIndex].coords.length === 0) {
-          const newLayersDef = [...layersDef];
-          newLayersDef[layerIndex].imgUrl = null;
-          newLayersDef[layerIndex].hsl = [];
-          setLayersDef(newLayersDef);
-          return;
-        }
-        handleMaskUpdate(layerId);
-      })
-      .catch((error) => console.error('Error moving layer pointer:', error));
-  }
+  const handlePointerChange = useCallback(
+    async (layerId, pointerChange) => {
+      console.log('handlePointerChange');
+      const layerIndex = layerPoints.findIndex((l) => l.id === layerId);
+      const layerPtsData = layerPoints[layerIndex];
+      // computes new pointer
+      const newPointer = layerPtsData.pointer + pointerChange;
+      // retrieves most recent coordinates in history
+      const lastPoints = layerPtsData.history[layerPtsData.history.length - 1];
+      // handle pointer overflow
+      if (newPointer < 0 || newPointer > lastPoints.length) {
+        return;
+      }
+      // update coordinates with new slice
+      const newLayerPoints = [...layerPoints];
+      newLayerPoints[layerIndex].pointer = newPointer;
+      newLayerPoints[layerIndex].coords = lastPoints.slice(0, newPointer);
+      setLayerPoints(newLayerPoints);
+      // triggers same operation in backend
+      const layer_pointer = { layer_id: layerId, pointer: newPointer };
+      axios
+        .post('http://localhost:8000/api/move-pointer', layer_pointer)
+        .then((response) => {
+          // image is reset if points are null
+          if (newLayerPoints[layerIndex].coords.length === 0) {
+            const newLayersDef = [...layersDef];
+            newLayersDef[layerIndex].imgUrl = null;
+            newLayersDef[layerIndex].hsl = [];
+            setLayersDef(newLayersDef);
+            return;
+          }
+          handleMaskUpdate(layerId);
+        })
+        .catch((error) => console.error('Error moving layer pointer:', error));
+    },
+    [layerPoints, layersDef, handleMaskUpdate]
+  );
 
   /**
    * Adds new point to layer
@@ -278,6 +296,7 @@ export function Editor() {
       baseImg={baseImg}
       layersDef={layersDef}
       selectedLayer={selectedLayer}
+      onSelectLayer={handleSelectLayer}
       imageVisibility={sidebarVisibility}
       layerPoints={layerPoints}
       onPointerChange={handlePointerChange}
@@ -293,30 +312,41 @@ export function Editor() {
     );
 
   return (
-    <div style={{ height: '78vh' }}>
-      <ImageEditorDrawer
-        key="side_nav"
-        baseImg={baseImg}
-        sidebarVisibility={sidebarVisibility}
-        layersDef={layersDef}
-        selectedLayer={selectedLayer}
-        onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
-        onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
-        onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
-        onSelectLayer={(layerId) => handleSelectLayer(layerId)}
-        onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
-        onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
-        onHandleSelectModel={handleSelectmodel}
-        modelSelected={modelSelected}
-        openModelConfirmation={modelConfirmation}
-        onCancelModelConfirmation={handleCancelModelConfirmation}
-        onConfirmModelConfirmation={handleConfirmModelConfirmation}
-        currentImage={currentImage}
-      />
+    <React.Fragment>
+      <Title sidebarVisibility={sidebarVisibility} onDrawerOpen={handleDrawerOpen} />
+      {sidebarVisibility ? (
+        <Stack
+          direction="row"
+          spacing={1}
+          justifyContent="center"
+          sx={{ height: '90vh', flexGrow: 1 }}
+        >
+          {imgEditor}
+          <ImageEditorDrawer
+            key="side_nav"
+            sidebarVisibility={sidebarVisibility}
+            layersDef={layersDef}
+            selectedLayer={selectedLayer}
+            onNewLayerDef={(newLayersDef) => setLayersDef(newLayersDef)}
+            onImageUpload={async (imgFile) => await handleImageUpload(imgFile)}
+            onHSLChange={(newHSL, layerId) => handleHSLChange(newHSL, layerId)}
+            onSelectLayer={(layerId) => handleSelectLayer(layerId)}
+            onHandleLayerVisibilityClick={(layerId) => handleLayerVisibilityClick(layerId)}
+            onDeleteLayer={(layerId) => handleLayerDelete(layerId)}
+            onHandleSelectModel={handleSelectmodel}
+            modelSelected={modelSelected}
+            openModelConfirmation={modelConfirmation}
+            onCancelModelConfirmation={handleCancelModelConfirmation}
+            onConfirmModelConfirmation={handleConfirmModelConfirmation}
+            drawerOpen={drawerOpen}
+            onDrawerClose={handleDrawerClose}
+            currentImage={currentImage}
+          />
+        </Stack>
+      ) : null}
       {modelSelector}
-      {imgEditor}
       {imgUploader}
       <LoadingComponent loaderVisibility={loaderVisibility} />
-    </div>
+    </React.Fragment>
   );
 }
