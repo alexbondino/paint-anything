@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Slider, Typography } from '@mui/material';
-import './gradients.scss';
 
 function valueLabelFormat(value) {
   return `${value} ${'%'}`;
@@ -16,10 +15,10 @@ function valueLabelFormat(value) {
  * @param {function} onHSLChange
  * @returns HSL slider for modifying hsl color of layer
  */
-const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
+const HSLSlider = ({ layerId, hue, saturation, existingOffset, onHSLChange }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [sliderPoint, setSliderPoint] = useState(50);
-  const [lightnessOffset, setLightnessOffset] = useState(0);
+  const [lightnessOffset, setLightnessOffset] = useState(existingOffset);
 
   const handleSliderDragStart = () => {
     setIsDragging(true);
@@ -54,35 +53,9 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
     setSliderPoint(newValue);
   };
 
-  const getHueGradientBackground = () => {
-    const hueGradientColor = `linear-gradient(to right, 
-      hsl(0, ${saturation}%, 50%), 
-      hsl(60, ${saturation}%, 50%), 
-      hsl(120, ${saturation}%, 50%), 
-      hsl(180, ${saturation}%, 50%), 
-      hsl(240, ${saturation}%, 50%), 
-      hsl(300, ${saturation}%, 50%), 
-      hsl(360, ${saturation}%, 50%))`;
-    return hueGradientColor;
-  };
-
-  const getSaturationGradientBackground = () => {
-    const saturationGradientColor = `linear-gradient(to right, 
-      hsl(${hue}, 0%, 50%), 
-      hsl(${hue}, 100%, 50%))`;
-    return saturationGradientColor;
-  };
-
-  const getLightnessGradientBackground = () => {
-    const lightnessGradientColor = `linear-gradient(to right, 
-      hsl(${hue}, ${saturation}%, 0%), 
-      hsl(${hue}, ${saturation}%, 100%))`;
-    return lightnessGradientColor;
-  };
-
   return (
     <Box className="sliders-box" sx={{ draggable: false }}>
-      <Typography variant="button" id="input-slider" gutterBottom className="text-slider">
+      <Typography variant="button" id="input-slider" gutterBottom>
         Hue
       </Typography>
       <Slider
@@ -93,17 +66,9 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
         min={0}
         max={360}
         valueLabelDisplay="auto"
-        sx={{
-          '& .MuiSlider-rail': {
-            height: '10px',
-            backgroundImage: getHueGradientBackground(),
-            opacity: '100%',
-          },
-        }}
         onChange={(e) => onHSLChange([e.target.value, saturation, lightnessOffset], layerId)}
-        className="hue-saturation-slider"
-      />
-      <Typography variant="button" id="input-slider" gutterBottom className="text-slider">
+      ></Slider>
+      <Typography variant="button" id="input-slider" gutterBottom>
         Saturation
       </Typography>
       <Slider
@@ -115,17 +80,9 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
         max={100}
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat}
-        sx={{
-          '& .MuiSlider-rail': {
-            height: '10px',
-            backgroundImage: getSaturationGradientBackground(),
-            opacity: '100%',
-          },
-        }}
         onChange={(e) => onHSLChange([hue, e.target.value, lightnessOffset], layerId)}
-        className="hue-saturation-slider"
-      />
-      <Typography variant="button" id="input-slider" gutterBottom className="text-slider">
+      ></Slider>
+      <Typography variant="button" id="input-slider" gutterBottom>
         Lightness
       </Typography>
       <Slider
@@ -136,14 +93,6 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
         max={100}
         color="info"
         value={sliderPoint}
-        sx={{
-          '& .MuiSlider-rail': {
-            height: '10px',
-            backgroundImage: getLightnessGradientBackground(),
-            opacity: '100%',
-          },
-        }}
-        className="lightness-slider"
         valueLabelDisplay="auto"
         valueLabelFormat={valueLabelFormat((sliderPoint - 50) / 10)}
         onMouseDown={() => handleOnHSLChange(sliderPoint)}
@@ -155,7 +104,7 @@ const HSLSlider = ({ layerId, hue, saturation, onHSLChange }) => {
         onMouseLeave={() => {
           handleSliderDragEnd(50);
         }}
-      />
+      ></Slider>
     </Box>
   );
 };
