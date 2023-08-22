@@ -7,7 +7,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import SquareRoundedIcon from '@mui/icons-material/SquareRounded';
-import TextFieldsIcon from '@mui/icons-material/TextFields';
+import TitleIcon from '@mui/icons-material/Title';
 import CheckIcon from '@mui/icons-material/Check';
 
 // other components
@@ -116,7 +116,7 @@ const DraggableLayer = ({
               </Tooltip>
             ) : (
               <IconButton onClick={handleLayerEditOpen}>
-                <TextFieldsIcon fontSize="small" />
+                <TitleIcon fontSize="small" />
               </IconButton>
             )}
             <IconButton
