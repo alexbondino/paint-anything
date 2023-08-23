@@ -25,6 +25,14 @@ Some other examples of what can be achieved in under 5 minutes per image are sho
 
 __This project is an open-source work in progress. Feel free to raise any issues!__
 
+- [Paint Anything](#paint-anything)
+  - [🔧 Setup](#-setup)
+    - [GPU Support](#gpu-support)
+  - [🏗️ Building the App](#️-building-the-app)
+  - [🖌️ Running the app](#️-running-the-app)
+  - [License](#license)
+
+
 ## 🔧 Setup
 
 This project requires `python >= 3.8` and `Node.js 18` to work properly. We recommend using **python 3.10** and **Node.js 18.16**. If you don't have python in your computer, you can install it from [here](https://www.python.org/downloads/release/python-3100/). Likewise, Node.js can be installed by following the instructions [here](https://nodejs.org/).
@@ -47,6 +55,12 @@ Download the SAM files (including ONNX decoders) from this [google drive](https:
    ├── vit_l_quantized.onnx # large model ONNX mask decoder
    └── vit_h_quantized.onnx # huge model ONNX mask decoder
 ```
+
+### GPU Support
+
+The initial image processing can be greatly accelerated with a GPU with enough vram. We have set a minimum requirement of **2Gb**, **6Gb** and **11Gb** for the base, large and huge model, respectively. If your computer has a GPU and you try to run a model that exceeds the available vram, it will instead be processed in the CPU.
+
+We provide GPU support for NVIDIA graphics cards that allow `cuda >= 11.7`, but you can change the [requirements](web-page/backend/app/requirements.txt) with a version of torch and cuda of your choice. As recommended in the [SAM repo](https://github.com/facebookresearch/segment-anything) instructions, be sure to use `pytorch>=1.7` and `torchvision>=0.8`.
 
 ## 🏗️ Building the App
 
