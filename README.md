@@ -3,7 +3,13 @@
 ![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
 ![Node JS](https://img.shields.io/badge/nodejs-18.16-green.svg)
 
-Project for easily visualizing color changes to objects inside images, house paintings, you name it!
+Open source project to easily change the color of anything in 3 steps:
+* Upload any image.
+* Left click to consider this part of the image in it’s segmentation.
+* Right click to not consider this part of the image in it’s segmentation.
+* Change hue, saturation and lightness as you wish.
+
+__This is a free to use project with no profit motive.__
 
 ## Setup
 
@@ -27,3 +33,28 @@ Create a folder under `web-page/backend/app` named "assets", download the SAM fi
    ├── vit_l_quantized.onnx # large model ONNX mask decoder
    └── vit_h_quantized.onnx # huge model ONNX mask decoder
 ```
+
+## Building the App
+
+__Step 1:__ Inside your repo, head to `web-page/frontend` and prepare JS packages using `npm`:
+
+```bash
+cd web-page/fronted
+npm install
+```
+
+__Step 2:__ Create the production build
+
+```bash
+npm run build
+```
+
+## Running the app
+
+Now the fun starts! Run the app with the following command:
+
+```bash
+npm run serve
+```
+
+The previous command will simultaneously spin-up the FastAPI backend at port 8000 and launch the React web-app at port 3000. A new browser tab should be automatically opened with the application, but you can also access it by heading to [localhost:3000](localhost:3000).
