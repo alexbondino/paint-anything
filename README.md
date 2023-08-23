@@ -1,20 +1,22 @@
-# Imagine-Houses
-
+# Paint Anything
 
 ![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
 ![Node JS](https://img.shields.io/badge/nodejs-18.16-green.svg)
 
-Open source project to easily change the color of anything in 3 steps:
-* Upload any image.
-* Left click to consider this part of the image in it’s segmentation.
-* Right click to not consider this part of the image in it’s segmentation.
-* Change hue, saturation and lightness as you wish.
+Change the color of anything with easy object selection using the novel [Segment Anything Model](https://github.com/facebookresearch/segment-anything) (SAM) through a web interface built with [React](https://react.dev/) and a [FastAPI](https://fastapi.tiangolo.com/) backend.
 
-__This is a free to use project with no profit motive.__
+Follow these steps:
+
+- 🆙 Upload any image.
+- 🟢 Left click any part of the image to include it in your colouring.
+- 🔴 Right click any part of the image to ignore it.
+- 🎚️Change hue, saturation and lightness as you wish.
+
+__This project is open source.__
 
 ## 🔧 Setup
 
-This project requires `python >= 3.8` and `Node.js 18` to work properly. We recommend using **python 3.10** and **Node.js 18.16**. If you don't have python in your computer, please install it from [here](https://www.python.org/downloads/release/python-3100/). Likewise, Node.js can be installed by following the instructions [here](https://nodejs.org/).
+This project requires `python >= 3.8` and `Node.js 18` to work properly. We recommend using **python 3.10** and **Node.js 18.16**. If you don't have python in your computer, you can install it from [here](https://www.python.org/downloads/release/python-3100/). Likewise, Node.js can be installed by following the instructions [here](https://nodejs.org/).
 
 Clone this repo and open it
 
@@ -23,7 +25,7 @@ git clone https://github.com/alexbondino/imagine-houses.git
 cd imagine-houses
 ```
 
-Create a folder under `web-page/backend/app` named "assets", download the SAM files (including ONNX decoders) from this [google drive](https://drive.google.com/drive/folders/1JVL1oGfZWsSuO4RpmSOw2UKkNObsnVtn?usp=drive_link) and unzip them into this folder. Your assets folder should now look like this:
+Download the SAM files (including ONNX decoders) from this [google drive](https://drive.google.com/drive/folders/1JVL1oGfZWsSuO4RpmSOw2UKkNObsnVtn?usp=drive_link) and unzip them into`web-page/backend/app/assets`. Your assets folder should now look like this:
 
 ```python
 ── assets
@@ -37,19 +39,19 @@ Create a folder under `web-page/backend/app` named "assets", download the SAM fi
 
 ## 🏗️ Building the App
 
-__Step 1:__ Inside your repo, head to `web-page/frontend` and prepare JS packages using `npm` (installed along with NodeJS):
+__Step 1:__ Inside your repo, head to `web-page/frontend` and install JS packages using `npm` (packaged along with NodeJS):
 
 ```bash
-cd web-page/fronted
+cd web-page/frontend
 npm install
 ```
 
-__Step 2:__ Create the production build
+__Step 2:__ Create a production build
 
 ```bash
 npm run build
 ```
-The previous commands should install all necessary packages to run the project.
+The previous commands should install and setup all necessary packages to run the project.
 
 ## 🖌️ Running the app
 
