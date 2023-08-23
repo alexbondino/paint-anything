@@ -12,6 +12,15 @@ Follow these steps:
 - 🔴 Right click any part of the image to ignore it.
 - 🎚️Change hue, saturation and lightness as you wish.
 
+Some examples of what can be achieved are shown below
+
+Original             |  Color Changed
+:-------------------------:|:-------------------------:
+| ![](figures/bolincheybochinche.jpg)  |  ![](figures/bolincheybochincheremake.png) |
+| ![](figures/house.jpg) | ![](figures/houseremastered.png) |
+| ![](figures/titanic.png) | ![](figures/titanic-redo.png)
+
+
 __This project is an open-source work in progress. Feel free to raise any issues!__
 
 ## 🔧 Setup
