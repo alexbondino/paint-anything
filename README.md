@@ -86,7 +86,7 @@ Now the fun starts! Run the app with the following command:
 npm run serve
 ```
 
-The previous command will simultaneously spin-up the FastAPI backend at port 8000 and launch the React web-app at port 3000. A new browser window should be automatically opened with the application, but you can also access it by heading to [localhost:3000](localhost:3000)
+The previous command will simultaneously spin-up the FastAPI backend at port 8000 and launch the React web-app at port 3000. A new browser window should be automatically opened with the application, but you can also access it by heading to [localhost:3000](http://localhost:3000)
 
 ## License
 
