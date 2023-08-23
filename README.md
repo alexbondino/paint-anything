@@ -1,5 +1,6 @@
 # Imagine-Houses
 
+
 ![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
 ![Node JS](https://img.shields.io/badge/nodejs-18.16-green.svg)
 
@@ -11,7 +12,7 @@ Open source project to easily change the color of anything in 3 steps:
 
 __This is a free to use project with no profit motive.__
 
-## :wrench: Setup
+## 🔧 Setup
 
 This project requires `python >= 3.8` and `Node.js 18` to work properly. We recommend using **python 3.10** and **Node.js 18.16**. If you don't have python in your computer, please install it from [here](https://www.python.org/downloads/release/python-3100/). Likewise, Node.js can be installed by following the instructions [here](https://nodejs.org/).
 
@@ -34,7 +35,7 @@ Create a folder under `web-page/backend/app` named "assets", download the SAM fi
    └── vit_h_quantized.onnx # huge model ONNX mask decoder
 ```
 
-## Building the App
+## 🏗️ Building the App
 
 __Step 1:__ Inside your repo, head to `web-page/frontend` and prepare JS packages using `npm` (installed along with NodeJS):
 
@@ -50,7 +51,7 @@ npm run build
 ```
 The previous commands should install all necessary packages to run the project.
 
-## Running the app
+## 🖌️ Running the app
 
 Now the fun starts! Run the app with the following command:
 
@@ -58,4 +59,8 @@ Now the fun starts! Run the app with the following command:
 npm run serve
 ```
 
-The previous command will simultaneously spin-up the FastAPI backend at port 8000 and launch the React web-app at port 3000. A new browser tab should be automatically opened with the application, but you can also access it by heading to [localhost:3000](localhost:3000).
+The previous command will simultaneously spin-up the FastAPI backend at port 8000 and launch the React web-app at port 3000. A new browser window should be automatically opened with the application, but you can also access it by heading to [localhost:3000](localhost:3000)
+
+## License
+
+This project is licensed under the [**MIT License**](LICENSE).
