@@ -12,10 +12,6 @@ Follow these steps:
 - 🔴 Right click any part of the image to ignore it.
 - 🎚️Change hue, saturation and lightness as you wish.
 
-<video width="640" height="320" controls>
-  <source src="figures/demo.mp4" type="video/mp4">
-</video>
-
 Some other examples of what can be achieved in under 5 minutes per image are shown below
 
 |              Original               |               Color Changed               |
