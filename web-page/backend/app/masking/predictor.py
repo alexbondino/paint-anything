@@ -4,11 +4,13 @@ import onnxruntime
 import numpy as np
 import cv2
 from segment_anything import sam_model_registry, SamPredictor
-from typing import List, Dict, Literal
+from typing import List, Dict, Literal, Union
 from PIL import Image
 from logger import color_logger
 
 logger = color_logger(__name__, "INFO")
+
+last_logits = None
 
 
 ## Defining the mask and the points
@@ -93,9 +95,9 @@ def predict_mask(
     image_embedding: np.ndarray,
     ort_session: onnxruntime,
     img: np.ndarray,
+    last_logits: np.ndarray,
 ) -> np.ndarray:
     """Uses the model over some given points to generate a chosen mask given the input data."""
-
     onnx_coord = np.concatenate([input_point, np.array([[0.0, 0.0]])], axis=0)[
         None, :, :
     ]
@@ -107,8 +109,12 @@ def predict_mask(
         np.float32
     )  ## ok
 
-    onnx_mask_input = np.zeros((1, 1, 256, 256), dtype=np.float32)
-    onnx_has_mask_input = np.ones(1, dtype=np.float32)
+    if last_logits is None:
+        onnx_mask_input = np.zeros((1, 1, 256, 256), dtype=np.float32)
+        onnx_has_mask_input = np.zeros(1, dtype=np.float32)
+    else:
+        onnx_mask_input = last_logits
+        onnx_has_mask_input = np.ones(1, dtype=np.float32)
 
     ort_inputs = {
         "image_embeddings": image_embedding,
@@ -119,9 +125,10 @@ def predict_mask(
         "orig_im_size": np.array(img.shape[:2], dtype=np.float32),
     }
 
-    masks, _, _ = ort_session.run(None, ort_inputs)
+    masks, _, logits = ort_session.run(None, ort_inputs)
+    last_logits = logits
     masks = masks > predictor.model.mask_threshold
-    return masks
+    return masks, logits
 
 
 def gen_new_mask(
@@ -130,6 +137,7 @@ def gen_new_mask(
     predictor: SamPredictor,
     image_embedding: np.ndarray,
     ort_session: onnxruntime,
+    last_logits: Union[np.ndarray, None],
 ) -> Image:
     """Creates a new mask Image from input points and predictor model
     Args:
@@ -151,7 +159,9 @@ def gen_new_mask(
         mask_img.putalpha(0)
         return mask_img
 
-    mask = predict_mask(points, labels, predictor, image_embedding, ort_session, img)
+    mask, logits = predict_mask(
+        points, labels, predictor, image_embedding, ort_session, img, last_logits
+    )
     mask = mask[0, 0, :, :]
     mask_img[mask] = img[mask]
     alpha_channel = np.zeros(img.shape[:2], dtype=np.uint8)
@@ -159,7 +169,7 @@ def gen_new_mask(
     mask_img = Image.fromarray(mask_img)
     mask_img.putalpha(Image.fromarray(alpha_channel))
     contours = compute_mask_contour(alpha_channel)
-    return mask_img, contours
+    return mask_img, contours, logits
 
 
 def update_stored_mask(
@@ -190,10 +200,17 @@ def update_stored_mask(
     if points["pointer"] == 0:
         return
     effective_points = points["points"][: points["pointer"]]
+    # retrieve last img logits, if any
+    last_logits = None
+    if os.path.exists(mask_dir, f"{layer_id}_logits.npy"):
+        last_logits = np.load(os.path.join(mask_dir, f"{layer_id}_logits.npy"))
     # create new mask
-    mask_img, contours = gen_new_mask(
-        img, effective_points, predictor, image_embedding, ort_session
+    mask_img, contours, new_logits = gen_new_mask(
+        img, effective_points, predictor, image_embedding, ort_session, last_logits
     )
+    # cache new logits
+    np.save(os.path.join(mask_dir, f"{layer_id}_logits.npy"), new_logits)
+    # cache new mask
     np.save(os.path.join(mask_dir, f"{layer_id}_cnt.npy"), contours, allow_pickle=True)
     # update mask by overwriting stored image
     mask_img.save(os.path.join(mask_dir, f"{layer_id}.png"))
