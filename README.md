@@ -12,6 +12,8 @@ Follow these steps:
 - 🔴 Right click any part of the image to ignore it.
 - 🎚️Change hue, saturation and lightness as you wish.
 
+https://github.com/alexbondino/paint-anything/assets/53621362/feb94a04-386b-4f65-a732-fd00eafbea6b
+
 Some other examples of what can be achieved in under 5 minutes per image are shown below
 
 |              Original               |               Color Changed               |
