@@ -12,7 +12,7 @@ Follow these steps:
 - 🔴 Right click any part of the image to ignore it.
 - 🎚️Change hue, saturation and lightness as you wish.
 
-Some examples of what can be achieved are shown below
+Some examples of what can be achieved in under 5 minutes per image are shown below
 
 Original             |  Color Changed
 :-------------------------:|:-------------------------:
