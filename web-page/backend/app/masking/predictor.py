@@ -202,7 +202,7 @@ def update_stored_mask(
     effective_points = points["points"][: points["pointer"]]
     # retrieve last img logits, if any
     last_logits = None
-    if os.path.exists(mask_dir, f"{layer_id}_logits.npy"):
+    if os.path.exists(os.path.join(mask_dir, f"{layer_id}_logits.npy")):
         last_logits = np.load(os.path.join(mask_dir, f"{layer_id}_logits.npy"))
     # create new mask
     mask_img, contours, new_logits = gen_new_mask(
