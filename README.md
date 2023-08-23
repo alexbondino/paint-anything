@@ -7,6 +7,8 @@ Project for easily visualizing color changes to objects inside images, house pai
 
 ## Setup
 
+This project requires `python >= 3.8` and `Node.js 18` to work properly. We recommend using **python 3.10** and **Node.js 18.16**. If you don't have python in your computer, please install it from [here](https://www.python.org/downloads/release/python-3100/). Likewise, Node.js can be installed by following the instructions [here](https://nodejs.org/).
+
 Clone this repo and open it
 
 ```bash
@@ -14,7 +16,7 @@ git clone https://github.com/alexbondino/imagine-houses.git
 cd imagine-houses
 ```
 
-Create a folder under `web-page/backend/app` named "assets", download the SAM files (including quantized versions) from this [google drive](https://drive.google.com/drive/folders/1JVL1oGfZWsSuO4RpmSOw2UKkNObsnVtn?usp=drive_link) and unzip them into this folder. Your assets folder should now look like this:
+Create a folder under `web-page/backend/app` named "assets", download the SAM files (including ONNX decoders) from this [google drive](https://drive.google.com/drive/folders/1JVL1oGfZWsSuO4RpmSOw2UKkNObsnVtn?usp=drive_link) and unzip them into this folder. Your assets folder should now look like this:
 
 ```python
 ── assets
