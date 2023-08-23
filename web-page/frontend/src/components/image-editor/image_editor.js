@@ -271,7 +271,9 @@ export default function ImageEditor({
     const drawableLayers = layersDef.filter((l) => l.visibility).reverse();
     for (const l of drawableLayers) {
       const maskImg = document.getElementById(`canvas-${l.id}`);
-      ctx.drawImage(maskImg, 0, 0, width, height);
+      if (maskImg){
+        ctx.drawImage(maskImg, 0, 0, width, height);
+      }
     }
     // dump image to file
     const link = document.createElement('a');
