@@ -12,7 +12,7 @@ Follow these steps:
 - 🔴 Right click any part of the image to ignore it.
 - 🎚️Change hue, saturation and lightness as you wish.
 
-__This project is open source.__
+__This project is an open-source work in progress. Feel free to raise any issues!__
 
 ## 🔧 Setup
 

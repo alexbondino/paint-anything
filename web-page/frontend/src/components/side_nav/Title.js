@@ -47,7 +47,7 @@ const Title = ({ sidebarVisibility, onDrawerOpen }) => {
         <Toolbar>
           <BrushIcon sx={{ marginRight: 2 }} />
           <Typography variant="h4" noWrap sx={{ flexGrow: 1 }} component="div">
-            Imagine Houses
+            Paint Anything
           </Typography>
         </Toolbar>
       </TitleBar>
