@@ -41,7 +41,7 @@ Clone this repo and open it
 
 ```bash
 git clone https://github.com/alexbondino/imagine-houses.git
-cd imagine-houses
+cd paint-anything
 ```
 
 Download the SAM files (including ONNX decoders) from this [google drive](https://drive.google.com/drive/folders/1JVL1oGfZWsSuO4RpmSOw2UKkNObsnVtn?usp=drive_link) and unzip them into`web-page/backend/app/assets`. Your assets folder should now look like this:
