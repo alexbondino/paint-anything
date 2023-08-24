@@ -6,9 +6,6 @@ fastapi>=0.95,<0.96
 python-multipart>=0.0.6
 uvicorn>=0.22,<0.23
 onnxruntime>=1.15
-torch==2.0.0; platform_system=="Darwin" or platform_system=="Linux"
-torchvision==0.15.1; platform_system=="Darwin" or platform_system=="Linux"
+torch==2.0.0
+torchvision==0.15.1
 git+https://github.com/facebookresearch/segment-anything.git
---extra-index-url https://download.pytorch.org/whl/cu117; platform_system=="Windows"
-torch==2.0.0+cu117; platform_system=="Windows"
-torchvision==0.15.1+cu117; platform_system=="Windows"

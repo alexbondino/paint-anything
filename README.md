@@ -40,7 +40,7 @@ This project requires `python >= 3.8` and `Node.js 18` to work properly. We reco
 Clone this repo and open it
 
 ```bash
-git clone https://github.com/alexbondino/imagine-houses.git
+git clone https://github.com/alexbondino/paint-anything.git
 cd paint-anything
 ```
 
